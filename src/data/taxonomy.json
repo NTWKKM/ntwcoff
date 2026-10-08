@@ -1,32 +1,33 @@
 {
-  "lastUpdated": "2026-10-08T06:48:03.250970+00:00",
-  "totalPapers": 34,
+  "lastUpdated": "2026-10-08T11:46:14.353519+00:00",
+  "totalPapers": 35,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction Science)": 9,
-    "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)": 8,
-    "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 9,
-    "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)": 8
+    "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)": 9,
+    "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 8,
+    "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)": 8,
+    "เคมีและอุณหพลศาสตร์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 1
   },
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 32
+      "count": 33
     },
     {
       "name": "RoastingChemistry",
-      "count": 30
+      "count": 31
     },
     {
       "name": "SensoryScience",
-      "count": 26
+      "count": 27
     },
     {
       "name": "Extraction",
-      "count": 24
+      "count": 25
     },
     {
       "name": "CoffeeBody",
-      "count": 21
+      "count": 22
     },
     {
       "name": "Phenolics",
