@@ -89,13 +89,13 @@ export const PaperReader: React.FC<PaperReaderProps> = ({ paper, onClose, onTagC
               </span>
 
               {paper.date && (
-                <span className="flex items-center gap-1 text-[12px] text-steel font-sf-text">
+                <span className="flex items-center gap-1 text-[12px] text-slate font-sf-text">
                   <Calendar className="w-3 h-3 text-steel" />
                   {paper.date}
                 </span>
               )}
 
-              <span className="flex items-center gap-1 text-[12px] text-steel font-sf-text">
+              <span className="flex items-center gap-1 text-[12px] text-slate font-sf-text">
                 <Clock className="w-3 h-3 text-steel" />
                 เวลาอ่าน {paper.readingTimeMinutes} นาที
               </span>
@@ -107,7 +107,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({ paper, onClose, onTagC
             </h1>
 
             {paper.documentHeader && (
-              <p className="text-[12px] text-steel font-mono">
+              <p className="text-[12px] text-slate font-mono">
                 เอกสารต้นฉบับ: {paper.documentHeader}
               </p>
             )}
@@ -163,7 +163,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({ paper, onClose, onTagC
 
             {/* Tags row with Hairline Pills */}
             <div className="pt-3 border-t border-hairline-silver flex flex-wrap items-center gap-1.5">
-              <span className="text-[12px] text-steel font-sf-text mr-1">
+              <span className="text-[12px] text-slate font-sf-text mr-1">
                 คีย์เวิร์ด:
               </span>
               {paper.tags.map((tag) => (

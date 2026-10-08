@@ -61,4 +61,17 @@
   - **Controls**: Outlined Explore Pills (transparent fill, `#1d1d1f` text, 1px `#86868b` outline), Pricing Blue Pills (`#0071e3` fill, `#ffffff` text, 12px, 9999px radius), and bare `#b64400` launch status text.
 - **Rationale**: Elevates readability and simplicity to a clean white gallery standard, focusing user attention purely on scientific evidence, molecular kinetics, and research monographs without decorative noise.
 
+## ADR-007: Token Alpha Channel Support and Semantic Markdown Tables
+
+- **Status**: Accepted
+- **Context**: CodeRabbit AI review on PR#4 identified contrast issues in dark mode selected pills, hardcoded utility strings in generated markdown tables, low contrast small labels using steel instead of slate, and missing alpha channel support in CSS color tokens.
+- **Decision**:
+  - Expose RGB channel variables (`--color-gallery-white-rgb`, `--color-steel-rgb`, `--color-pricing-blue-rgb`) in CSS for Tailwind `/ <alpha-value>` opacity modifier support across both light and dark themes, while preserving existing hex variables.
+  - Centralize generated Markdown table styles in `src/index.css` under stable semantic classes (`.markdown-table-wrapper`, `.markdown-table`, `.markdown-table-label`).
+  - Standardize small micro-metadata text and input placeholders to `slate` (`#707070` / `#a1a1a6`), reserving `steel` for decorative iconography and hairline borders.
+  - Fix pill selected state text to `text-gallery-white` so it adapts correctly across light and dark themes.
+- **Rationale**: Guarantees WCAG-compliant contrast ratios in dark mode, keeps generated HTML decoupled from utility class churn, and restores alpha-channel composition across Tailwind utilities.
+
+
+
 

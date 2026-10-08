@@ -46,7 +46,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหางานวิจัย (5-HMF, Acrylamide, Melanoidins, Astringency, ผู้เขียน)..."
-              className="w-full pl-11 pr-11 py-3.5 rounded-[980px] bg-gallery-white border border-steel/60 text-ink placeholder:text-steel text-[14px] font-sans focus:outline-none focus:border-apple-blue focus:ring-1 focus:ring-apple-blue shadow-none transition-all"
+              className="w-full pl-11 pr-11 py-3.5 rounded-[980px] bg-gallery-white border border-steel/60 text-ink placeholder:text-slate text-[14px] font-sans focus:outline-none focus:border-apple-blue focus:ring-1 focus:ring-apple-blue shadow-none transition-all"
             />
             {searchQuery && (
               <button

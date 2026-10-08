@@ -35,7 +35,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             onClick={() => setSelectedCategory(null)}
             className={`px-3.5 py-1.5 rounded-full text-[12px] font-normal tracking-[-0.12px] whitespace-nowrap transition-colors ${
               selectedCategory === null
-                ? 'bg-ink text-white'
+                ? 'bg-ink text-gallery-white'
                 : 'bg-gallery-white text-slate hover:text-ink hover:bg-studio-mist border border-hairline-silver'
             }`}
           >
@@ -50,7 +50,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 onClick={() => setSelectedCategory(isSelected ? null : cat)}
                 className={`px-3.5 py-1.5 rounded-full text-[12px] font-normal tracking-[-0.12px] whitespace-nowrap transition-colors ${
                   isSelected
-                    ? 'bg-ink text-white'
+                    ? 'bg-ink text-gallery-white'
                     : 'bg-gallery-white text-slate hover:text-ink hover:bg-studio-mist border border-hairline-silver'
                 }`}
               >
@@ -68,7 +68,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 
       {/* Scientific Auto-Tag Cloud — Quiet Hairline Pills */}
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[12px] font-sf-text text-steel mr-1.5">
+        <span className="text-[12px] font-sf-text text-slate mr-1.5">
           Keywords:
         </span>
 

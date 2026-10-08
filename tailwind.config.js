@@ -8,16 +8,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        'gallery-white': 'var(--color-gallery-white, #ffffff)',
+        'gallery-white': 'rgb(var(--color-gallery-white-rgb, 255 255 255) / <alpha-value>)',
         'studio-mist': 'var(--color-studio-mist, #f5f5f7)',
         'paper-frost': 'var(--color-paper-frost, #fafafc)',
         'hairline-silver': 'var(--color-hairline-silver, #d6d6d6)',
         'control-gray': 'var(--color-control-gray, #e6e6e8)',
         ink: 'var(--color-ink, #1d1d1f)',
         slate: 'var(--color-slate, #707070)',
-        steel: 'var(--color-steel, #86868b)',
+        steel: 'rgb(var(--color-steel-rgb, 134 134 139) / <alpha-value>)',
         'apple-blue': 'var(--color-apple-blue, #0066cc)',
-        'pricing-blue': 'var(--color-pricing-blue, #0071e3)',
+        'pricing-blue': 'rgb(var(--color-pricing-blue-rgb, 0 113 227) / <alpha-value>)',
         'launch-orange': 'var(--color-launch-orange, #b64400)',
       },
       fontFamily: {

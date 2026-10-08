@@ -19,7 +19,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper, onSelect, onTagClic
             {paper.category}
           </span>
 
-          <div className="flex items-center gap-3 text-[12px] text-steel font-sf-text tracking-[-0.12px]">
+          <div className="flex items-center gap-3 text-[12px] text-slate font-sf-text tracking-[-0.12px]">
             {paper.date && (
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3 text-steel" />
@@ -50,7 +50,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper, onSelect, onTagClic
               </p>
             )}
             {paper.journal && (
-              <p className="line-clamp-1 text-steel">
+              <p className="line-clamp-1 text-slate">
                 <span className="text-slate">Journal:</span> {paper.journal}
               </p>
             )}
@@ -81,7 +81,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper, onSelect, onTagClic
 
       {/* Card Footer Divider & Conversion Control */}
       <div className="pt-5 border-t border-hairline-silver flex items-center justify-between">
-        <span className="text-[12px] text-steel font-mono">
+        <span className="text-[12px] text-slate font-mono">
           {paper.wordCount.toLocaleString()} words
         </span>
 

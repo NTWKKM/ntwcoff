@@ -82,23 +82,23 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         // skip separator row if exists
         const dataRows = rows.slice(1).filter((r) => !r.every((c) => c.match(/^:?-+:?$/)));
 
-        let tableHtml = `<div class="overflow-x-auto my-6 rounded-[20px] border border-hairline-silver bg-gallery-white"><table class="w-full text-left border-collapse text-sm">`;
-        tableHtml += `<thead class="bg-studio-mist text-ink font-semibold border-b border-hairline-silver"><tr>`;
+        let tableHtml = `<div class="markdown-table-wrapper"><table class="markdown-table">`;
+        tableHtml += `<thead><tr>`;
         header.forEach((h) => {
           let formatted = escapeSourceText(h);
           formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>');
           formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-slate">$1</em>');
-          tableHtml += `<th class="py-3 px-4 font-semibold">${renderWithKatex(formatted)}</th>`;
+          tableHtml += `<th>${renderWithKatex(formatted)}</th>`;
         });
-        tableHtml += `</tr></thead><tbody class="divide-y divide-hairline-silver text-slate">`;
+        tableHtml += `</tr></thead><tbody>`;
         dataRows.forEach((row) => {
-          tableHtml += `<tr class="hover:bg-studio-mist/60 transition-colors">`;
+          tableHtml += `<tr>`;
           row.forEach((cell, idx) => {
             const isLabel = idx === 0 && row.length === 2;
             let formatted = escapeSourceText(cell);
             formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>');
             formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-slate">$1</em>');
-            tableHtml += `<td class="py-3 px-4 ${isLabel ? 'font-semibold text-ink whitespace-nowrap' : ''}">${renderWithKatex(formatted)}</td>`;
+            tableHtml += `<td class="${isLabel ? 'markdown-table-label' : ''}">${renderWithKatex(formatted)}</td>`;
           });
           tableHtml += `</tr>`;
         });
