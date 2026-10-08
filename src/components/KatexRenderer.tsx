@@ -59,7 +59,20 @@ export const escapeSourceText = (text: string): string => {
   return parts.join('');
 };
 
-export const slugifyHeading = (rawText: string, existingCounts?: Map<string, number>): string => {
+export interface HeadingTracker {
+  counts: Map<string, number>;
+  assigned: Set<string>;
+}
+
+export const createHeadingTracker = (): HeadingTracker => ({
+  counts: new Map<string, number>(),
+  assigned: new Set<string>(),
+});
+
+export const slugifyHeading = (
+  rawText: string,
+  tracker?: HeadingTracker | Map<string, number>
+): string => {
   // Strip markdown formatting (*, _, $, `) before slugifying so math or formatting produces clean slugs
   const clean = rawText
     .replace(/\$\$[\s\S]+?\$\$/g, '')
@@ -72,27 +85,36 @@ export const slugifyHeading = (rawText: string, existingCounts?: Map<string, num
     .toLowerCase();
   if (!baseId) baseId = 'section';
 
-  if (!existingCounts) return baseId;
+  if (!tracker) return baseId;
 
-  const count = existingCounts.get(baseId) || 0;
-  existingCounts.set(baseId, count + 1);
-  return count === 0 ? baseId : `${baseId}-${count}`;
+  // Support both HeadingTracker and legacy Map<string, number> for backwards compatibility
+  const isTracker = 'assigned' in tracker && 'counts' in tracker;
+  const counts = isTracker ? tracker.counts : tracker;
+  const assigned = isTracker ? tracker.assigned : undefined;
+
+  let count = counts.get(baseId) || 0;
+  let candidate = count === 0 ? baseId : `${baseId}-${count}`;
+
+  if (assigned) {
+    while (assigned.has(candidate)) {
+      count++;
+      candidate = `${baseId}-${count}`;
+    }
+    assigned.add(candidate);
+  }
+
+  counts.set(baseId, count + 1);
+  return candidate;
 };
 
 export const KatexRenderer: React.FC<KatexRendererProps> = ({
   content,
   fontSize = 'md',
 }) => {
-  const textSizeClass = useMemo(() => {
-    if (fontSize === 'sm') return 'text-[15px] leading-[1.75]';
-    if (fontSize === 'lg') return 'text-[19px] leading-[1.85]';
-    return 'text-[17px] leading-[1.8]'; // standard 'md'
-  }, [fontSize]);
-
   const renderedHtml = useMemo(() => {
     const lines = content.split('\n');
     const processedLines: string[] = [];
-    const headingCounts = new Map<string, number>();
+    const tracker = createHeadingTracker();
     let inTable = false;
     let tableBuffer: string[] = [];
 
@@ -157,7 +179,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
         formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
-          `<blockquote class="markdown-blockquote font-geist ${textSizeClass}">${renderWithKatex(formatted)}</blockquote>`
+          `<blockquote class="markdown-blockquote font-geist">${renderWithKatex(formatted)}</blockquote>`
         );
         continue;
       }
@@ -165,7 +187,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
       // Headings — gelica 600, Cocoa Ink, lowercase
       if (line.startsWith('### ')) {
         const headingText = line.replace('### ', '').trim();
-        const id = slugifyHeading(headingText, headingCounts);
+        const id = slugifyHeading(headingText, tracker);
         processedLines.push(
           `<h3 id="${id}" class="text-lg sm:text-xl font-gelica font-semibold lowercase mt-9 mb-3 text-cocoa-ink scroll-mt-24 flex items-center gap-2">${renderWithKatex(
             escapeSourceText(headingText)
@@ -173,7 +195,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
         );
       } else if (line.startsWith('## ')) {
         const headingText = line.replace('## ', '').trim();
-        const id = slugifyHeading(headingText, headingCounts);
+        const id = slugifyHeading(headingText, tracker);
         processedLines.push(
           `<h2 id="${id}" class="text-xl sm:text-2xl font-gelica font-semibold lowercase mt-12 mb-4 pb-2 border-b-[1.5px] border-charcoal/20 text-cocoa-ink scroll-mt-24"><span>${renderWithKatex(
             escapeSourceText(headingText)
@@ -197,7 +219,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
         formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
-          `<li class="ml-5 list-disc my-1.5 text-charcoal font-geist ${textSizeClass}">${renderWithKatex(
+          `<li class="ml-5 list-disc my-1.5 text-charcoal font-geist">${renderWithKatex(
             formatted
           )}</li>`
         );
@@ -208,7 +230,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
         formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
-          `<li class="ml-5 list-decimal my-1.5 text-charcoal font-geist ${textSizeClass}">${renderWithKatex(
+          `<li class="ml-5 list-decimal my-1.5 text-charcoal font-geist">${renderWithKatex(
             formatted
           )}</li>`
         );
@@ -221,7 +243,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         
         processedLines.push(
-          `<p class="my-4 text-charcoal font-geist ${textSizeClass} text-pretty">${renderWithKatex(
+          `<p class="my-4 text-charcoal font-geist text-pretty">${renderWithKatex(
             formatted
           )}</p>`
         );
@@ -233,11 +255,11 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
     }
 
     return processedLines.join('\n');
-  }, [content, textSizeClass]);
+  }, [content]);
 
   return (
     <div
-      className="prose-content text-charcoal max-w-none font-geist"
+      className={`prose-content prose-size-${fontSize} text-charcoal max-w-none font-geist`}
       dangerouslySetInnerHTML={{ __html: renderedHtml }}
     />
   );

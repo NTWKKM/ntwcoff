@@ -204,6 +204,35 @@
   }
 }
 
+/* Reduced motion fallback for JS-driven progress bar */
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress-bar {
+    transition: none !important;
+  }
+}
+
+/* Scoped typography for reader content based on selected font size */
+.prose-size-sm p,
+.prose-size-sm li,
+.prose-size-sm .markdown-blockquote {
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.prose-size-md p,
+.prose-size-md li,
+.prose-size-md .markdown-blockquote {
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.prose-size-lg p,
+.prose-size-lg li,
+.prose-size-lg .markdown-blockquote {
+  font-size: 19px;
+  line-height: 1.85;
+}
+
 /* KaTeX Styling — Warm Schoolyard Card */
 .katex {
   font-size: 1.05em;

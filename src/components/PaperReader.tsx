@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Paper } from '../types';
-import { KatexRenderer, slugifyHeading } from './KatexRenderer';
+import { KatexRenderer, slugifyHeading, createHeadingTracker } from './KatexRenderer';
 import {
   X,
   ArrowLeft,
@@ -71,17 +71,17 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
   const tocItems = useMemo<TocItem[]>(() => {
     if (!paper) return [];
     const items: TocItem[] = [];
-    const headingCounts = new Map<string, number>();
+    const tracker = createHeadingTracker();
     const lines = paper.content.split('\n');
 
     for (const line of lines) {
       if (line.startsWith('## ')) {
         const title = line.replace('## ', '').trim();
-        const id = slugifyHeading(title, headingCounts);
+        const id = slugifyHeading(title, tracker);
         items.push({ id, title, level: 2 });
       } else if (line.startsWith('### ')) {
         const title = line.replace('### ', '').trim();
-        const id = slugifyHeading(title, headingCounts);
+        const id = slugifyHeading(title, tracker);
         items.push({ id, title, level: 3 });
       }
     }
@@ -99,18 +99,20 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
       setScrollProgress(Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)));
     }
 
-    // Determine active section for scroll-spy
+    // Determine active section for scroll-spy (clears selection if scrolled above all headings)
     if (tocItems.length > 0) {
+      let currentMatch = '';
       for (let i = tocItems.length - 1; i >= 0; i--) {
         const sectionEl = document.getElementById(tocItems[i].id);
         if (sectionEl) {
           const rect = sectionEl.getBoundingClientRect();
           if (rect.top <= 180) {
-            setActiveSection(tocItems[i].id);
+            currentMatch = tocItems[i].id;
             break;
           }
         }
       }
+      setActiveSection(currentMatch);
     }
   };
 
@@ -133,7 +135,13 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
   const scrollToHeading = (id: string) => {
     const target = document.getElementById(id);
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      target.scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'start',
+      });
       setActiveSection(id);
       setShowTocMobile(false);
     }
@@ -161,7 +169,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
         <div
           aria-hidden="true"
           style={{ width: `${scrollProgress}%` }}
-          className="reading-progress-bar absolute top-0 left-0 h-[3px] bg-marker-orange z-30 transition-[width] duration-75 ease-out"
+          className="reading-progress-bar absolute top-0 left-0 h-[3px] bg-marker-orange z-30 transition-[width] duration-75 ease-out motion-reduce:transition-none"
         />
 
         {/* Sticky Reader Toolbar */}
