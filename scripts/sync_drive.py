@@ -119,6 +119,18 @@ def sync_drive():
         modified_time = file.get("modifiedTime", "")
         md5 = file.get("md5Checksum", "")
 
+        # Validate filename to prevent path traversal or invalid path components
+        path_obj = Path(file_name)
+        if (
+            file_name in (".", "..")
+            or len(path_obj.parts) != 1
+            or path_obj.name != file_name
+            or "/" in file_name
+            or "\\" in file_name
+        ):
+            print(f"⚠️ Skipping invalid or unsafe filename: {file_name}")
+            continue
+
         # Handle duplicate filenames in Drive: if multiple files share the same name, add short id
         base_name = file_name
         if name_occurrences[file_name] > 1:
@@ -179,12 +191,22 @@ def sync_drive():
         }
         print(f"✅ Successfully saved: {file_path.name}")
 
-    # Remove files recorded in the previous manifest but absent from the completed new manifest
+    # Remove files recorded in the previous manifest but absent from the completed new manifest,
+    # or whose path changed upon rename, while preserving paths still owned by current manifest
+    current_owned_names = {
+        info.get("name")
+        for info in new_manifest.values()
+        if isinstance(info, dict) and info.get("name")
+    }
     deleted_count = 0
     for old_id, old_info in manifest.items():
+        old_name = old_info.get("name") if isinstance(old_info, dict) else None
+        if not old_name:
+            continue
+
         if old_id not in new_manifest:
-            old_name = old_info.get("name") if isinstance(old_info, dict) else None
-            if old_name:
+            # File removed from Drive
+            if old_name not in current_owned_names:
                 old_path = dest_dir / old_name
                 if old_path.exists():
                     print(f"🗑️ Removing deleted Drive file: {old_name}")
@@ -193,6 +215,23 @@ def sync_drive():
                         deleted_count += 1
                     except Exception as e:
                         print(f"⚠️ Failed to remove {old_name}: {e}")
+        else:
+            # Retained ID: compare old and new paths
+            new_name = (
+                new_manifest[old_id].get("name")
+                if isinstance(new_manifest[old_id], dict)
+                else None
+            )
+            if new_name and old_name != new_name:
+                if old_name not in current_owned_names:
+                    old_path = dest_dir / old_name
+                    if old_path.exists():
+                        print(f"🗑️ Removing renamed stale Drive file: {old_name}")
+                        try:
+                            old_path.unlink()
+                            deleted_count += 1
+                        except Exception as e:
+                            print(f"⚠️ Failed to remove {old_name}: {e}")
 
     save_manifest(new_manifest)
     print(
