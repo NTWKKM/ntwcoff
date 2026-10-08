@@ -150,18 +150,17 @@ def sync_drive():
             is_gdoc = False
 
         # Anti-Duplication & Incremental Cache Check:
-        # If file exists on disk and modifiedTime has not changed, skip re-download
+        # If file exists on disk, filename matches, and modifiedTime has not changed, skip re-download
         cached_info = manifest.get(file_id)
         if (
             cached_info
+            and cached_info.get("name") == file_path.name
             and cached_info.get("modifiedTime") == modified_time
             and file_path.exists()
         ):
             print(
                 f"⏭️ [UNCHANGED] {file_path.name} (modified: {modified_time}) - Skipping download."
             )
-            if isinstance(cached_info, dict) and "name" not in cached_info:
-                cached_info["name"] = file_path.name
             new_manifest[file_id] = cached_info
             skipped_count += 1
             continue
