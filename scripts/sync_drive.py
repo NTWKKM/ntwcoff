@@ -200,7 +200,18 @@ def sync_drive():
     deleted_count = 0
     for old_id, old_info in manifest.items():
         old_name = old_info.get("name") if isinstance(old_info, dict) else None
-        if not old_name:
+        if not isinstance(old_name, str) or not old_name.strip():
+            continue
+
+        old_path_obj = Path(old_name)
+        if (
+            old_name in (".", "..")
+            or len(old_path_obj.parts) != 1
+            or old_path_obj.name != old_name
+            or "/" in old_name
+            or "\\" in old_name
+        ):
+            print(f"⚠️ Skipping unsafe stale filename from manifest: {old_name}")
             continue
 
         if old_id not in new_manifest:
