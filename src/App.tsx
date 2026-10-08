@@ -47,7 +47,9 @@ export const App: React.FC = () => {
       if (hash.startsWith('#paper=')) {
         const slug = decodeURIComponent(hash.replace('#paper=', ''));
         const matched = papersData.find((p) => p.slug === slug);
-        if (matched) setSelectedPaper(matched);
+        setSelectedPaper(matched || null);
+      } else {
+        setSelectedPaper(null);
       }
     };
 
@@ -64,7 +66,7 @@ export const App: React.FC = () => {
   const handleCloseReader = () => {
     setSelectedPaper(null);
     if (window.location.hash.startsWith('#paper=')) {
-      history.pushState('', document.title, window.location.pathname + window.location.search);
+      history.replaceState('', document.title, window.location.pathname + window.location.search);
     }
   };
 

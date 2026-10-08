@@ -103,7 +103,8 @@ flowchart TD
 ntwcoff/
 ├── .github/
 │   └── workflows/
-│       └── sync.yml              # GitHub Actions Cron 12:00 ICT + Build & Deploy Pages
+│       ├── sync.yml              # GitHub Actions Cron 12:00 ICT (Google Drive Sync Pipeline)
+│       └── deploy.yml            # Build Vite & Deploy Web Application to GitHub Pages
 ├── scripts/
 │   ├── sync_drive.py             # ดึงไฟล์จาก Drive, ตรวจ Manifest Cache, ป้องกันชื่อซ้ำ
 │   └── prep_content.py           # สกัด Metadata, จำแนก 20 แท็ก, ลบข้อมูลซ้ำ, สร้าง JSON

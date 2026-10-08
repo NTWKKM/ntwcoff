@@ -79,20 +79,27 @@ def sync_drive():
     print(f"🔍 Searching Google Drive folder: {folder_id} ...")
     query = f"'{folder_id}' in parents and trashed = false"
 
+    files = []
+    page_token = None
     try:
-        results = (
-            service.files()
-            .list(
-                q=query,
-                fields="files(id, name, mimeType, modifiedTime, md5Checksum, size)",
+        while True:
+            results = (
+                service.files()
+                .list(
+                    q=query,
+                    fields="nextPageToken, files(id, name, mimeType, modifiedTime, md5Checksum, size)",
+                    pageToken=page_token,
+                )
+                .execute()
             )
-            .execute()
-        )
+            files.extend(results.get("files", []))
+            page_token = results.get("nextPageToken")
+            if not page_token:
+                break
     except Exception as e:
         print(f"❌ [ERROR] Drive API list call failed: {e}")
         sys.exit(1)
 
-    files = results.get("files", [])
     print(f"📄 Found {len(files)} files in Google Drive folder.")
 
     manifest = load_manifest()
@@ -141,6 +148,8 @@ def sync_drive():
             print(
                 f"⏭️ [UNCHANGED] {file_path.name} (modified: {modified_time}) - Skipping download."
             )
+            if isinstance(cached_info, dict) and "name" not in cached_info:
+                cached_info["name"] = file_path.name
             new_manifest[file_id] = cached_info
             skipped_count += 1
             continue
@@ -170,9 +179,24 @@ def sync_drive():
         }
         print(f"✅ Successfully saved: {file_path.name}")
 
+    # Remove files recorded in the previous manifest but absent from the completed new manifest
+    deleted_count = 0
+    for old_id, old_info in manifest.items():
+        if old_id not in new_manifest:
+            old_name = old_info.get("name") if isinstance(old_info, dict) else None
+            if old_name:
+                old_path = dest_dir / old_name
+                if old_path.exists():
+                    print(f"🗑️ Removing deleted Drive file: {old_name}")
+                    try:
+                        old_path.unlink()
+                        deleted_count += 1
+                    except Exception as e:
+                        print(f"⚠️ Failed to remove {old_name}: {e}")
+
     save_manifest(new_manifest)
     print(
-        f"\n🎉 Sync completed: {downloaded_count} updated, {skipped_count} unchanged (skipped)."
+        f"\n🎉 Sync completed: {downloaded_count} updated, {skipped_count} unchanged, {deleted_count} deleted."
     )
 
 
