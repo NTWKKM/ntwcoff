@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, Clock, Sun, Moon } from 'lucide-react';
+import { Github, Clock, Sun, Moon, BookOpen } from 'lucide-react';
 
 interface NavbarProps {
   isDark: boolean;
@@ -9,78 +9,78 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme, totalPapers }) => {
   return (
-    <header className="sticky top-0 z-30 w-full bg-gallery-white/85 backdrop-blur-md border-b border-hairline-silver transition-colors">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
+    <header className="sticky top-0 z-30 w-full bg-cream-paper/95 backdrop-blur-md border-b-[1.5px] border-charcoal/20 transition-colors">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
         
-        {/* Brand: Product Local Bar Style (SF Pro Display 19px/600) */}
+        {/* Brand: Schoolyard Notebook Brand (lowercase Cocoa Ink + Marker Orange Script) */}
         <div className="flex items-center gap-3">
           <a
             href="/"
-            className="flex items-center gap-2 text-ink hover:opacity-85 transition-opacity"
+            className="flex items-center gap-2.5 text-cocoa-ink hover:opacity-90 transition-opacity"
           >
-            <span className="font-semibold text-[19px] tracking-[0.228px] text-ink font-sf-display">
-              NTWK Coffee
+            <div className="w-8 h-8 rounded-[8px] bg-dew-drop border-[1.5px] border-charcoal flex items-center justify-center text-charcoal shadow-subtle">
+              <BookOpen className="w-4 h-4 text-cocoa-ink" />
+            </div>
+            <span className="font-gelica font-semibold text-[20px] lowercase text-cocoa-ink tracking-normal">
+              ntwk coffee
             </span>
           </a>
-          <span className="hidden sm:inline-block text-[12px] font-normal text-slate tracking-[-0.12px]">
-            Science Notebook
+          <span className="hidden sm:inline-block font-gelica text-[14px] text-marker-orange lowercase pl-1">
+            ~ science notebook
           </span>
         </div>
 
-        {/* Center Navigation Links (SF Pro Text 12px/400) */}
-        <nav className="hidden md:flex items-center gap-6 text-[12px] font-normal text-slate tracking-[-0.12px]">
-          <span className="text-ink font-medium">
-            Overview
-          </span>
-          <a href="#catalog" className="hover:text-apple-blue transition-colors">
-            {totalPapers} Monographs
+        {/* Center Navigation Links (Geist & Gelica) */}
+        <nav className="hidden md:flex items-center gap-6 text-[14px] text-charcoal font-geist">
+          <a href="#catalog" className="hover:text-marker-orange transition-colors">
+            {totalPapers} monographs
           </a>
-          <a href="#taxonomy" className="hover:text-apple-blue transition-colors">
-            Taxonomy
+          <a href="#taxonomy" className="hover:text-marker-orange transition-colors">
+            taxonomy
           </a>
-          <span className="text-slate/70">
-            Sync: 12:00 ICT
+          <span className="text-charcoal/60 text-[13px]">
+            daily sync 12:00 ict
           </span>
         </nav>
 
-        {/* Right Controls: Outlined Explore Pill & Pricing Blue Pill */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        {/* Right Controls: Superr Pill Action Buttons */}
+        <div className="flex items-center gap-2.5">
           {/* Sync schedule badge */}
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-studio-mist text-[12px] text-slate border border-hairline-silver">
-            <Clock className="w-3 h-3 text-slate" />
-            <span className="tracking-[-0.12px]">Daily 12:00 ICT</span>
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-[20px] bg-dew-drop text-[12px] text-charcoal border-[1.5px] border-charcoal/30">
+            <Clock className="w-3.5 h-3.5 text-charcoal" />
+            <span>12:00 ICT</span>
           </div>
 
-          {/* Theme Switcher — Outlined Explore Pill */}
+          {/* Theme Switcher — Superr Pill */}
           <button
             onClick={toggleTheme}
-            className="px-2.5 py-1 rounded-full text-[12px] text-ink bg-transparent hover:bg-studio-mist border border-steel hover:border-ink transition-colors flex items-center gap-1.5"
-            title={isDark ? "Switch to Light Gallery" : "Switch to Dark Gallery"}
+            className="px-3 py-1.5 rounded-[20px] text-[13px] text-charcoal bg-cream-paper hover:bg-dew-drop border-[1.5px] border-charcoal shadow-subtle transition-all flex items-center gap-1.5"
+            title={isDark ? "Switch to Light Notebook" : "Switch to Dark Notebook"}
             aria-label="Toggle Canvas Theme"
           >
             {isDark ? (
               <>
-                <Sun className="w-3 h-3 text-ink" />
-                <span className="hidden sm:inline tracking-[-0.12px]">Light</span>
+                <Sun className="w-3.5 h-3.5 text-charcoal" />
+                <span className="hidden sm:inline font-gelica text-[13px]">light</span>
               </>
             ) : (
               <>
-                <Moon className="w-3 h-3 text-ink" />
-                <span className="hidden sm:inline tracking-[-0.12px]">Dark</span>
+                <Moon className="w-3.5 h-3.5 text-charcoal" />
+                <span className="hidden sm:inline font-gelica text-[13px]">dark</span>
               </>
             )}
           </button>
 
-          {/* GitHub Repo — Pricing Blue Pill (#0071e3 filled conversion control) */}
+          {/* GitHub Repo — Superr Pill Action Button (Cream fill, 1.5px Charcoal border, 20px radius) */}
           <a
             href="https://github.com/NTWKKM/ntwcoff"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] font-normal text-white bg-pricing-blue hover:bg-[#0077ed] active:bg-[#0062c4] transition-colors tracking-[-0.12px]"
+            className="superr-pill-btn !py-1.5 !px-3.5 !text-[13px]"
             title="View on GitHub"
           >
-            <Github className="w-3.5 h-3.5" />
-            <span>GitHub</span>
+            <Github className="w-3.5 h-3.5 text-charcoal" />
+            <span>github</span>
           </a>
         </div>
 
@@ -88,5 +88,3 @@ export const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme, totalPapers
     </header>
   );
 };
-
-

@@ -72,6 +72,36 @@
   - Fix pill selected state text to `text-gallery-white` so it adapts correctly across light and dark themes.
 - **Rationale**: Guarantees WCAG-compliant contrast ratios in dark mode, keeps generated HTML decoupled from utility class churn, and restores alpha-channel composition across Tailwind utilities.
 
+## ADR-008: Superr Schoolyard Notebook Design System & Reading Ergonomics
+
+- **Status**: Accepted
+- **Context**: The user requested a complete color palette and style migration to the **Superr Style Reference** (warm schoolyard notebook on cream paper, uncapped marker orange, tactile 12px cards, 20px pill buttons, 56px rounded marker-orange footer band), while optimizing long-form reading ergonomics and reducing visual density per modern web guidelines (`modern-web-guidance`).
+- **Decision**:
+  - **Color Tokens**:
+    - Cream Paper (`#fdfbf9`): Warm page canvas, card surfaces, and pill button backgrounds.
+    - Charcoal (`#171717`): 1.5px structural borders, body text, and button strokes.
+    - Cocoa Ink (`#2b1a07`): Warm headline tone for display titles and section openers.
+    - Dew Drop (`#f7efe9`): Secondary card layer, specification blocks, and filter pill backgrounds.
+    - Marker Orange (`#ff6f1e`): Handwritten captions, script annotations, scroll progress indicator, inline emphasis highlights, and 56px rounded-t footer brand band.
+    - Burnt Sienna (`#ce500a`): Body and link accent for contrast against cream.
+    - Sky Sticker (`#3b82f6`) & Bubblegum (`#ff66cf`): Decorative illustrated stickers.
+  - **Typography**:
+    - Display: Custom `gelica` (Fraunces / Plus Jakarta Sans) lowercase display headings in Cocoa Ink, line-height 1.08, weight 600.
+    - Body: Clean grotesque `geist` (Inter) paired with Sarabun for Thai text at line-height 1.8.
+  - **Button & Card Geometry**:
+    - Buttons: 20px pill radius with 1.5px Charcoal border, Cream Paper fill, subtle paper-lift shadow (`rgba(0,0,0,0.25) 0px 1px 2px 0px`). No solid color fills.
+    - Cards: 12px radius, 1.5px Charcoal border, whisper-light drop shadow (`rgba(0,0,0,0.06) 0px 2px 20px 0px`).
+    - Inputs: 8px radius with 1.5px Charcoal border on Dew Drop.
+    - Footer: Marker Orange band with 56px asymmetric top border radius (`rounded-t-[56px]`).
+  - **Reading Ergonomics & Performance (modern-web-guidance)**:
+    - Constrained reading column measure capped at 65ch–75ch (`max-w-[70ch]`), with real-time reader toolbar toggles (Font size: A-/A/A+, Width: Focus/Standard).
+    - Dynamic Table of Contents (TOC) with scroll-spy jump links.
+    - Native CSS scroll-driven progress bar (`animation-timeline: scroll()`) in Marker Orange with reactive fallback.
+    - Light-dismiss on modal dialog backdrop (`closedby="any"` pattern).
+    - Below-the-fold catalog cards optimized with `content-visibility: auto` and `contain-intrinsic-size: auto none auto 260px`.
+- **Rationale**: Merges warm, tactile schoolyard notebook aesthetics with evidence-based reading ergonomics, ensuring dense scientific monographs are legible and fatigue-free.
+
+
 
 
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X, ArrowDown, ArrowRight } from 'lucide-react';
+import { Search, X, ArrowDown, ArrowRight, Zap, Sparkles } from 'lucide-react';
 
 interface HeroBannerProps {
   searchQuery: string;
@@ -17,41 +17,68 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   totalTags,
 }) => {
   return (
-    <section className="relative w-full pt-16 pb-16 px-4 sm:px-6 lg:px-8 bg-gallery-white border-b border-hairline-silver transition-colors">
-      <div className="max-w-[1280px] mx-auto flex flex-col items-center text-center">
+    <section className="relative w-full pt-14 pb-14 px-4 sm:px-6 lg:px-8 bg-cream-paper border-b-[1.5px] border-charcoal/20 transition-colors overflow-hidden">
+      
+      {/* Decorative Stickers — Schoolyard notebook physical stickers */}
+      <div className="absolute top-8 left-6 sm:left-12 hidden md:flex items-center gap-2 rotate-[-8deg] pointer-events-none select-none opacity-85">
+        <div className="px-3 py-1 rounded-[8px] bg-dew-drop border-[1.5px] border-charcoal text-[13px] font-gelica text-charcoal shadow-subtle flex items-center gap-1.5">
+          <Zap className="w-3.5 h-3.5 text-sky-sticker fill-sky-sticker" />
+          <span>vol. 2026</span>
+        </div>
+      </div>
+
+      <div className="absolute top-10 right-8 sm:right-16 hidden md:flex items-center gap-2 rotate-[10deg] pointer-events-none select-none opacity-85">
+        <div className="px-3 py-1 rounded-[8px] bg-dew-drop border-[1.5px] border-charcoal text-[13px] font-gelica text-charcoal shadow-subtle flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-marker-orange fill-marker-orange" />
+          <span>peer-reviewed</span>
+        </div>
+      </div>
+
+      <div className="max-w-[1080px] mx-auto flex flex-col items-center text-center">
         
-        {/* Product Kicker / Category Title: SF Pro Display 19px-21px/600 */}
-        <div className="mb-3">
-          <span className="text-[17px] sm:text-[19px] font-semibold leading-tight tracking-[0.231px] text-ink font-sf-display">
-            NTWK Coffee Science Notebook
+        {/* Handwritten Annotation Caption with SVG Arrow */}
+        <div className="mb-2 flex items-center gap-2">
+          <span className="handwritten-caption text-[19px] sm:text-[21px] lowercase tracking-normal">
+            dear coffee geeks,
           </span>
+          <svg
+            className="w-8 h-5 text-charcoal rotate-[-10deg]"
+            viewBox="0 0 40 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          >
+            <path d="M2 14 C 15 2, 28 4, 38 12 M38 12 L 31 10 M38 12 L 34 18" />
+          </svg>
         </div>
 
-        {/* Hero Display Headline: SF Pro Display 600, responsive 44px to 76px, line-height 1.05, tracking -1.2px */}
-        <h1 className="text-4xl sm:text-6xl lg:text-[76px] font-semibold leading-[1.05] tracking-[-1.2px] text-ink font-sf-display max-w-4xl text-balance mb-6">
-          The chemistry of extraction. Redefined.
+        {/* Display Headline: gelica 600 weight, lowercase, Cocoa Ink, tight line-height 1.08 */}
+        <h1 className="text-4xl sm:text-6xl lg:text-[72px] font-gelica font-semibold lowercase leading-[1.08] text-cocoa-ink tracking-normal max-w-4xl text-balance mb-6">
+          the chemistry of extraction.{' '}
+          <span className="marker-highlight">redefined.</span>
         </h1>
 
-        {/* Body Copy: SF Pro Text 17px/400 at 25px line height, tracking -0.374px */}
-        <p className="text-[16px] sm:text-[17px] font-normal leading-[1.47] tracking-[-0.374px] text-slate font-sf-text max-w-2xl text-pretty mb-10">
-          สมุดบันทึกและพอร์ทัลวิจัยวิทยาศาสตร์กาแฟเชิงลึก — อุณหพลศาสตร์การคั่ว จลนศาสตร์เคมี และสัมผัสเชิง Oral Tribology จากเอกสารวิจัย Peer-Reviewed
+        {/* Body Copy: Geist / Sarabun 18px/400 at 1.6 line height */}
+        <p className="text-[16px] sm:text-[18px] font-normal leading-[1.7] text-charcoal/90 font-geist max-w-2xl text-pretty mb-8">
+          สมุดบันทึกและพอร์ทัลวิจัยวิทยาศาสตร์กาแฟเชิงลึก — อุณหพลศาสตร์การคั่ว จลนศาสตร์เคมี 5-HMF/Acrylamide และสัมผัส Oral Tribology จากงานวิจัย Peer-Reviewed
         </p>
 
-        {/* Rounded Search Input: #ffffff fill, #1d1d1f text, 1px #86868b outline, 980px radius */}
-        <div className="w-full max-w-2xl mb-8">
+        {/* Search Input: 8px radius, 1.5px Charcoal border, Dew Drop background */}
+        <div className="w-full max-w-xl mb-7">
           <div className="relative flex items-center">
-            <Search className="w-4 h-4 text-steel absolute left-4 pointer-events-none" />
+            <Search className="w-4 h-4 text-charcoal/60 absolute left-4 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="ค้นหางานวิจัย (5-HMF, Acrylamide, Melanoidins, Astringency, ผู้เขียน)..."
-              className="w-full pl-11 pr-11 py-3.5 rounded-[980px] bg-gallery-white border border-steel/60 text-ink placeholder:text-slate text-[14px] font-sans focus:outline-none focus:border-apple-blue focus:ring-1 focus:ring-apple-blue shadow-none transition-all"
+              placeholder="ค้นหางานวิจัย (5-HMF, Acrylamide, Melanoidins, Astringency)..."
+              className="w-full pl-11 pr-11 py-3 rounded-[8px] bg-dew-drop border-[1.5px] border-charcoal text-charcoal placeholder:text-charcoal/50 text-[14px] font-geist focus:outline-none focus:ring-2 focus:ring-marker-orange/40 shadow-subtle transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 p-1 rounded-full text-slate hover:text-ink transition-colors"
+                className="absolute right-3.5 p-1 rounded-[6px] text-charcoal/60 hover:text-charcoal transition-colors"
                 title="ล้างคำค้นหา"
               >
                 <X className="w-4 h-4" />
@@ -60,40 +87,40 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           </div>
         </div>
 
-        {/* Real Action Conversion Controls: Pricing Blue Pill & Outlined Explore Pill */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+        {/* Superr Pill Action Buttons: Cream Fill + 1.5px Charcoal border + 20px radius */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
           <a
             href="#catalog"
-            className="inline-flex items-center justify-center px-5 py-2 rounded-full text-[12px] font-normal leading-[16px] tracking-[-0.12px] bg-pricing-blue hover:bg-[#0077ed] text-white active:bg-[#0062c4] transition-colors"
+            className="superr-pill-btn !text-[14px] !py-2.5 !px-5"
           >
             <span>สำรวจ {totalPapers} งานวิจัยฉบับเต็ม</span>
-            <ArrowDown className="w-3.5 h-3.5 ml-1.5" />
+            <ArrowDown className="w-3.5 h-3.5 text-charcoal" />
           </a>
 
           <a
             href="#taxonomy"
-            className="inline-flex items-center justify-center px-4 py-2 rounded-full text-[12px] font-normal leading-[16px] tracking-[-0.12px] bg-transparent text-ink border border-steel hover:border-ink transition-colors"
+            className="superr-pill-btn !text-[14px] !py-2.5 !px-5 !bg-dew-drop"
           >
             <span>จำแนกตาม {totalCategories} หมวดหมู่วิทยาศาสตร์</span>
-            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+            <ArrowRight className="w-3.5 h-3.5 text-charcoal" />
           </a>
         </div>
 
-        {/* Real Overview Stats: Flat, quiet, monochrome typography directly from papers.json */}
-        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-[12px] text-slate font-sf-text pt-4 border-t border-hairline-silver/60 w-full max-w-xl">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-ink text-sm">{totalPapers}</span>
-            <span>Monographs</span>
+        {/* Real Overview Stats: School sticker name labels */}
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-[13px] text-charcoal font-gelica pt-4 border-t-[1.5px] border-charcoal/15 w-full max-w-lg">
+          <div className="px-3.5 py-1.5 rounded-[8px] bg-dew-drop border-[1.5px] border-charcoal/40 flex items-center gap-2 shadow-subtle">
+            <span className="font-semibold text-cocoa-ink text-[14px]">{totalPapers}</span>
+            <span className="text-charcoal/80">monographs</span>
           </div>
-          <span className="text-hairline-silver">•</span>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-ink text-sm">{totalCategories}</span>
-            <span>Disciplines</span>
+
+          <div className="px-3.5 py-1.5 rounded-[8px] bg-dew-drop border-[1.5px] border-charcoal/40 flex items-center gap-2 shadow-subtle">
+            <span className="font-semibold text-cocoa-ink text-[14px]">{totalCategories}</span>
+            <span className="text-charcoal/80">disciplines</span>
           </div>
-          <span className="text-hairline-silver">•</span>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-ink text-sm">{totalTags}</span>
-            <span>Taxonomy Tags</span>
+
+          <div className="px-3.5 py-1.5 rounded-[8px] bg-dew-drop border-[1.5px] border-charcoal/40 flex items-center gap-2 shadow-subtle">
+            <span className="font-semibold text-cocoa-ink text-[14px]">{totalTags}</span>
+            <span className="text-charcoal/80">taxonomy tags</span>
           </div>
         </div>
 

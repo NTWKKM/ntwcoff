@@ -3,106 +3,316 @@
 @tailwind utilities;
 
 :root {
-  /* Design System Tokens */
-  --color-gallery-white: #ffffff;
-  --color-gallery-white-rgb: 255 255 255;
-  --color-studio-mist: #f5f5f7;
-  --color-paper-frost: #fafafc;
-  --color-hairline-silver: #d6d6d6;
-  --color-control-gray: #e6e6e8;
-  --color-ink: #1d1d1f;
-  --color-slate: #707070;
-  --color-steel: #86868b;
-  --color-steel-rgb: 134 134 139;
-  --color-apple-blue: #0066cc;
-  --color-pricing-blue: #0071e3;
-  --color-pricing-blue-rgb: 0 113 227;
-  --color-launch-orange: #b64400;
+  /* Superr Design System Tokens */
+  --color-cream-paper: #fdfbf9;
+  --color-charcoal: #171717;
+  --color-cocoa-ink: #2b1a07;
+  --color-true-black: #000000;
+  --color-dew-drop: #f7efe9;
+  --color-marker-orange: #ff6f1e;
+  --color-burnt-sienna: #ce500a;
+  --color-sky-sticker: #3b82f6;
+  --color-bubblegum-sticker: #ff66cf;
+  --color-sprout-sticker: #22c55e;
+  --color-shadow-mist: #bebcbb;
+  --color-border: #171717;
 
-  /* Typography */
-  --font-sf-pro-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', 'Sarabun', ui-sans-serif, system-ui, sans-serif;
-  --font-sf-pro-text: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Inter', 'Sarabun', ui-sans-serif, system-ui, sans-serif;
-  --font-arial: 'Arial', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Typography Families */
+  --font-gelica: 'Fraunces', 'Plus Jakarta Sans', 'Sarabun', ui-sans-serif, system-ui, sans-serif;
+  --font-geist: 'Inter', 'Sarabun', ui-sans-serif, system-ui, sans-serif;
 
-  /* Shadows */
-  --shadow-subtle: rgb(230, 230, 232) 0px 0px 0px 1px;
-  --shadow-subtle-2: rgb(134, 134, 139) 0px 0px 0px 1px;
+  /* Elevation Shadows */
+  --shadow-lg: rgba(0, 0, 0, 0.06) 0px 2px 20px 0px;
+  --shadow-subtle: rgba(0, 0, 0, 0.25) 0px 1px 2px 0px;
+
+  /* Backward Compatibility Aliases */
+  --color-gallery-white: var(--color-cream-paper);
+  --color-gallery-white-rgb: 253 251 249;
+  --color-studio-mist: var(--color-dew-drop);
+  --color-paper-frost: var(--color-dew-drop);
+  --color-hairline-silver: rgba(23, 23, 23, 0.18);
+  --color-control-gray: var(--color-dew-drop);
+  --color-ink: var(--color-cocoa-ink);
+  --color-slate: #4a4540;
+  --color-steel: rgba(23, 23, 23, 0.6);
+  --color-steel-rgb: 23 23 23;
+  --color-apple-blue: var(--color-marker-orange);
+  --color-pricing-blue: var(--color-charcoal);
+  --color-pricing-blue-rgb: 23 23 23;
+  --color-launch-orange: var(--color-marker-orange);
 }
 
 .dark {
-  --color-gallery-white: #000000;
-  --color-gallery-white-rgb: 0 0 0;
-  --color-studio-mist: #161617;
-  --color-paper-frost: #1d1d1f;
-  --color-hairline-silver: #333336;
-  --color-control-gray: #2c2c2e;
-  --color-ink: #f5f5f7;
-  --color-slate: #a1a1a6;
-  --color-steel: #86868b;
-  --color-steel-rgb: 134 134 139;
-  --color-apple-blue: #2997ff;
-  --color-pricing-blue: #0071e3;
-  --color-pricing-blue-rgb: 0 113 227;
-  --color-launch-orange: #f56300;
+  /* Soft dark notebook variant */
+  --color-cream-paper: #191614;
+  --color-charcoal: #ede8e3;
+  --color-cocoa-ink: #fdfbf9;
+  --color-true-black: #ffffff;
+  --color-dew-drop: #24201c;
+  --color-marker-orange: #ff853f;
+  --color-burnt-sienna: #ff6f1e;
+  --color-sky-sticker: #60a5fa;
+  --color-bubblegum-sticker: #f472b6;
+  --color-sprout-sticker: #4ade80;
+  --color-shadow-mist: #0a0908;
+  --color-border: #ede8e3;
+
+  --color-gallery-white: var(--color-cream-paper);
+  --color-gallery-white-rgb: 25 22 20;
+  --color-studio-mist: var(--color-dew-drop);
+  --color-paper-frost: var(--color-dew-drop);
+  --color-hairline-silver: rgba(237, 232, 227, 0.2);
+  --color-control-gray: var(--color-dew-drop);
+  --color-ink: var(--color-cocoa-ink);
+  --color-slate: #cfc8bf;
+  --color-steel: rgba(237, 232, 227, 0.6);
+  --color-steel-rgb: 237 232 227;
+  --color-apple-blue: var(--color-marker-orange);
+  --color-pricing-blue: var(--color-charcoal);
+  --color-pricing-blue-rgb: 237 232 227;
+  --color-launch-orange: var(--color-marker-orange);
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: var(--color-gallery-white);
-    color: var(--color-ink);
-    font-family: var(--font-sf-pro-text);
+    scrollbar-gutter: stable;
+    background-color: var(--color-cream-paper);
+    color: var(--color-charcoal);
+    font-family: var(--font-geist);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Editorial Headings: SF Pro Display 600 weight, compact negative tracking */
+  /* Superr Display Headings: gelica, warm cocoa ink, tight line-height, text-wrap balance */
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-sf-pro-display);
-    font-weight: 600;
-    color: var(--color-ink);
+    font-family: var(--font-gelica);
+    color: var(--color-cocoa-ink);
     text-wrap: balance;
   }
 
   /* Body copy with relaxed legibility and orphan prevention */
   p, blockquote, li {
-    font-family: var(--font-sf-pro-text);
+    font-family: var(--font-geist);
     text-wrap: pretty;
   }
 }
 
-/* Restrained Minimal scrollbar */
+/* Restrained Minimal Paper Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-gallery-white);
+  background: var(--color-cream-paper);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-control-gray);
-  border-radius: 9999px;
+  background: rgba(23, 23, 23, 0.2);
+  border-radius: 20px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-steel);
+  background: var(--color-charcoal);
 }
 
-/* KaTeX styling — Pure Gallery White / Studio Mist Card */
+/* Superr Pill Button Standard */
+.superr-pill-btn {
+  background-color: var(--color-cream-paper);
+  border: 1.5px solid var(--color-charcoal);
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-family: var(--font-gelica);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-charcoal);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+  cursor: pointer;
+}
+
+.superr-pill-btn:hover {
+  background-color: var(--color-dew-drop);
+  transform: translateY(-1px);
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 2px 4px 0px;
+}
+
+.superr-pill-btn:active {
+  transform: translateY(0px);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
+}
+
+/* Handwritten script annotation */
+.handwritten-caption {
+  font-family: var(--font-gelica);
+  color: var(--color-marker-orange);
+  font-weight: 400;
+}
+
+/* Marker highlight underline */
+.marker-highlight {
+  color: var(--color-marker-orange);
+  position: relative;
+  display: inline;
+}
+
+.marker-highlight::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 1px;
+  width: 100%;
+  height: 2.5px;
+  background-color: var(--color-marker-orange);
+  border-radius: 2px;
+  opacity: 0.85;
+}
+
+/* Deferred rendering for below-the-fold cards */
+.paper-card-deferred {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 260px;
+}
+
+/* Native CSS Scroll-Driven Progress Bar using Named Scroll Timeline */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: --reader-scroll) and (timeline-scope: --reader-scroll)) {
+    @keyframes grow-progress {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    .reader-modal-card {
+      timeline-scope: --reader-scroll;
+    }
+
+    .reader-scroll-container {
+      scroll-timeline: --reader-scroll block;
+    }
+
+    .reading-progress-bar {
+      width: 100% !important;
+      transform-origin: 0 50%;
+      animation: grow-progress auto linear;
+      animation-timeline: --reader-scroll;
+    }
+  }
+}
+
+/* Reduced motion fallback for JS-driven progress bar */
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress-bar {
+    transition: none !important;
+  }
+}
+
+/* Scoped typography for reader content based on selected font size */
+.prose-size-sm p,
+.prose-size-sm li,
+.prose-size-sm .markdown-blockquote {
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.prose-size-md p,
+.prose-size-md li,
+.prose-size-md .markdown-blockquote {
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.prose-size-lg p,
+.prose-size-lg li,
+.prose-size-lg .markdown-blockquote {
+  font-size: 19px;
+  line-height: 1.85;
+}
+
+/* KaTeX Styling — Warm Schoolyard Card */
 .katex {
-  font-size: 1.02em;
+  font-size: 1.05em;
   text-rendering: auto;
 }
 
 .katex-display-wrapper {
-  margin: 1.5rem 0;
+  margin: 1.75rem 0;
   padding: 1.25rem 1.5rem;
-  background-color: var(--color-studio-mist);
-  border: 1px solid var(--color-hairline-silver);
-  border-left: 3px solid var(--color-apple-blue);
-  border-radius: 16px;
+  background-color: var(--color-dew-drop);
+  border: 1.5px solid var(--color-charcoal);
+  border-left: 4px solid var(--color-marker-orange);
+  border-radius: 12px;
+}
+
+/* Blockquote styling */
+.markdown-blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background-color: var(--color-dew-drop);
+  border-left: 3.5px solid var(--color-marker-orange);
+  border-radius: 8px;
+  color: var(--color-cocoa-ink);
+  font-style: normal;
+}
+
+/* Markdown Table Styles */
+.markdown-table-wrapper {
+  overflow-x: auto;
+  margin: 1.75rem 0;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-charcoal);
+  background-color: var(--color-cream-paper);
+}
+
+.markdown-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.markdown-table thead {
+  background-color: var(--color-dew-drop);
+  color: var(--color-cocoa-ink);
+  font-weight: 600;
+  font-family: var(--font-gelica);
+  border-bottom: 1.5px solid var(--color-charcoal);
+}
+
+.markdown-table th {
+  padding: 0.85rem 1.1rem;
+  font-weight: 600;
+}
+
+.markdown-table tbody {
+  color: var(--color-charcoal);
+}
+
+.markdown-table tbody tr {
+  border-top: 1px solid rgba(23, 23, 23, 0.12);
+  transition: background-color 0.15s ease;
+}
+
+.markdown-table tbody tr:first-child {
+  border-top: none;
+}
+
+.markdown-table tbody tr:hover {
+  background-color: var(--color-dew-drop);
+}
+
+.markdown-table td {
+  padding: 0.85rem 1.1rem;
+}
+
+.markdown-table td.markdown-table-label {
+  font-weight: 600;
+  color: var(--color-cocoa-ink);
+  white-space: nowrap;
 }
 
 @keyframes fadeIn {
@@ -118,59 +328,4 @@
 
 .animate-fadeIn {
   animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Shared Generated-Markdown Table Styles */
-.markdown-table-wrapper {
-  overflow-x: auto;
-  margin: 1.5rem 0;
-  border-radius: 20px;
-  border: 1px solid var(--color-hairline-silver);
-  background-color: var(--color-gallery-white);
-}
-
-.markdown-table {
-  width: 100%;
-  text-align: left;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
-
-.markdown-table thead {
-  background-color: var(--color-studio-mist);
-  color: var(--color-ink);
-  font-weight: 600;
-  border-bottom: 1px solid var(--color-hairline-silver);
-}
-
-.markdown-table th {
-  padding: 0.75rem 1rem;
-  font-weight: 600;
-}
-
-.markdown-table tbody {
-  color: var(--color-slate);
-}
-
-.markdown-table tbody tr {
-  border-top: 1px solid var(--color-hairline-silver);
-  transition: background-color 0.15s ease;
-}
-
-.markdown-table tbody tr:first-child {
-  border-top: none;
-}
-
-.markdown-table tbody tr:hover {
-  background-color: color-mix(in srgb, var(--color-studio-mist) 60%, transparent);
-}
-
-.markdown-table td {
-  padding: 0.75rem 1rem;
-}
-
-.markdown-table td.markdown-table-label {
-  font-weight: 600;
-  color: var(--color-ink);
-  white-space: nowrap;
 }

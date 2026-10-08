@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { TagInfo } from '../types';
-import { X } from 'lucide-react';
+import { X, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface FilterBarProps {
   categories: string[];
@@ -23,23 +23,37 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   filteredCount,
   totalCount,
 }) => {
+  const [showAllTags, setShowAllTags] = useState(false);
   const hasFilter = selectedCategory !== null || selectedTag !== null;
 
+  // Curate initial tags to top 12 to prevent visual overcrowding, but always preserve selectedTag
+  const visibleTags = useMemo(() => {
+    if (showAllTags) return tags;
+    const initial = tags.slice(0, 12);
+    if (selectedTag && !initial.some((t) => t.name === selectedTag)) {
+      const selected = tags.find((t) => t.name === selectedTag);
+      if (selected) {
+        return [...initial, selected];
+      }
+    }
+    return initial;
+  }, [showAllTags, tags, selectedTag]);
+
   return (
-    <section id="taxonomy" className="w-full pt-8 pb-6 space-y-5">
+    <section id="taxonomy" className="w-full pt-4 pb-6 space-y-4">
       
-      {/* Category Navigation Pills — Segmented Control */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-hairline-silver/60">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-3 scrollbar-none">
+      {/* Category Navigation Pills — Schoolyard Segmented Control */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-[1.5px] border-charcoal/15">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-3.5 py-1.5 rounded-full text-[12px] font-normal tracking-[-0.12px] whitespace-nowrap transition-colors ${
+            className={`px-4 py-1.5 rounded-[20px] text-[13px] font-gelica transition-all whitespace-nowrap shadow-subtle ${
               selectedCategory === null
-                ? 'bg-ink text-gallery-white'
-                : 'bg-gallery-white text-slate hover:text-ink hover:bg-studio-mist border border-hairline-silver'
+                ? 'bg-charcoal text-cream-paper border-[1.5px] border-charcoal font-medium'
+                : 'bg-cream-paper text-charcoal border-[1.5px] border-charcoal/30 hover:border-charcoal hover:bg-dew-drop'
             }`}
           >
-            All Papers ({totalCount})
+            all papers ({totalCount})
           </button>
 
           {categories.map((cat) => {
@@ -48,46 +62,46 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(isSelected ? null : cat)}
-                className={`px-3.5 py-1.5 rounded-full text-[12px] font-normal tracking-[-0.12px] whitespace-nowrap transition-colors ${
+                className={`px-4 py-1.5 rounded-[20px] text-[13px] font-gelica transition-all whitespace-nowrap shadow-subtle ${
                   isSelected
-                    ? 'bg-ink text-gallery-white'
-                    : 'bg-gallery-white text-slate hover:text-ink hover:bg-studio-mist border border-hairline-silver'
+                    ? 'bg-charcoal text-cream-paper border-[1.5px] border-charcoal font-medium'
+                    : 'bg-cream-paper text-charcoal border-[1.5px] border-charcoal/30 hover:border-charcoal hover:bg-dew-drop'
                 }`}
               >
-                {cat}
+                {cat.toLowerCase()}
               </button>
             );
           })}
         </div>
 
         {/* Filter Summary Counter */}
-        <div className="text-[12px] text-slate font-sf-text shrink-0 pb-1">
-          Showing {filteredCount} of {totalCount} monographs
+        <div className="text-[13px] text-charcoal/70 font-gelica shrink-0">
+          showing {filteredCount} of {totalCount} monographs
         </div>
       </div>
 
-      {/* Scientific Auto-Tag Cloud — Quiet Hairline Pills */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[12px] font-sf-text text-slate mr-1.5">
-          Keywords:
+      {/* Scientific Auto-Tag Cloud — Dew Drop & Sprout Green Pills */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[13px] font-gelica text-charcoal/70 mr-1">
+          keywords:
         </span>
 
-        {tags.map((tag) => {
+        {visibleTags.map((tag) => {
           const isSelected = selectedTag === tag.name;
           return (
             <button
               key={tag.name}
               onClick={() => setSelectedTag(isSelected ? null : tag.name)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-sf-text tracking-[-0.12px] transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-[20px] text-[12px] font-geist shadow-subtle transition-all ${
                 isSelected
-                  ? 'bg-pricing-blue text-white font-normal'
-                  : 'bg-gallery-white hover:bg-studio-mist text-slate hover:text-ink border border-hairline-silver'
+                  ? 'bg-marker-orange text-cream-paper border-[1.5px] border-charcoal font-medium'
+                  : 'bg-dew-drop text-charcoal border-[1.5px] border-charcoal/30 hover:border-charcoal hover:bg-cream-paper'
               }`}
             >
               <span>#{tag.name}</span>
               <span
-                className={`text-[10px] px-1 rounded-full font-mono ${
-                  isSelected ? 'bg-white/25 text-white' : 'bg-studio-mist text-slate'
+                className={`text-[10px] px-1.5 py-0.2 rounded-[10px] font-mono ${
+                  isSelected ? 'bg-black/20 text-cream-paper' : 'bg-charcoal/10 text-charcoal'
                 }`}
               >
                 {tag.count}
@@ -96,17 +110,28 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           );
         })}
 
-        {/* Clear Filter Control — Outlined Explore Pill */}
+        {/* Toggle more tags */}
+        {tags.length > 12 && (
+          <button
+            onClick={() => setShowAllTags(!showAllTags)}
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-[20px] text-[12px] font-gelica text-charcoal bg-cream-paper border-[1.5px] border-charcoal/30 hover:border-charcoal transition-colors"
+          >
+            <span>{showAllTags ? 'less tags' : `+${tags.length - 12} more`}</span>
+            {showAllTags ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
+        )}
+
+        {/* Clear Filter Control */}
         {hasFilter && (
           <button
             onClick={() => {
               setSelectedCategory(null);
               setSelectedTag(null);
             }}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[12px] font-normal text-apple-blue hover:underline transition-colors ml-1"
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-[20px] text-[12px] font-gelica text-burnt-sienna hover:text-marker-orange border-[1.5px] border-burnt-sienna/40 hover:border-marker-orange transition-colors ml-1"
           >
-            <X className="w-3 h-3 text-apple-blue" />
-            <span>Reset filters</span>
+            <X className="w-3 h-3" />
+            <span>reset filters</span>
           </button>
         )}
       </div>
@@ -114,5 +139,3 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     </section>
   );
 };
-
-
