@@ -1,0 +1,73 @@
+name: Sync Content from Google Drive & Deploy Portal
+
+on:
+  schedule:
+    # รันทุกวันเวลา 12:00 น. เวลาไทย (ICT, UTC+7) = 05:00 UTC
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  sync-and-build:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Google API Dependencies
+        run: pip install google-api-python-client google-auth
+
+      - name: Download Files from Google Drive
+        env:
+          GDRIVE_SERVICE_ACCOUNT_KEY: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_KEY }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: python scripts/sync_drive.py
+
+      - name: Run Content Pipeline & Auto-Tagging
+        run: python scripts/prep_content.py
+
+      - name: Commit Updated Markdown & Processed Data
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add raw_papers/ src/data/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: sync papers from Google Drive [skip ci]" && git push)
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Frontend Dependencies
+        run: npm ci || npm install
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
