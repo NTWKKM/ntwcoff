@@ -18,6 +18,25 @@ from pathlib import Path
 MANIFEST_FILE = "raw_papers/.sync_manifest.json"
 
 
+def is_safe_filename(value, *, reject_blank=False) -> bool:
+    if (
+        not isinstance(value, str)
+        or not value
+        or (reject_blank and not value.strip())
+        or "\x00" in value
+    ):
+        return False
+
+    path_obj = Path(value)
+    return (
+        value not in (".", "..")
+        and len(path_obj.parts) == 1
+        and path_obj.name == value
+        and "/" not in value
+        and "\\" not in value
+    )
+
+
 def load_manifest() -> dict:
     p = Path(MANIFEST_FILE)
     if p.exists():
@@ -119,15 +138,8 @@ def sync_drive():
         modified_time = file.get("modifiedTime", "")
         md5 = file.get("md5Checksum", "")
 
-        # Validate filename to prevent path traversal or invalid path components
-        path_obj = Path(file_name)
-        if (
-            file_name in (".", "..")
-            or len(path_obj.parts) != 1
-            or path_obj.name != file_name
-            or "/" in file_name
-            or "\\" in file_name
-        ):
+        # Validate filename to prevent path traversal, null bytes, or invalid path components
+        if not is_safe_filename(file_name):
             print(f"⚠️ Skipping invalid or unsafe filename: {file_name}")
             continue
 
@@ -200,17 +212,7 @@ def sync_drive():
     deleted_count = 0
     for old_id, old_info in manifest.items():
         old_name = old_info.get("name") if isinstance(old_info, dict) else None
-        if not isinstance(old_name, str) or not old_name.strip():
-            continue
-
-        old_path_obj = Path(old_name)
-        if (
-            old_name in (".", "..")
-            or len(old_path_obj.parts) != 1
-            or old_path_obj.name != old_name
-            or "/" in old_name
-            or "\\" in old_name
-        ):
+        if not is_safe_filename(old_name, reject_blank=True):
             print(f"⚠️ Skipping unsafe stale filename from manifest: {old_name}")
             continue
 

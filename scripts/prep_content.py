@@ -303,19 +303,29 @@ def main():
                 raw_files.append(f)
     raw_files = sorted(raw_files, key=lambda p: p.name)
 
+    FORMAT_PRIORITY = {".md": 2, ".txt": 1}
+
     for paper_file in raw_files:
         paper = parse_paper(paper_file)
 
-        # Deduplication check: if a paper with identical normalized title exists, keep the latest
+        # Deduplication check: if a paper with identical normalized title exists, preserve higher-priority format (.md > .txt)
         norm_title = re.sub(r"[^\w\u0E00-\u0E7F]+", "", paper["title"].lower())
         if norm_title in seen_titles:
             prev_idx = seen_titles[norm_title]["index"]
             prev_file = seen_titles[norm_title]["file"]
-            print(
-                f"⚠️ [DUPLICATE DETECTED] '{paper['title']}' in '{paper_file.name}' already loaded from '{prev_file}'. Merging with latest."
-            )
-            raw_papers_list[prev_idx] = paper
-            seen_titles[norm_title]["file"] = paper_file.name
+            prev_prio = FORMAT_PRIORITY.get(Path(prev_file).suffix.lower(), 0)
+            curr_prio = FORMAT_PRIORITY.get(paper_file.suffix.lower(), 0)
+
+            if curr_prio > prev_prio:
+                print(
+                    f"⚠️ [DUPLICATE DETECTED] Replacing lower-priority '{prev_file}' with '{paper_file.name}' for '{paper['title']}'."
+                )
+                raw_papers_list[prev_idx] = paper
+                seen_titles[norm_title]["file"] = paper_file.name
+            else:
+                print(
+                    f"⚠️ [DUPLICATE DETECTED] Retaining existing '{prev_file}' over '{paper_file.name}' for '{paper['title']}'."
+                )
         else:
             seen_titles[norm_title] = {
                 "index": len(raw_papers_list),

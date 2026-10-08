@@ -1,4 +1,4 @@
-รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)
+# รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)
 วันที่: 7 ตุลาคม 2026
 หมวดหมู่: เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)
 ข้อมูลงานวิจัย (Research Metadata)

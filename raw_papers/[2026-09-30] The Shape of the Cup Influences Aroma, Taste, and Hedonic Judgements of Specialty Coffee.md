@@ -1,4 +1,4 @@
-รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)
+# รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)
 วันที่: 30 กันยายน 2026
 หมวดหมู่: วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)
 ข้อมูลงานวิจัย (Research Metadata)
