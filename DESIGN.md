@@ -49,3 +49,29 @@
   - Ensures every push to `main` deploys in under 1-2 minutes without blocking on Google Drive sync.
   - Reactive trigger via `workflow_run` automatically rebuilds the web app whenever new research papers are fetched and committed from Google Drive.
 
+## ADR-006: White Gallery Minimalist Design System Migration
+
+- **Status**: Accepted
+- **Context**: The user instructed to simplify the UI/UX and adopt a light-theme white gallery where scientific research claims are the visual centerpiece, surrounded by deliberate monochrome typography, 28px shadowless media frames, Studio Mist (`#f5f5f7`) alternating feature bands, and quiet Blue (`#0066cc` / `#0071e3`) controls.
+- **Decision**:
+  - **Color Tokens**: Gallery White (`#ffffff`), Studio Mist (`#f5f5f7`), Hairline Silver (`#d6d6d6`), Control Gray (`#e6e6e8`), Ink (`#1d1d1f`), Slate (`#707070`), Steel (`#86868b`), Accent Blue (`#0066cc`), Pricing Blue (`#0071e3`), and Launch Orange (`#b64400`).
+  - **Visual Treatment**: Stripped all multi-color gradient fills and drop shadows. Replaced with pure flat surfaces separated by `#ffffff` against `#f5f5f7` and 1px `#d6d6d6` hairline edges.
+  - **Card & Geometry Rules**: Feature cards and media frames use `28px` corner radius (`rounded-[28px]`), navigation uses `20px` radius, buttons use `9999px` full pills, search inputs use `980px` radius, and cards remain strictly shadowless.
+  - **Typography**: SF Pro Display (`600` weight, tight negative tracking `-1.2px` on display statements, `+0.23px` on kickers) and SF Pro Text (`400/500/600`, negative tracking `-0.12px` to `-0.374px`).
+  - **Controls**: Outlined Explore Pills (transparent fill, `#1d1d1f` text, 1px `#86868b` outline), Pricing Blue Pills (`#0071e3` fill, `#ffffff` text, 12px, 9999px radius), and bare `#b64400` launch status text.
+- **Rationale**: Elevates readability and simplicity to a clean white gallery standard, focusing user attention purely on scientific evidence, molecular kinetics, and research monographs without decorative noise.
+
+## ADR-007: Token Alpha Channel Support and Semantic Markdown Tables
+
+- **Status**: Accepted
+- **Context**: CodeRabbit AI review on PR#4 identified contrast issues in dark mode selected pills, hardcoded utility strings in generated markdown tables, low contrast small labels using steel instead of slate, and missing alpha channel support in CSS color tokens.
+- **Decision**:
+  - Expose RGB channel variables (`--color-gallery-white-rgb`, `--color-steel-rgb`, `--color-pricing-blue-rgb`) in CSS for Tailwind `/ <alpha-value>` opacity modifier support across both light and dark themes, while preserving existing hex variables.
+  - Centralize generated Markdown table styles in `src/index.css` under stable semantic classes (`.markdown-table-wrapper`, `.markdown-table`, `.markdown-table-label`).
+  - Standardize small micro-metadata text and input placeholders to `slate` (`#707070` / `#a1a1a6`), reserving `steel` for decorative iconography and hairline borders.
+  - Fix pill selected state text to `text-gallery-white` so it adapts correctly across light and dark themes.
+- **Rationale**: Guarantees WCAG-compliant contrast ratios in dark mode, keeps generated HTML decoupled from utility class churn, and restores alpha-channel composition across Tailwind utilities.
+
+
+
+

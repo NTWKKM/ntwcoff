@@ -98,16 +98,16 @@ export const App: React.FC = () => {
   const categories = Object.keys(taxonomyData.categories || {});
 
   return (
-    <div className="min-h-screen flex flex-col bg-eggshell text-ink transition-colors selection:bg-stone selection:text-ink">
+    <div className="min-h-screen flex flex-col bg-gallery-white text-ink transition-colors selection:bg-pricing-blue/15 selection:text-ink">
       
-      {/* Top Nav Bar */}
+      {/* Global & Local Navigation */}
       <Navbar
         isDark={isDark}
         toggleTheme={toggleTheme}
         totalPapers={papersData.length}
       />
 
-      {/* Hero Banner with Whisper Headline & Audio Sphere */}
+      {/* Hero Visual Stage: Full-bleed #ffffff Gallery White */}
       <HeroBanner
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -116,59 +116,61 @@ export const App: React.FC = () => {
         totalTags={taxonomyData.tags.length}
       />
 
-      {/* Main Content Area — Single Max-Width 1280px Centered Column */}
-      <main id="catalog" className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 lg:px-8 pb-20">
-        
-        {/* Category & Tag Filter Bar */}
-        <FilterBar
-          categories={categories}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          tags={taxonomyData.tags}
-          selectedTag={selectedTag}
-          setSelectedTag={setSelectedTag}
-          filteredCount={filteredPapers.length}
-          totalCount={papersData.length}
-        />
+      {/* Feature & Catalog Stage: Full-width Studio Mist (#f5f5f7) Band */}
+      <section id="catalog" className="flex-1 w-full bg-studio-mist border-b border-hairline-silver py-12 sm:py-16 transition-colors">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Category & Tag Filter Bar */}
+          <FilterBar
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            tags={taxonomyData.tags}
+            selectedTag={selectedTag}
+            setSelectedTag={setSelectedTag}
+            filteredCount={filteredPapers.length}
+            totalCount={papersData.length}
+          />
 
-        {/* Paper Grid — 2-Column Responsive Feature Cards with 20px Radius */}
-        {filteredPapers.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mt-4">
-            {filteredPapers.map((paper) => (
-              <PaperCard
-                key={paper.id}
-                paper={paper}
-                onSelect={handleSelectPaper}
-                onTagClick={(tag) => setSelectedTag(tag)}
-              />
-            ))}
-          </div>
-        ) : (
-          /* Empty Search State */
-          <div className="py-24 text-center max-w-md mx-auto">
-            <div className="w-14 h-14 rounded-full bg-warm-taupe border border-stone flex items-center justify-center mx-auto mb-4 text-smoke">
-              <SearchX className="w-6 h-6" />
+          {/* Paper Grid — 2-Column Oversized #ffffff Gallery Cards with 28px Radius & Shadowless Surface */}
+          {filteredPapers.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mt-6">
+              {filteredPapers.map((paper) => (
+                <PaperCard
+                  key={paper.id}
+                  paper={paper}
+                  onSelect={handleSelectPaper}
+                  onTagClick={(tag) => setSelectedTag(tag)}
+                />
+              ))}
             </div>
-            <h3 className="text-xl font-light tracking-whisper text-ink font-waldenburg mb-2">
-              ไม่พบบทวิเคราะห์ที่ตรงกับเงื่อนไข
-            </h3>
-            <p className="text-sm text-smoke font-sans mb-6 leading-relaxed">
-              ลองค้นหาด้วยคำอื่น หรือกดล้างตัวกรองเพื่อดูบทวิเคราะห์ทั้งหมด
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory(null);
-                setSelectedTag(null);
-              }}
-              className="px-4 py-2 rounded-full text-xs font-medium bg-gradient-to-r from-violet-spark to-ember-orange hover:opacity-90 text-white shadow-sm shadow-violet-spark/20 transition-all"
-            >
-              ล้างตัวกรองทั้งหมด
-            </button>
-          </div>
-        )}
+          ) : (
+            /* Empty Search State */
+            <div className="py-24 text-center max-w-md mx-auto">
+              <div className="w-14 h-14 rounded-full bg-gallery-white border border-hairline-silver flex items-center justify-center mx-auto mb-4 text-slate">
+                <SearchX className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-semibold tracking-[-0.3px] text-ink font-sf-display mb-2">
+                No matching research monographs found
+              </h3>
+              <p className="text-sm text-slate font-sf-text mb-6 leading-relaxed">
+                Try searching for other chemical compounds, keywords, or reset filters to view all papers.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory(null);
+                  setSelectedTag(null);
+                }}
+                className="px-4 py-2 rounded-full text-[12px] font-normal bg-pricing-blue hover:bg-[#0077ed] text-white transition-colors"
+              >
+                Reset all filters
+              </button>
+            </div>
+          )}
 
-      </main>
+        </div>
+      </section>
 
       {/* Paper Reader Modal */}
       <PaperReader
@@ -177,26 +179,25 @@ export const App: React.FC = () => {
         onTagClick={(tag) => setSelectedTag(tag)}
       />
 
-      {/* Compact Single Band Footer — ElevenLabs Bauhaus Reference with Spark Dot */}
-      <footer className="border-t border-stone bg-warm-taupe py-6 px-4 sm:px-6 lg:px-8 text-xs text-smoke font-sans">
+      {/* Studio Mist Clean Footer */}
+      <footer className="bg-gallery-white py-8 px-4 sm:px-6 lg:px-8 text-[12px] text-slate font-sf-text">
         <div className="max-w-[1280px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-gradient-to-tr from-violet-spark to-ember-orange" />
-            <span className="font-medium text-ink font-sans">
+            <span className="font-semibold text-ink font-sf-display">
               NTWK Coffee
             </span>
-            <span className="text-ash">•</span>
+            <span className="text-hairline-silver">•</span>
             <span>Scientific Research Notebook & Knowledge Portal</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-[12px] font-mono text-ash">
+          <div className="flex flex-wrap items-center gap-4 text-[12px] text-slate">
             <span>Daily Sync: 12:00 ICT (05:00 UTC)</span>
-            <span>•</span>
+            <span className="text-hairline-silver">•</span>
             <a
               href="https://github.com/NTWKKM/ntwcoff"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-graphite hover:text-violet-spark underline decoration-stone hover:decoration-violet-spark transition-colors"
+              className="text-apple-blue hover:underline transition-colors"
             >
               GitHub Source
             </a>
