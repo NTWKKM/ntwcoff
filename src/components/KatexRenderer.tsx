@@ -59,6 +59,26 @@ export const escapeSourceText = (text: string): string => {
   return parts.join('');
 };
 
+export const slugifyHeading = (rawText: string, existingCounts?: Map<string, number>): string => {
+  // Strip markdown formatting (*, _, $, `) before slugifying so math or formatting produces clean slugs
+  const clean = rawText
+    .replace(/\$\$[\s\S]+?\$\$/g, '')
+    .replace(/\$[^\$\n]+?\$/g, '')
+    .replace(/[*_`#]/g, '')
+    .trim();
+  let baseId = clean
+    .replace(/[^\w\u0E00-\u0E7F]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase();
+  if (!baseId) baseId = 'section';
+
+  if (!existingCounts) return baseId;
+
+  const count = existingCounts.get(baseId) || 0;
+  existingCounts.set(baseId, count + 1);
+  return count === 0 ? baseId : `${baseId}-${count}`;
+};
+
 export const KatexRenderer: React.FC<KatexRendererProps> = ({
   content,
   fontSize = 'md',
@@ -72,6 +92,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
   const renderedHtml = useMemo(() => {
     const lines = content.split('\n');
     const processedLines: string[] = [];
+    const headingCounts = new Map<string, number>();
     let inTable = false;
     let tableBuffer: string[] = [];
 
@@ -143,16 +164,16 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
 
       // Headings — gelica 600, Cocoa Ink, lowercase
       if (line.startsWith('### ')) {
-        const headingText = line.replace('### ', '');
-        const id = headingText.replace(/[^\w\u0E00-\u0E7F]+/g, '-').toLowerCase();
+        const headingText = line.replace('### ', '').trim();
+        const id = slugifyHeading(headingText, headingCounts);
         processedLines.push(
           `<h3 id="${id}" class="text-lg sm:text-xl font-gelica font-semibold lowercase mt-9 mb-3 text-cocoa-ink scroll-mt-24 flex items-center gap-2">${renderWithKatex(
             escapeSourceText(headingText)
           )}</h3>`
         );
       } else if (line.startsWith('## ')) {
-        const headingText = line.replace('## ', '');
-        const id = headingText.replace(/[^\w\u0E00-\u0E7F]+/g, '-').toLowerCase();
+        const headingText = line.replace('## ', '').trim();
+        const id = slugifyHeading(headingText, headingCounts);
         processedLines.push(
           `<h2 id="${id}" class="text-xl sm:text-2xl font-gelica font-semibold lowercase mt-12 mb-4 pb-2 border-b-[1.5px] border-charcoal/20 text-cocoa-ink scroll-mt-24"><span>${renderWithKatex(
             escapeSourceText(headingText)

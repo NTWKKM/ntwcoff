@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Paper } from '../types';
-import { KatexRenderer } from './KatexRenderer';
+import { KatexRenderer, slugifyHeading } from './KatexRenderer';
 import {
   X,
   ArrowLeft,
@@ -56,20 +56,32 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // Extract Table of Contents (TOC) from Markdown headings
+  // Reset scroll and progress when paper changes
+  useEffect(() => {
+    if (paper?.id) {
+      setScrollProgress(0);
+      setActiveSection('');
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
+    }
+  }, [paper?.id]);
+
+  // Extract Table of Contents (TOC) from Markdown headings with unique IDs
   const tocItems = useMemo<TocItem[]>(() => {
     if (!paper) return [];
     const items: TocItem[] = [];
+    const headingCounts = new Map<string, number>();
     const lines = paper.content.split('\n');
 
     for (const line of lines) {
       if (line.startsWith('## ')) {
         const title = line.replace('## ', '').trim();
-        const id = title.replace(/[^\w\u0E00-\u0E7F]+/g, '-').toLowerCase();
+        const id = slugifyHeading(title, headingCounts);
         items.push({ id, title, level: 2 });
       } else if (line.startsWith('### ')) {
         const title = line.replace('### ', '').trim();
-        const id = title.replace(/[^\w\u0E00-\u0E7F]+/g, '-').toLowerCase();
+        const id = slugifyHeading(title, headingCounts);
         items.push({ id, title, level: 3 });
       }
     }
@@ -143,13 +155,13 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
       {/* Modal Dialog Card — Superr Schoolyard Notebook Canvas */}
       <div
         ref={modalContentRef}
-        className="bg-cream-paper text-charcoal w-full max-w-6xl rounded-none sm:rounded-[16px] border-[1.5px] border-charcoal flex flex-col my-auto max-h-screen sm:max-h-[94vh] overflow-hidden shadow-card relative"
+        className="reader-modal-card bg-cream-paper text-charcoal w-full max-w-6xl rounded-none sm:rounded-[16px] border-[1.5px] border-charcoal flex flex-col my-auto max-h-screen sm:max-h-[94vh] overflow-hidden shadow-card relative"
       >
         {/* Native Scroll Progress Indicator in Marker Orange */}
         <div
           aria-hidden="true"
           style={{ width: `${scrollProgress}%` }}
-          className="absolute top-0 left-0 h-[3px] bg-marker-orange z-30 transition-[width] duration-75 ease-out"
+          className="reading-progress-bar absolute top-0 left-0 h-[3px] bg-marker-orange z-30 transition-[width] duration-75 ease-out"
         />
 
         {/* Sticky Reader Toolbar */}
@@ -297,7 +309,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-6 sm:px-10 lg:px-12 py-8 space-y-8"
+          className="reader-scroll-container flex-1 overflow-y-auto px-6 sm:px-10 lg:px-12 py-8 space-y-8"
         >
           <div className="max-w-5xl mx-auto flex gap-10 items-start">
             

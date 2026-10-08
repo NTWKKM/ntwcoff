@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { TagInfo } from '../types';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -26,8 +26,18 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   const [showAllTags, setShowAllTags] = useState(false);
   const hasFilter = selectedCategory !== null || selectedTag !== null;
 
-  // Curate initial tags to top 12 to prevent visual overcrowding
-  const visibleTags = showAllTags ? tags : tags.slice(0, 12);
+  // Curate initial tags to top 12 to prevent visual overcrowding, but always preserve selectedTag
+  const visibleTags = useMemo(() => {
+    if (showAllTags) return tags;
+    const initial = tags.slice(0, 12);
+    if (selectedTag && !initial.some((t) => t.name === selectedTag)) {
+      const selected = tags.find((t) => t.name === selectedTag);
+      if (selected) {
+        return [...initial, selected];
+      }
+    }
+    return initial;
+  }, [showAllTags, tags, selectedTag]);
 
   return (
     <section id="taxonomy" className="w-full pt-4 pb-6 space-y-4">

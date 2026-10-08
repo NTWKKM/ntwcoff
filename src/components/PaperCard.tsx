@@ -89,12 +89,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
             </button>
           ))}
           {remainingTagsCount > 0 && (
-            <span
+            <button
+              type="button"
               onClick={() => onSelect(paper)}
               className="px-2 py-0.5 rounded-[20px] text-[11px] font-geist text-charcoal/60 bg-cream-paper border-[1.5px] border-charcoal/20 cursor-pointer hover:text-charcoal"
             >
               +{remainingTagsCount} more
-            </span>
+            </button>
           )}
         </div>
       </div>

@@ -179,18 +179,27 @@
   contain-intrinsic-size: auto none auto 260px;
 }
 
-/* Native CSS Scroll-Driven Progress Bar */
+/* Native CSS Scroll-Driven Progress Bar using Named Scroll Timeline */
 @media (prefers-reduced-motion: no-preference) {
-  @supports ((animation-timeline: scroll())) {
+  @supports ((animation-timeline: --reader-scroll) and (timeline-scope: --reader-scroll)) {
     @keyframes grow-progress {
       from { transform: scaleX(0); }
       to { transform: scaleX(1); }
     }
 
+    .reader-modal-card {
+      timeline-scope: --reader-scroll;
+    }
+
+    .reader-scroll-container {
+      scroll-timeline: --reader-scroll block;
+    }
+
     .reading-progress-bar {
+      width: 100% !important;
       transform-origin: 0 50%;
       animation: grow-progress auto linear;
-      animation-timeline: scroll();
+      animation-timeline: --reader-scroll;
     }
   }
 }
