@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper } from '../types';
-import { BookOpen, Calendar, Clock, ChevronRight, GraduationCap, Award } from 'lucide-react';
+import { ArrowUpRight, Clock, Calendar } from 'lucide-react';
 
 interface PaperCardProps {
   paper: Paper;
@@ -10,65 +10,59 @@ interface PaperCardProps {
 
 export const PaperCard: React.FC<PaperCardProps> = ({ paper, onSelect, onTagClick }) => {
   return (
-    <article className="group flex flex-col justify-between rounded-2xl bg-white dark:bg-stone-900/90 border border-stone-200/80 dark:border-stone-800 hover:border-amber-500/50 dark:hover:border-amber-500/50 shadow-sm hover:shadow-xl hover:shadow-amber-900/5 transition-all duration-300 p-6 sm:p-7 relative overflow-hidden">
+    <article className="group flex flex-col justify-between rounded-[20px] bg-warm-taupe border border-stone/70 hover:border-stone p-7 sm:p-8 transition-colors duration-200">
       
-      {/* Top accent line on hover */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-coffee-500 to-amber-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-
       <div>
-        {/* Top Badges */}
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60">
-            <Award className="w-3.5 h-3.5" />
+        {/* Top Badges & Meta */}
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-eggshell text-graphite border border-[#e5e5e5]">
             {paper.category}
           </span>
 
-          <div className="flex items-center gap-3 text-xs text-stone-500 dark:text-slate-400">
+          <div className="flex items-center gap-3 text-xs text-ash font-mono">
             {paper.date && (
               <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
+                <Calendar className="w-3 h-3 text-ash" />
                 {paper.date}
               </span>
             )}
             <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
+              <Clock className="w-3 h-3 text-ash" />
               {paper.readingTimeMinutes} นาที
             </span>
           </div>
         </div>
 
-        {/* Paper Title */}
+        {/* Paper Title — ElevenLabs Whisper-Weight 300 & Tight -0.02em tracking */}
         <h2
           onClick={() => onSelect(paper)}
-          className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors cursor-pointer leading-snug tracking-tight mb-3"
+          className="text-2xl sm:text-[26px] font-light tracking-whisper text-ink font-waldenburg leading-[1.15] hover:opacity-80 transition-opacity cursor-pointer mb-3 text-balance"
         >
           {paper.title}
         </h2>
 
-        {/* Authors & Journal */}
+        {/* Authors & Journal micro-metadata */}
         {(paper.authors || paper.journal) && (
-          <div className="flex flex-col gap-1 text-xs text-stone-600 dark:text-slate-400 mb-4 bg-stone-50 dark:bg-stone-950/60 p-3 rounded-xl border border-stone-200/60 dark:border-stone-800/60">
+          <div className="flex flex-col gap-0.5 text-xs text-smoke font-sans mb-4">
             {paper.authors && (
-              <div className="flex items-start gap-1.5">
-                <GraduationCap className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                <span className="line-clamp-1"><strong className="text-stone-700 dark:text-slate-300">ผู้วิจัย:</strong> {paper.authors}</span>
-              </div>
+              <p className="line-clamp-1">
+                <span className="text-graphite font-medium">ผู้วิจัย:</span> {paper.authors}
+              </p>
             )}
             {paper.journal && (
-              <div className="flex items-start gap-1.5">
-                <BookOpen className="w-3.5 h-3.5 text-coffee-600 dark:text-coffee-300 mt-0.5 shrink-0" />
-                <span className="line-clamp-1"><strong className="text-stone-700 dark:text-slate-300">วารสาร:</strong> {paper.journal}</span>
-              </div>
+              <p className="line-clamp-1 text-ash">
+                <span className="text-smoke">วารสาร:</span> {paper.journal}
+              </p>
             )}
           </div>
         )}
 
         {/* Excerpt */}
-        <p className="text-sm text-stone-600 dark:text-slate-300 leading-relaxed line-clamp-3 mb-5">
+        <p className="text-sm sm:text-[15px] text-smoke font-sans leading-relaxed line-clamp-3 mb-6 text-pretty">
           {paper.excerpt}
         </p>
 
-        {/* Auto-Tags */}
+        {/* Fully-Pilled 9999px Auto-Tags */}
         <div className="flex flex-wrap gap-1.5 mb-6">
           {paper.tags.map((tag) => (
             <button
@@ -77,7 +71,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper, onSelect, onTagClic
                 e.stopPropagation();
                 onTagClick(tag);
               }}
-              className="px-2 py-0.5 rounded-md text-[11px] bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-slate-400 hover:bg-amber-100 hover:text-amber-800 dark:hover:bg-amber-950 dark:hover:text-amber-300 transition-colors"
+              className="px-2.5 py-0.5 rounded-full text-[11px] font-sans bg-eggshell text-smoke hover:text-ink hover:bg-stone/50 border border-[#e5e5e5] transition-colors"
             >
               #{tag}
             </button>
@@ -85,21 +79,23 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper, onSelect, onTagClic
         </div>
       </div>
 
-      {/* Card Footer */}
-      <div className="pt-4 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between">
-        <span className="text-xs text-stone-400 dark:text-slate-500 font-mono">
+      {/* Card Footer Divider & Filled Pill CTA */}
+      <div className="pt-5 border-t border-stone flex items-center justify-between">
+        <span className="text-xs text-ash font-mono">
           {paper.wordCount.toLocaleString()} คำ
         </span>
 
+        {/* Filled Pill Button — Primary Action */}
         <button
           onClick={() => onSelect(paper)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-sm shadow-amber-600/20 group-hover:shadow-md group-hover:shadow-amber-600/30 transition-all"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium bg-ink text-white border border-[#e5e5e5] hover:bg-graphite transition-colors shadow-none"
         >
           <span>อ่านบทวิเคราะห์ฉบับเต็ม</span>
-          <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          <ArrowUpRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
     </article>
   );
 };
+

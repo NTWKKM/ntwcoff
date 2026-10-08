@@ -41,14 +41,19 @@
 
 ---
 
-### 4. ประสบการณ์การอ่านบทความแบบ Modern Editorial (Web Portal)
-- **Ergonomic Coffee Aesthetics**: ออกแบบโดยใช้คู่สี Deep Espresso (`#0c0a09`), Warm Amber (`#d97706`), และสีตัวอักษร Slate White (`#e2e8f0`) ช่วยลดแสงสะท้อนและอาการล้าสายตาตามมาตรฐาน WCAG AAA
-- **Dark / Light Mode**: สลับธีมมืดและธีมสว่างได้ทันที พร้อมบันทึกสถานะลงใน LocalStorage
-- **Live Search & Fuzzy Matching**: ช่องค้นหาอัจฉริยะ ค้นหาได้ทั้งจากชื่อเรื่อง, สารประกอบเคมี (เช่น 5-HMF, Cation, Acrylamide), ชื่อผู้วิจัย, หรือวารสาร
-- **Interactive Taxonomy Filters**: เลือกดูตามกลุ่มสาขาวิจัย (Category Pills) หรือคลิกเลือกแท็ก (Tag Chips) พร้อมแสดงจำนวนบทความในแต่ละแท็ก
+### 4. ประสบการณ์การอ่านบทความแบบ ElevenLabs Bauhaus Studio Notebook
+- **A Bauhaus Studio Notebook on Cream Paper**: ออกแบบตามอัตลักษณ์ ElevenLabs Style Reference — วางบนผืนผ้าใบกระดาษ Eggshell (`#fdfcfc`), พื้นผิวรอง Warm Taupe (`#f5f3f1`), เส้นขอบ hairline Stone (`#ebe8e4`), ตัวอักษรสีหมึก Ink (`#000000`), พร้อมประกายสีคู่ผลิตภัณฑ์ **Audio Synthesis Sphere** (Violet Spark `#0447ff` และ Ember Orange `#ff4704`)
+- **Whisper-Weight Typography**: ตัวพิมพ์หัวข้อ Display และ Heading ใช้น้ำหนัก **300 (Whisper-weight)** พร้อมระยะบีบตัวอักษรชิดแน่นเป็นพิเศษ **`-0.02em`** (`tracking-whisper`) และระบบ `text-wrap: balance / pretty` ให้ความรู้สึกสุขุม นิ่ง มีพลัง และอ่านสบายตาเหมือนสิ่งพิมพ์สถาปัตยกรรมชั้นสูง
+- **Fully-Pilled Hierarchy & 20px Cards**:
+  - ปุ่มและแท็กทั้งหมดเป็นทรงแคปซูล **`rounded-full` (9999px)** ตามลำดับขั้น Filled Pill Button (สีดำ) และ Outline Pill Button (สีขาวไข่)
+  - Feature Cards พื้นผิว Warm Taupe มุมโค้งมน **20px (`rounded-[20px]`)** วางแบนเรียบแบบ Flat Editorial
+  - หน้าต่างอ่านบทความขนาดใหญ่ทรงโค้งมน **24px (`rounded-[24px]`)**
+- **Light-First Editorial Canvas**: หน้ากระดาษเริ่มต้นด้วย Light Theme นุ่มนวล ไม่สะท้อนแสงจ้าดิจิทัล พร้อมรองรับการสลับเป็น Dark Theme สไตล์กระดาษคาร์บอน Bauhaus
+- **Live Search & Fuzzy Matching**: ช่องค้นหาอัจฉริยะ ค้นหาได้ทั้งจากชื่อเรื่อง, สารประกอบเคมี (เช่น 5-HMF, Cation, Melanoidins, Acrylamide), ชื่อผู้วิจัย, หรือวารสาร
+- **Interactive Taxonomy Filters**: สลับหมวดหมู่วิจัยด้วย Tab Pills ทรงแคปซูล และเลือกคีย์เวิร์ดวิทยาศาสตร์จาก Tag Cloud
 - **Full Research Reader Modal**: 
-  - สรุปข้อมูลจำเพาะงานวิจัย (Research Specifications Box)
-  - รองรับสูตรคณิตศาสตร์และสมการเคมีด้วย **KaTeX** (\$HMW > 5\text{ kDa}\$, \$C_{21}H_{21}O_7\$, \$m/z\$, ฯลฯ)
+  - สรุปข้อมูลจำเพาะงานวิจัย (Research Specifications Box ในพื้นผิว Warm Taupe)
+  - รองรับสูตรคณิตศาสตร์และสมการเคมีด้วย **KaTeX** (\$HMW > 5\text{ kDa}\$, \$C_{21}H_{21}O_7\$, \$m/z\$, ฯลฯ) ในโทนกระดาษอบอุ่น
   - ตารางผลการทดลองและกล่องสรุปผลการนำไปใช้จริง (Practical Applications)
   - ปุ่ม **Copy Citation**: คัดลอกรายการอ้างอิงรูปแบบมาตรฐานได้ในคลิกเดียว
   - รองรับ Deep Linking ผ่าน URL Hash (`#paper=<slug>`)
@@ -99,21 +104,21 @@ ntwcoff/
 ├── raw_papers/                   # คลังเอกสารวิจัยต้นฉบับ Markdown ที่ซิงค์มาจาก Google Drive
 ├── src/
 │   ├── components/
-│   │   ├── Navbar.tsx            # แถบเมนูด้านบน, สวิตช์ Dark Mode, สถานะ Sync
-│   │   ├── HeroBanner.tsx        # ส่วนค้นหาเรียลไทม์ และสถิติคลังวิจัย
-│   │   ├── FilterBar.tsx         # ตัวเลือกหมวดหมู่วิจัย และ Tag Cloud
-│   │   ├── PaperCard.tsx         # การ์ดแสดงบทวิเคราะห์แบบกระชับ
-│   │   ├── PaperReader.tsx       # หน้าอ่านบทความฉบับเต็ม พร้อม Citation Tool
-│   │   └── KatexRenderer.tsx     # ตัวเรนเดอร์สูตรคณิตศาสตร์และสมการเคมี
+│   │   ├── Navbar.tsx            # แถบเมนู 52px, Wordmark สีดำ, Pill Buttons, สถานะ Sync
+│   │   ├── HeroBanner.tsx        # ส่วนค้นหาเรียลไทม์, หัวข้อ Whisper 48px และ Audio Sphere
+│   │   ├── FilterBar.tsx         # Tab Pills สลับหมวดหมู่ และ 9999px Scientific Tag Cloud
+│   │   ├── PaperCard.tsx         # Feature Card Warm Taupe 20px พร้อม Filled Pill CTA
+│   │   ├── PaperReader.tsx       # หน้าอ่านบทความฉบับเต็ม 24px พร้อม Research Specifications
+│   │   └── KatexRenderer.tsx     # ตัวเรนเดอร์สูตรคณิตศาสตร์ สมการเคมี และตาราง Bauhaus
 │   ├── data/
 │   │   ├── papers.json           # ฐานข้อมูลงานวิจัยทั้งหมดที่ประมวลผลแล้ว
 │   │   └── taxonomy.json         # สถิติหมวดหมู่และแท็กทั้งหมด
 │   ├── types.ts                  # โครงสร้าง Type Definitions (TypeScript)
-│   ├── App.tsx                   # คอมโพเนนต์หลักและ State Management
-│   └── index.css                 # สไตล์ Tailwind CSS, KaTeX, และฟอนต์ภาษาไทย
+│   ├── App.tsx                   # คอมโพเนนต์หลัก, คอลัมน์ 1280px และ Compact Single-Band Footer
+│   └── index.css                 # ElevenLabs Custom Properties, Whisper Headings, KaTeX Box
 ├── ARCHITECTURE.md               # Structural Diary
 ├── CONTEXT.md                    # Domain Ontology Diary
-├── DESIGN.md                     # Architectural Decision Records (ADRs)
+├── DESIGN.md                     # Architectural Decision Records (ADRs & ADR-004)
 └── package.json
 ```
 
@@ -123,7 +128,7 @@ ntwcoff/
 
 - **Data Sync & Ingestion**: Python 3.11+, Google Drive API v3, Google Auth
 - **Frontend Framework**: React 18, TypeScript, Vite 6
-- **Styling & Design System**: Tailwind CSS 3 (Coffee & Espresso Custom Palette)
-- **Scientific Typography**: KaTeX (LaTeX Math & Chemical Expressions)
+- **Styling & Design System**: Tailwind CSS 3 (ElevenLabs Bauhaus System: Eggshell `#fdfcfc`, Warm Taupe `#f5f3f1`, Stone `#ebe8e4`, Ink `#000000`, Violet `#0447ff` & Orange `#ff4704` Product Sparks)
+- **Scientific Typography**: Whisper-Weight Headings (300 Weight / `-0.02em` Tracking), KaTeX (LaTeX Math & Chemical Formulae)
 - **Iconography**: Lucide React
 - **CI/CD & Hosting**: GitHub Actions, GitHub Pages

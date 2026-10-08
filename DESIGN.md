@@ -25,3 +25,14 @@
 - **Status**: Accepted
 - **Context**: The user requested automatic sync every day at 12:00 PM Thai time.
 - **Decision**: Set cron schedule in GitHub Actions to `0 5 * * *` (05:00 UTC = 12:00 ICT, UTC+7) with `workflow_dispatch` for manual on-demand triggers.
+
+## ADR-004: ElevenLabs Bauhaus Studio Notebook Design System
+
+- **Status**: Accepted
+- **Context**: The user specified redesigning the site to follow the ElevenLabs Core Style Reference: warm cream editorial with whispered headlines, Bauhaus studio notebook on eggshell paper.
+- **Decision**:
+  - **Color Palette**: Eggshell canvas (`#fdfcfc`), Warm Taupe secondary surfaces (`#f5f3f1`), Stone hairline borders (`#ebe8e4`), and Ink (`#000000`). Dual accent sparks (`#0447ff` Violet Spark, `#ff4704` Ember Orange) are quarantined strictly to product visual moments (the Audio Sphere graphic) and never used in UI chrome.
+  - **Typography**: Whisper-weight display headings at weight 300 with tight `-0.02em` tracking and `text-wrap: balance`. Neutral Inter at 400/500 with `+0.01em` tracking and `text-wrap: pretty`. Geist/JetBrains Mono for technical micro-metadata at 13px.
+  - **Component Hierarchy**: Strictly `#000000` filled pill buttons paired with `#fdfcfc` outline pill buttons (both `9999px` radius). Feature cards at `20px` radius, large modal panels at `24px` radius. Hairline `1px` stone dividers replace heavy shadows.
+- **Rationale**: Elevates scientific coffee research into an authoritative, restrained, high-legibility publication that feels like an architectural studio notebook rather than a generic tech template.
+

@@ -58,17 +58,17 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         // skip separator row if exists
         const dataRows = rows.slice(1).filter((r) => !r.every((c) => c.match(/^:?-+:?$/)));
 
-        let tableHtml = `<div class="overflow-x-auto my-6 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm bg-white dark:bg-stone-900/50"><table class="w-full text-left border-collapse text-sm">`;
-        tableHtml += `<thead class="bg-stone-100/80 dark:bg-stone-800/80 text-stone-700 dark:text-stone-300 font-semibold border-b border-stone-200 dark:border-stone-800"><tr>`;
+        let tableHtml = `<div class="overflow-x-auto my-6 rounded-[16px] border border-stone bg-eggshell"><table class="w-full text-left border-collapse text-sm">`;
+        tableHtml += `<thead class="bg-warm-taupe text-graphite font-medium border-b border-stone"><tr>`;
         header.forEach((h) => {
-          tableHtml += `<th class="py-3 px-4">${renderWithKatex(h)}</th>`;
+          tableHtml += `<th class="py-3 px-4 font-medium">${renderWithKatex(h)}</th>`;
         });
-        tableHtml += `</tr></thead><tbody class="divide-y divide-stone-100 dark:divide-stone-800 text-stone-700 dark:text-stone-300">`;
+        tableHtml += `</tr></thead><tbody class="divide-y divide-stone text-smoke">`;
         dataRows.forEach((row) => {
-          tableHtml += `<tr class="hover:bg-amber-500/5 transition-colors">`;
+          tableHtml += `<tr class="hover:bg-warm-taupe/40 transition-colors">`;
           row.forEach((cell, idx) => {
             const isLabel = idx === 0 && row.length === 2;
-            tableHtml += `<td class="py-3 px-4 ${isLabel ? 'font-medium text-stone-900 dark:text-amber-200/90 whitespace-nowrap' : ''}">${renderWithKatex(cell)}</td>`;
+            tableHtml += `<td class="py-3 px-4 ${isLabel ? 'font-medium text-ink whitespace-nowrap' : ''}">${renderWithKatex(cell)}</td>`;
           });
           tableHtml += `</tr>`;
         });
@@ -91,12 +91,12 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         flushTable();
       }
 
-      // Headings
+      // Headings — Whisper-Weight 300 & Tight -0.02em tracking
       if (line.startsWith('### ')) {
         const headingText = line.replace('### ', '');
         const id = headingText.replace(/[^\w\u0E00-\u0E7F]+/g, '-').toLowerCase();
         processedLines.push(
-          `<h3 id="${id}" class="text-lg md:text-xl font-bold mt-8 mb-3 text-stone-900 dark:text-amber-200 flex items-center gap-2 scroll-mt-24"><span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>${renderWithKatex(
+          `<h3 id="${id}" class="text-xl font-light tracking-whisper mt-8 mb-3 text-ink font-waldenburg scroll-mt-24">${renderWithKatex(
             headingText
           )}</h3>`
         );
@@ -104,26 +104,26 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         const headingText = line.replace('## ', '');
         const id = headingText.replace(/[^\w\u0E00-\u0E7F]+/g, '-').toLowerCase();
         processedLines.push(
-          `<h2 id="${id}" class="text-xl md:text-2xl font-bold mt-12 mb-4 pb-2 border-b border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 flex items-center justify-between scroll-mt-24"><span>${renderWithKatex(
+          `<h2 id="${id}" class="text-2xl sm:text-[28px] font-light tracking-whisper mt-12 mb-4 pb-2 border-b border-stone text-ink font-waldenburg scroll-mt-24"><span>${renderWithKatex(
             headingText
           )}</span></h2>`
         );
       } else if (line.startsWith('# ')) {
         const headingText = line.replace('# ', '');
         processedLines.push(
-          `<h1 class="text-2xl md:text-3xl font-extrabold mt-4 mb-6 text-stone-900 dark:text-white">${renderWithKatex(
+          `<h1 class="text-3xl sm:text-[36px] font-light tracking-whisper mt-4 mb-6 text-ink font-waldenburg">${renderWithKatex(
             headingText
           )}</h1>`
         );
       } else if (line.startsWith('---')) {
         processedLines.push(
-          `<hr class="my-8 border-t border-stone-200 dark:border-stone-800" />`
+          `<hr class="my-8 border-t border-stone" />`
         );
       } else if (line.trim().startsWith('- ')) {
         // Bullet points
         const text = line.trim().replace(/^- /, '');
         processedLines.push(
-          `<li class="ml-5 list-disc my-1.5 text-stone-700 dark:text-slate-300 leading-relaxed">${renderWithKatex(
+          `<li class="ml-5 list-disc my-1.5 text-smoke leading-relaxed font-sans text-[15px]">${renderWithKatex(
             text
           )}</li>`
         );
@@ -131,7 +131,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         // Numbered list
         const text = line.trim().replace(/^\d+\.\s/, '');
         processedLines.push(
-          `<li class="ml-5 list-decimal my-1.5 text-stone-700 dark:text-slate-300 leading-relaxed">${renderWithKatex(
+          `<li class="ml-5 list-decimal my-1.5 text-smoke leading-relaxed font-sans text-[15px]">${renderWithKatex(
             text
           )}</li>`
         );
@@ -141,12 +141,12 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         // Normal paragraph
         let formatted = line;
         // Bold
-        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-stone-900 dark:text-stone-100">$1</strong>');
+        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-medium text-ink">$1</strong>');
         // Italic
-        formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
+        formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-graphite">$1</em>');
         
         processedLines.push(
-          `<p class="my-3 text-stone-700 dark:text-slate-300 leading-relaxed text-base">${renderWithKatex(
+          `<p class="my-3 text-smoke leading-relaxed font-sans text-[15px] text-pretty">${renderWithKatex(
             formatted
           )}</p>`
         );
@@ -162,7 +162,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
 
   return (
     <div
-      className="prose-content text-stone-800 dark:text-slate-300 leading-relaxed max-w-none"
+      className="prose-content text-smoke leading-relaxed max-w-none font-sans"
       dangerouslySetInnerHTML={{ __html: renderedHtml }}
     />
   );

@@ -13,11 +13,11 @@ const papersData = rawPapers as Paper[];
 const taxonomyData = rawTaxonomy as Taxonomy;
 
 export const App: React.FC = () => {
-  // Theme state
+  // Theme state — Defaults to Light Eggshell per ElevenLabs design system
   const [isDark, setIsDark] = useState<boolean>(() => {
     const saved = localStorage.getItem('ntwcoff_theme');
     if (saved) return saved === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return false;
   });
 
   // Filter & Search states
@@ -96,16 +96,16 @@ export const App: React.FC = () => {
   const categories = Object.keys(taxonomyData.categories || {});
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 dark:bg-espresso-950 dark:text-slate-200 transition-colors">
+    <div className="min-h-screen flex flex-col bg-eggshell text-ink transition-colors selection:bg-stone selection:text-ink">
       
-      {/* Navigation Bar */}
+      {/* Top Nav Bar */}
       <Navbar
         isDark={isDark}
         toggleTheme={toggleTheme}
         totalPapers={papersData.length}
       />
 
-      {/* Hero Banner with Search & Metrics */}
+      {/* Hero Banner with Whisper Headline & Audio Sphere */}
       <HeroBanner
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -114,8 +114,8 @@ export const App: React.FC = () => {
         totalTags={taxonomyData.tags.length}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-16">
+      {/* Main Content Area — Single Max-Width 1280px Centered Column */}
+      <main id="catalog" className="flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 lg:px-8 pb-20">
         
         {/* Category & Tag Filter Bar */}
         <FilterBar
@@ -129,9 +129,9 @@ export const App: React.FC = () => {
           totalCount={papersData.length}
         />
 
-        {/* Paper Grid */}
+        {/* Paper Grid — 2-Column Responsive Feature Cards with 20px Radius */}
         {filteredPapers.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mt-4">
             {filteredPapers.map((paper) => (
               <PaperCard
                 key={paper.id}
@@ -143,14 +143,14 @@ export const App: React.FC = () => {
           </div>
         ) : (
           /* Empty Search State */
-          <div className="py-20 text-center max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center mx-auto mb-4 text-stone-400 dark:text-slate-500">
-              <SearchX className="w-8 h-8" />
+          <div className="py-24 text-center max-w-md mx-auto">
+            <div className="w-14 h-14 rounded-full bg-warm-taupe border border-stone flex items-center justify-center mx-auto mb-4 text-smoke">
+              <SearchX className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-1">
+            <h3 className="text-xl font-light tracking-whisper text-ink font-waldenburg mb-2">
               ไม่พบบทวิเคราะห์ที่ตรงกับเงื่อนไข
             </h3>
-            <p className="text-sm text-stone-500 dark:text-slate-400 mb-6">
+            <p className="text-sm text-smoke font-sans mb-6 leading-relaxed">
               ลองค้นหาด้วยคำอื่น หรือกดล้างตัวกรองเพื่อดูบทวิเคราะห์ทั้งหมด
             </p>
             <button
@@ -159,7 +159,7 @@ export const App: React.FC = () => {
                 setSelectedCategory(null);
                 setSelectedTag(null);
               }}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all"
+              className="px-4 py-2 rounded-full text-xs font-medium bg-ink hover:bg-graphite text-white border border-[#e5e5e5] transition-colors"
             >
               ล้างตัวกรองทั้งหมด
             </button>
@@ -175,27 +175,27 @@ export const App: React.FC = () => {
         onTagClick={(tag) => setSelectedTag(tag)}
       />
 
-      {/* Modern Footer */}
-      <footer className="border-t border-stone-200 dark:border-stone-800/80 bg-stone-100/60 dark:bg-espresso-900/60 py-8 px-4 text-xs text-stone-500 dark:text-slate-400">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Compact Single Band Footer — ElevenLabs Bauhaus Reference */}
+      <footer className="border-t border-stone bg-warm-taupe py-6 px-4 sm:px-6 lg:px-8 text-xs text-smoke font-sans">
+        <div className="max-w-[1280px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Coffee className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            <span className="font-semibold text-stone-700 dark:text-slate-300">
-              NTWK Coffee Science Portal
+            <span className="font-medium text-ink font-sans">
+              NTWK Coffee
             </span>
-            <span>— Google Drive Auto-Sync Edition</span>
+            <span className="text-ash">•</span>
+            <span>Scientific Research Notebook & Knowledge Portal</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-[11px]">
-            <span>กำหนดเวลารัน: ทุกวัน 12:00 น. ICT (05:00 UTC)</span>
+          <div className="flex flex-wrap items-center gap-4 text-[12px] font-mono text-ash">
+            <span>Daily Sync: 12:00 ICT (05:00 UTC)</span>
             <span>•</span>
             <a
               href="https://github.com/NTWKKM/ntwcoff"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-amber-600 dark:text-amber-400 hover:underline"
+              className="text-graphite hover:text-ink underline decoration-stone hover:decoration-ink transition-colors"
             >
-              GitHub Repository
+              GitHub Source
             </a>
           </div>
         </div>
