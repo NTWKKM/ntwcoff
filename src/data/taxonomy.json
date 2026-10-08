@@ -1,78 +1,82 @@
 {
-  "lastUpdated": "2026-10-08T01:07:32.482217+00:00",
-  "totalPapers": 2,
+  "lastUpdated": "2026-10-08T01:11:25.808360+00:00",
+  "totalPapers": 36,
   "categories": {
-    "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)": 1,
-    "เคมีและอุณหพลศาสตร์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 1
+    "การสกัดและการชง (Brewing & Extraction Science)": 6,
+    "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)": 9,
+    "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 6,
+    "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)": 8,
+    "การชงและการสกัด (Brewing & Extraction Science)": 3,
+    "เคมีและอุณหพลศาสตร์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 4
   },
   "tags": [
     {
-      "name": "Melanoidins",
-      "count": 2
+      "name": "SpecialtyCoffee",
+      "count": 34
     },
     {
       "name": "RoastingChemistry",
-      "count": 2
-    },
-    {
-      "name": "MaillardReaction",
-      "count": 2
-    },
-    {
-      "name": "SpecialtyCoffee",
-      "count": 2
-    },
-    {
-      "name": "FT-ICR-MS",
-      "count": 2
+      "count": 32
     },
     {
       "name": "SensoryScience",
-      "count": 1
-    },
-    {
-      "name": "CoffeeBody",
-      "count": 1
-    },
-    {
-      "name": "Astringency",
-      "count": 1
-    },
-    {
-      "name": "Phenolics",
-      "count": 1
+      "count": 27
     },
     {
       "name": "Extraction",
-      "count": 1
+      "count": 24
+    },
+    {
+      "name": "CoffeeBody",
+      "count": 21
+    },
+    {
+      "name": "Phenolics",
+      "count": 13
     },
     {
       "name": "Q-Grader",
-      "count": 1
-    },
-    {
-      "name": "Tribology",
-      "count": 1
-    },
-    {
-      "name": "Acrylamide",
-      "count": 1
-    },
-    {
-      "name": "5-HMF",
-      "count": 1
-    },
-    {
-      "name": "SucrosePyrolysis",
-      "count": 1
-    },
-    {
-      "name": "FoodSafety",
-      "count": 1
+      "count": 13
     },
     {
       "name": "KineticModeling",
-      "count": 1
+      "count": 13
+    },
+    {
+      "name": "MaillardReaction",
+      "count": 12
+    },
+    {
+      "name": "SucrosePyrolysis",
+      "count": 12
+    },
+    {
+      "name": "Astringency",
+      "count": 9
+    },
+    {
+      "name": "FT-ICR-MS",
+      "count": 8
+    },
+    {
+      "name": "Melanoidins",
+      "count": 7
+    },
+    {
+      "name": "Tribology",
+      "count": 3
+    },
+    {
+      "name": "5-HMF",
+      "count": 3
+    },
+    {
+      "name": "Acrylamide",
+      "count": 2
+    },
+    {
+      "name": "FoodSafety",
+      "count": 2
     }
   ]
 }
