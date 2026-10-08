@@ -1,26 +1,26 @@
 {
-  "lastUpdated": "2026-10-08T01:14:42.051301+00:00",
-  "totalPapers": 36,
+  "lastUpdated": "2026-10-08T01:16:19.147935+00:00",
+  "totalPapers": 34,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction Science)": 6,
-    "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)": 9,
+    "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)": 8,
     "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 6,
     "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)": 8,
     "การชงและการสกัด (Brewing & Extraction Science)": 3,
-    "เคมีและอุณหพลศาสตร์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 4
+    "เคมีและอุณหพลศาสตร์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 3
   },
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 34
-    },
-    {
-      "name": "RoastingChemistry",
       "count": 32
     },
     {
+      "name": "RoastingChemistry",
+      "count": 30
+    },
+    {
       "name": "SensoryScience",
-      "count": 27
+      "count": 26
     },
     {
       "name": "Extraction",
@@ -32,51 +32,63 @@
     },
     {
       "name": "Phenolics",
-      "count": 13
+      "count": 12
     },
     {
       "name": "Q-Grader",
-      "count": 13
+      "count": 12
     },
     {
       "name": "KineticModeling",
-      "count": 13
-    },
-    {
-      "name": "MaillardReaction",
       "count": 12
     },
     {
       "name": "SucrosePyrolysis",
-      "count": 12
+      "count": 11
     },
     {
-      "name": "Astringency",
-      "count": 9
+      "name": "GrindingPhysics",
+      "count": 11
+    },
+    {
+      "name": "MaillardReaction",
+      "count": 10
+    },
+    {
+      "name": "Fermentation",
+      "count": 10
     },
     {
       "name": "FT-ICR-MS",
+      "count": 9
+    },
+    {
+      "name": "Astringency",
       "count": 8
     },
     {
+      "name": "WaterChemistry",
+      "count": 5
+    },
+    {
       "name": "Melanoidins",
-      "count": 7
+      "count": 5
     },
     {
       "name": "Tribology",
-      "count": 3
+      "count": 2
     },
     {
       "name": "5-HMF",
-      "count": 3
+      "count": 2
     },
     {
       "name": "Acrylamide",
-      "count": 2
+      "count": 1
     },
     {
       "name": "FoodSafety",
-      "count": 2
+      "count": 1
     }
   ]
 }
