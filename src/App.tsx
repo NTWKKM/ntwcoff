@@ -7,13 +7,13 @@ import { HeroBanner } from './components/HeroBanner';
 import { FilterBar } from './components/FilterBar';
 import { PaperCard } from './components/PaperCard';
 import { PaperReader } from './components/PaperReader';
-import { Coffee, SearchX, Sparkles, RefreshCw } from 'lucide-react';
+import { SearchX, Sparkles } from 'lucide-react';
 
 const papersData = rawPapers as Paper[];
 const taxonomyData = rawTaxonomy as Taxonomy;
 
 export const App: React.FC = () => {
-  // Theme state — Defaults to Light Eggshell per ElevenLabs design system
+  // Theme state — Defaults to Light Cream Paper per Superr design system
   const [isDark, setIsDark] = useState<boolean>(() => {
     const saved = localStorage.getItem('ntwcoff_theme');
     if (saved) return saved === 'dark';
@@ -98,16 +98,16 @@ export const App: React.FC = () => {
   const categories = Object.keys(taxonomyData.categories || {});
 
   return (
-    <div className="min-h-screen flex flex-col bg-gallery-white text-ink transition-colors selection:bg-pricing-blue/15 selection:text-ink">
+    <div className="min-h-screen flex flex-col bg-cream-paper text-charcoal transition-colors selection:bg-marker-orange/20 selection:text-charcoal">
       
-      {/* Global & Local Navigation */}
+      {/* Global Navigation */}
       <Navbar
         isDark={isDark}
         toggleTheme={toggleTheme}
         totalPapers={papersData.length}
       />
 
-      {/* Hero Visual Stage: Full-bleed #ffffff Gallery White */}
+      {/* Hero Visual Stage */}
       <HeroBanner
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -116,9 +116,9 @@ export const App: React.FC = () => {
         totalTags={taxonomyData.tags.length}
       />
 
-      {/* Feature & Catalog Stage: Full-width Studio Mist (#f5f5f7) Band */}
-      <section id="catalog" className="flex-1 w-full bg-studio-mist border-b border-hairline-silver py-12 sm:py-16 transition-colors">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Feature & Catalog Stage: Full-width Dew Drop (#f7efe9) Warm Band */}
+      <section id="catalog" className="flex-1 w-full bg-dew-drop border-b-[1.5px] border-charcoal/20 py-10 sm:py-14 transition-colors">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Category & Tag Filter Bar */}
           <FilterBar
@@ -132,13 +132,14 @@ export const App: React.FC = () => {
             totalCount={papersData.length}
           />
 
-          {/* Paper Grid — 2-Column Oversized #ffffff Gallery Cards with 28px Radius & Shadowless Surface */}
+          {/* Paper Grid — 2-Column Warm Notebook Cards with 12px Radius & Defer Rendering */}
           {filteredPapers.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mt-6">
-              {filteredPapers.map((paper) => (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-7 mt-4">
+              {filteredPapers.map((paper, index) => (
                 <PaperCard
                   key={paper.id}
                   paper={paper}
+                  isDeferred={index >= 4}
                   onSelect={handleSelectPaper}
                   onTagClick={(tag) => setSelectedTag(tag)}
                 />
@@ -146,15 +147,15 @@ export const App: React.FC = () => {
             </div>
           ) : (
             /* Empty Search State */
-            <div className="py-24 text-center max-w-md mx-auto">
-              <div className="w-14 h-14 rounded-full bg-gallery-white border border-hairline-silver flex items-center justify-center mx-auto mb-4 text-slate">
+            <div className="py-20 text-center max-w-md mx-auto">
+              <div className="w-14 h-14 rounded-[12px] bg-cream-paper border-[1.5px] border-charcoal flex items-center justify-center mx-auto mb-4 text-charcoal shadow-subtle">
                 <SearchX className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold tracking-[-0.3px] text-ink font-sf-display mb-2">
-                No matching research monographs found
+              <h3 className="text-xl font-gelica font-semibold lowercase text-cocoa-ink mb-2">
+                no matching research monographs found
               </h3>
-              <p className="text-sm text-slate font-sf-text mb-6 leading-relaxed">
-                Try searching for other chemical compounds, keywords, or reset filters to view all papers.
+              <p className="text-sm text-charcoal/80 font-geist mb-6 leading-relaxed">
+                ลองค้นหาด้วยชื่อสารเคมี คำสำคัญ หรือรีเซ็ตตัวกรองเพื่อดูงานวิจัยทั้งหมด
               </p>
               <button
                 onClick={() => {
@@ -162,9 +163,9 @@ export const App: React.FC = () => {
                   setSelectedCategory(null);
                   setSelectedTag(null);
                 }}
-                className="px-4 py-2 rounded-full text-[12px] font-normal bg-pricing-blue hover:bg-[#0077ed] text-white transition-colors"
+                className="superr-pill-btn !py-2 !px-5"
               >
-                Reset all filters
+                รีเซ็ตตัวกรองทั้งหมด
               </button>
             </div>
           )}
@@ -179,27 +180,29 @@ export const App: React.FC = () => {
         onTagClick={(tag) => setSelectedTag(tag)}
       />
 
-      {/* Studio Mist Clean Footer */}
-      <footer className="bg-gallery-white py-8 px-4 sm:px-6 lg:px-8 text-[12px] text-slate font-sf-text">
-        <div className="max-w-[1280px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-ink font-sf-display">
-              NTWK Coffee
+      {/* Superr Footer Brand Band: Marker Orange (#ff6f1e) with 56px Top Border Radius */}
+      <footer className="w-full bg-marker-orange text-charcoal rounded-t-[56px] pt-10 pb-8 px-6 sm:px-10 mt-auto transition-colors shadow-card">
+        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-center sm:text-left">
+            <span className="font-gelica font-semibold text-[20px] lowercase text-charcoal">
+              ntwk coffee
             </span>
-            <span className="text-hairline-silver">•</span>
-            <span>Scientific Research Notebook & Knowledge Portal</span>
+            <span className="hidden sm:inline text-charcoal/40">•</span>
+            <span className="font-geist text-[13px] text-charcoal/90">
+              schoolyard research notebook & scientific knowledge portal
+            </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-[12px] text-slate">
-            <span>Daily Sync: 12:00 ICT (05:00 UTC)</span>
-            <span className="text-hairline-silver">•</span>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-[13px] font-gelica text-charcoal">
+            <span>daily sync 12:00 ict (05:00 utc)</span>
+            <span className="text-charcoal/40">•</span>
             <a
               href="https://github.com/NTWKKM/ntwcoff"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-apple-blue hover:underline transition-colors"
+              className="underline decoration-charcoal/40 hover:decoration-charcoal transition-colors"
             >
-              GitHub Source
+              github source
             </a>
           </div>
         </div>

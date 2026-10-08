@@ -3,6 +3,7 @@ import katex from 'katex';
 
 interface KatexRendererProps {
   content: string;
+  fontSize?: 'sm' | 'md' | 'lg';
 }
 
 const escapeHtml = (unsafe: string): string => {
@@ -20,7 +21,7 @@ export const renderWithKatex = (text: string): string => {
   // Render display math $$...$$
   let result = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
     try {
-      return `<div class="katex-display-wrapper my-4 overflow-x-auto py-2 text-center">${katex.renderToString(
+      return `<div class="katex-display-wrapper my-5 overflow-x-auto py-2 text-center">${katex.renderToString(
         math.trim(),
         { displayMode: true, throwOnError: false }
       )}</div>`;
@@ -45,7 +46,6 @@ export const renderWithKatex = (text: string): string => {
 };
 
 export const escapeSourceText = (text: string): string => {
-  // Preserve $$...$$ and $...$ math blocks while escaping HTML entities in raw text
   const parts: string[] = [];
   let lastIndex = 0;
   const regex = /(\$\$[\s\S]+?\$\$|\$[^\$\n]+?\$)/g;
@@ -59,7 +59,16 @@ export const escapeSourceText = (text: string): string => {
   return parts.join('');
 };
 
-export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
+export const KatexRenderer: React.FC<KatexRendererProps> = ({
+  content,
+  fontSize = 'md',
+}) => {
+  const textSizeClass = useMemo(() => {
+    if (fontSize === 'sm') return 'text-[15px] leading-[1.75]';
+    if (fontSize === 'lg') return 'text-[19px] leading-[1.85]';
+    return 'text-[17px] leading-[1.8]'; // standard 'md'
+  }, [fontSize]);
+
   const renderedHtml = useMemo(() => {
     const lines = content.split('\n');
     const processedLines: string[] = [];
@@ -79,15 +88,14 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
 
       if (rows.length >= 2) {
         const header = rows[0];
-        // skip separator row if exists
         const dataRows = rows.slice(1).filter((r) => !r.every((c) => c.match(/^:?-+:?$/)));
 
         let tableHtml = `<div class="markdown-table-wrapper"><table class="markdown-table">`;
         tableHtml += `<thead><tr>`;
         header.forEach((h) => {
           let formatted = escapeSourceText(h);
-          formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>');
-          formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-slate">$1</em>');
+          formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
+          formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
           tableHtml += `<th>${renderWithKatex(formatted)}</th>`;
         });
         tableHtml += `</tr></thead><tbody>`;
@@ -96,8 +104,8 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
           row.forEach((cell, idx) => {
             const isLabel = idx === 0 && row.length === 2;
             let formatted = escapeSourceText(cell);
-            formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>');
-            formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-slate">$1</em>');
+            formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
+            formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
             tableHtml += `<td class="${isLabel ? 'markdown-table-label' : ''}">${renderWithKatex(formatted)}</td>`;
           });
           tableHtml += `</tr>`;
@@ -121,12 +129,24 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         flushTable();
       }
 
-      // Headings — SF Pro Display 600, Clean & Quiet
+      // Blockquotes
+      if (line.trim().startsWith('>')) {
+        const quoteText = line.trim().replace(/^>\s?/, '');
+        let formatted = escapeSourceText(quoteText);
+        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
+        formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
+        processedLines.push(
+          `<blockquote class="markdown-blockquote font-geist ${textSizeClass}">${renderWithKatex(formatted)}</blockquote>`
+        );
+        continue;
+      }
+
+      // Headings — gelica 600, Cocoa Ink, lowercase
       if (line.startsWith('### ')) {
         const headingText = line.replace('### ', '');
         const id = headingText.replace(/[^\w\u0E00-\u0E7F]+/g, '-').toLowerCase();
         processedLines.push(
-          `<h3 id="${id}" class="text-xl font-semibold tracking-tight mt-8 mb-3 text-ink font-sf-display scroll-mt-24 flex items-center gap-2">${renderWithKatex(
+          `<h3 id="${id}" class="text-lg sm:text-xl font-gelica font-semibold lowercase mt-9 mb-3 text-cocoa-ink scroll-mt-24 flex items-center gap-2">${renderWithKatex(
             escapeSourceText(headingText)
           )}</h3>`
         );
@@ -134,29 +154,29 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         const headingText = line.replace('## ', '');
         const id = headingText.replace(/[^\w\u0E00-\u0E7F]+/g, '-').toLowerCase();
         processedLines.push(
-          `<h2 id="${id}" class="text-2xl sm:text-[28px] font-semibold tracking-tight mt-12 mb-4 pb-2 border-b border-hairline-silver text-ink font-sf-display scroll-mt-24"><span>${renderWithKatex(
+          `<h2 id="${id}" class="text-xl sm:text-2xl font-gelica font-semibold lowercase mt-12 mb-4 pb-2 border-b-[1.5px] border-charcoal/20 text-cocoa-ink scroll-mt-24"><span>${renderWithKatex(
             escapeSourceText(headingText)
           )}</span></h2>`
         );
       } else if (line.startsWith('# ')) {
         const headingText = line.replace('# ', '');
         processedLines.push(
-          `<h1 class="text-3xl sm:text-[36px] font-semibold tracking-tight mt-4 mb-6 text-ink font-sf-display">${renderWithKatex(
+          `<h1 class="text-2xl sm:text-3xl font-gelica font-semibold lowercase mt-5 mb-6 text-cocoa-ink">${renderWithKatex(
             escapeSourceText(headingText)
           )}</h1>`
         );
       } else if (line.startsWith('---')) {
         processedLines.push(
-          `<hr class="my-8 border-t border-hairline-silver" />`
+          `<hr class="my-8 border-t-[1.5px] border-charcoal/15" />`
         );
-      } else if (line.trim().startsWith('- ')) {
+      } else if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) {
         // Bullet points
-        const text = line.trim().replace(/^- /, '');
+        const text = line.trim().replace(/^[\*\-]\s+/, '');
         let formatted = escapeSourceText(text);
-        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>');
-        formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-slate">$1</em>');
+        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
+        formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
-          `<li class="ml-5 list-disc my-1.5 text-slate leading-relaxed font-sf-text text-[15px]">${renderWithKatex(
+          `<li class="ml-5 list-disc my-1.5 text-charcoal font-geist ${textSizeClass}">${renderWithKatex(
             formatted
           )}</li>`
         );
@@ -164,10 +184,10 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         // Numbered list
         const text = line.trim().replace(/^\d+\.\s/, '');
         let formatted = escapeSourceText(text);
-        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>');
-        formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-slate">$1</em>');
+        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
+        formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
-          `<li class="ml-5 list-decimal my-1.5 text-slate leading-relaxed font-sf-text text-[15px]">${renderWithKatex(
+          `<li class="ml-5 list-decimal my-1.5 text-charcoal font-geist ${textSizeClass}">${renderWithKatex(
             formatted
           )}</li>`
         );
@@ -176,13 +196,11 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
       } else {
         // Normal paragraph
         let formatted = escapeSourceText(line);
-        // Bold
-        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>');
-        // Italic
-        formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-slate">$1</em>');
+        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
+        formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         
         processedLines.push(
-          `<p class="my-3 text-slate leading-relaxed font-sf-text text-[15px] text-pretty">${renderWithKatex(
+          `<p class="my-4 text-charcoal font-geist ${textSizeClass} text-pretty">${renderWithKatex(
             formatted
           )}</p>`
         );
@@ -194,11 +212,11 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
     }
 
     return processedLines.join('\n');
-  }, [content]);
+  }, [content, textSizeClass]);
 
   return (
     <div
-      className="prose-content text-slate leading-relaxed max-w-none font-sf-text"
+      className="prose-content text-charcoal max-w-none font-geist"
       dangerouslySetInnerHTML={{ __html: renderedHtml }}
     />
   );
