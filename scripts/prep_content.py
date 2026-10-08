@@ -186,14 +186,36 @@ def main():
         print(f"⚠️ [WARNING] {raw_dir} does not exist.")
         return
 
-    papers = []
+    raw_papers_list = []
+    seen_titles = {}
+
+    for md_file in sorted(raw_dir.glob("*.md")):
+        if md_file.name.startswith("."):
+            continue
+        paper = parse_paper(md_file)
+
+        # Deduplication check: if a paper with identical title exists, keep the latest
+        norm_title = re.sub(r"[^\w\u0E00-\u0E7F]+", "", paper["title"].lower())
+        if norm_title in seen_titles:
+            print(
+                f"⚠️ [DUPLICATE DETECTED] '{paper['title']}' in '{md_file.name}' already loaded from '{seen_titles[norm_title]['file']}'. Keeping latest."
+            )
+            # replace or merge
+            prev_idx = seen_titles[norm_title]["index"]
+            raw_papers_list[prev_idx] = paper
+            seen_titles[norm_title]["file"] = md_file.name
+        else:
+            seen_titles[norm_title] = {
+                "index": len(raw_papers_list),
+                "file": md_file.name,
+            }
+            raw_papers_list.append(paper)
+
+    papers = raw_papers_list
     category_counts = {}
     tag_counts = {}
 
-    for md_file in sorted(raw_dir.glob("*.md")):
-        paper = parse_paper(md_file)
-        papers.append(paper)
-
+    for paper in papers:
         # Count categories
         cat = paper["category"]
         category_counts[cat] = category_counts.get(cat, 0) + 1

@@ -2,6 +2,11 @@
 """
 Sync files from Google Drive folder using a Service Account.
 Saves downloaded files into `raw_papers/`.
+
+Anti-Duplication & Performance Features:
+1. In-place overwrite (no 'file (1).md' duplicates).
+2. Manifest caching (.sync_manifest.json) using Drive modifiedTime / md5Checksum to skip unchanged files.
+3. Drive duplicate name resolution (different Drive files sharing same name get a unique ID suffix).
 """
 
 import io
@@ -9,6 +14,24 @@ import json
 import os
 import sys
 from pathlib import Path
+
+MANIFEST_FILE = "raw_papers/.sync_manifest.json"
+
+
+def load_manifest() -> dict:
+    p = Path(MANIFEST_FILE)
+    if p.exists():
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
+
+
+def save_manifest(manifest: dict):
+    p = Path(MANIFEST_FILE)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def sync_drive():
@@ -59,7 +82,10 @@ def sync_drive():
     try:
         results = (
             service.files()
-            .list(q=query, fields="files(id, name, mimeType, modifiedTime)")
+            .list(
+                q=query,
+                fields="files(id, name, mimeType, modifiedTime, md5Checksum, size)",
+            )
             .execute()
         )
     except Exception as e:
@@ -69,26 +95,63 @@ def sync_drive():
     files = results.get("files", [])
     print(f"📄 Found {len(files)} files in Google Drive folder.")
 
+    manifest = load_manifest()
+    new_manifest = {}
     downloaded_count = 0
+    skipped_count = 0
+
+    # Detect duplicate filenames within the same Drive folder
+    name_occurrences = {}
+    for f in files:
+        name_occurrences[f["name"]] = name_occurrences.get(f["name"], 0) + 1
+
     for file in files:
         file_id = file["id"]
         file_name = file["name"]
         mime_type = file["mimeType"]
+        modified_time = file.get("modifiedTime", "")
+        md5 = file.get("md5Checksum", "")
 
-        # Normalize file path and extension
+        # Handle duplicate filenames in Drive: if multiple files share the same name, add short id
+        base_name = file_name
+        if name_occurrences[file_name] > 1:
+            name_parts = os.path.splitext(file_name)
+            base_name = f"{name_parts[0]}_{file_id[:6]}{name_parts[1]}"
+
+        # Normalize target file path
         if mime_type == "application/vnd.google-apps.document":
-            safe_name = file_name if file_name.endswith(".md") else f"{file_name}.md"
+            safe_name = base_name if base_name.endswith(".md") else f"{base_name}.md"
             file_path = dest_dir / safe_name
+            is_gdoc = True
+        else:
+            if not (base_name.endswith(".md") or base_name.endswith(".txt")):
+                print(f"⏭️ Skipping non-markdown file: {file_name} ({mime_type})")
+                continue
+            file_path = dest_dir / base_name
+            is_gdoc = False
+
+        # Anti-Duplication & Incremental Cache Check:
+        # If file exists on disk and modifiedTime has not changed, skip re-download
+        cached_info = manifest.get(file_id)
+        if (
+            cached_info
+            and cached_info.get("modifiedTime") == modified_time
+            and file_path.exists()
+        ):
+            print(
+                f"⏭️ [UNCHANGED] {file_path.name} (modified: {modified_time}) - Skipping download."
+            )
+            new_manifest[file_id] = cached_info
+            skipped_count += 1
+            continue
+
+        # Download / Export file
+        if is_gdoc:
             print(f"📥 Exporting Google Doc '{file_name}' -> {file_path.name} ...")
             request = service.files().export_media(
                 fileId=file_id, mimeType="text/plain"
             )
         else:
-            # Only sync Markdown or text documents
-            if not (file_name.endswith(".md") or file_name.endswith(".txt")):
-                print(f"⏭️ Skipping non-markdown file: {file_name} ({mime_type})")
-                continue
-            file_path = dest_dir / file_name
             print(f"📥 Downloading '{file_name}' -> {file_path.name} ...")
             request = service.files().get_media(fileId=file_id)
 
@@ -100,9 +163,17 @@ def sync_drive():
 
         file_path.write_bytes(fh.getvalue())
         downloaded_count += 1
+        new_manifest[file_id] = {
+            "name": file_path.name,
+            "modifiedTime": modified_time,
+            "md5Checksum": md5,
+        }
         print(f"✅ Successfully saved: {file_path.name}")
 
-    print(f"🎉 Sync completed. Total {downloaded_count} files updated in {dest_dir}/")
+    save_manifest(new_manifest)
+    print(
+        f"\n🎉 Sync completed: {downloaded_count} updated, {skipped_count} unchanged (skipped)."
+    )
 
 
 if __name__ == "__main__":
