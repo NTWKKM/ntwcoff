@@ -18,6 +18,25 @@ from pathlib import Path
 MANIFEST_FILE = "raw_papers/.sync_manifest.json"
 
 
+def is_safe_filename(value, *, reject_blank=False) -> bool:
+    if (
+        not isinstance(value, str)
+        or not value
+        or (reject_blank and not value.strip())
+        or "\x00" in value
+    ):
+        return False
+
+    path_obj = Path(value)
+    return (
+        value not in (".", "..")
+        and len(path_obj.parts) == 1
+        and path_obj.name == value
+        and "/" not in value
+        and "\\" not in value
+    )
+
+
 def load_manifest() -> dict:
     p = Path(MANIFEST_FILE)
     if p.exists():
@@ -79,20 +98,27 @@ def sync_drive():
     print(f"🔍 Searching Google Drive folder: {folder_id} ...")
     query = f"'{folder_id}' in parents and trashed = false"
 
+    files = []
+    page_token = None
     try:
-        results = (
-            service.files()
-            .list(
-                q=query,
-                fields="files(id, name, mimeType, modifiedTime, md5Checksum, size)",
+        while True:
+            results = (
+                service.files()
+                .list(
+                    q=query,
+                    fields="nextPageToken, files(id, name, mimeType, modifiedTime, md5Checksum, size)",
+                    pageToken=page_token,
+                )
+                .execute()
             )
-            .execute()
-        )
+            files.extend(results.get("files", []))
+            page_token = results.get("nextPageToken")
+            if not page_token:
+                break
     except Exception as e:
         print(f"❌ [ERROR] Drive API list call failed: {e}")
         sys.exit(1)
 
-    files = results.get("files", [])
     print(f"📄 Found {len(files)} files in Google Drive folder.")
 
     manifest = load_manifest()
@@ -111,6 +137,11 @@ def sync_drive():
         mime_type = file["mimeType"]
         modified_time = file.get("modifiedTime", "")
         md5 = file.get("md5Checksum", "")
+
+        # Validate filename to prevent path traversal, null bytes, or invalid path components
+        if not is_safe_filename(file_name):
+            print(f"⚠️ Skipping invalid or unsafe filename: {file_name}")
+            continue
 
         # Handle duplicate filenames in Drive: if multiple files share the same name, add short id
         base_name = file_name
@@ -131,10 +162,11 @@ def sync_drive():
             is_gdoc = False
 
         # Anti-Duplication & Incremental Cache Check:
-        # If file exists on disk and modifiedTime has not changed, skip re-download
+        # If file exists on disk, filename matches, and modifiedTime has not changed, skip re-download
         cached_info = manifest.get(file_id)
         if (
             cached_info
+            and cached_info.get("name") == file_path.name
             and cached_info.get("modifiedTime") == modified_time
             and file_path.exists()
         ):
@@ -170,9 +202,52 @@ def sync_drive():
         }
         print(f"✅ Successfully saved: {file_path.name}")
 
+    # Remove files recorded in the previous manifest but absent from the completed new manifest,
+    # or whose path changed upon rename, while preserving paths still owned by current manifest
+    current_owned_names = {
+        info.get("name")
+        for info in new_manifest.values()
+        if isinstance(info, dict) and info.get("name")
+    }
+    deleted_count = 0
+    for old_id, old_info in manifest.items():
+        old_name = old_info.get("name") if isinstance(old_info, dict) else None
+        if not is_safe_filename(old_name, reject_blank=True):
+            print(f"⚠️ Skipping unsafe stale filename from manifest: {old_name}")
+            continue
+
+        if old_id not in new_manifest:
+            # File removed from Drive
+            if old_name not in current_owned_names:
+                old_path = dest_dir / old_name
+                if old_path.exists():
+                    print(f"🗑️ Removing deleted Drive file: {old_name}")
+                    try:
+                        old_path.unlink()
+                        deleted_count += 1
+                    except Exception as e:
+                        print(f"⚠️ Failed to remove {old_name}: {e}")
+        else:
+            # Retained ID: compare old and new paths
+            new_name = (
+                new_manifest[old_id].get("name")
+                if isinstance(new_manifest[old_id], dict)
+                else None
+            )
+            if new_name and old_name != new_name:
+                if old_name not in current_owned_names:
+                    old_path = dest_dir / old_name
+                    if old_path.exists():
+                        print(f"🗑️ Removing renamed stale Drive file: {old_name}")
+                        try:
+                            old_path.unlink()
+                            deleted_count += 1
+                        except Exception as e:
+                            print(f"⚠️ Failed to remove {old_name}: {e}")
+
     save_manifest(new_manifest)
     print(
-        f"\n🎉 Sync completed: {downloaded_count} updated, {skipped_count} unchanged (skipped)."
+        f"\n🎉 Sync completed: {downloaded_count} updated, {skipped_count} unchanged, {deleted_count} deleted."
     )
 
 

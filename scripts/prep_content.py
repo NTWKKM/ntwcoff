@@ -148,9 +148,9 @@ def _assign_meta(meta: dict, key: str, val: str):
         return
     if "ชื่อบทความวิจัย" in key and not meta.get("englishTitle"):
         meta["englishTitle"] = val
-    elif "คณะผู้วิจัย" in key and not meta.get("authors"):
+    elif ("คณะผู้วิจัย" in key or "ผู้วิจัย" in key) and not meta.get("authors"):
         meta["authors"] = val
-    elif "สถาบัน" in key and not meta.get("institution"):
+    elif ("สถาบัน" in key or "หน่วยงาน" in key) and not meta.get("institution"):
         meta["institution"] = val
     elif "วารสารวิชาการ" in key and not meta.get("journal"):
         meta["journal"] = val
@@ -188,7 +188,7 @@ def extract_metadata(text: str, slug: str = "") -> dict:
 
     # 4. Google Docs plain text / tab format
     gdoc_matches = re.findall(
-        r"(ชื่อบทความวิจัย|คณะผู้วิจัย|สถาบัน|วารสารวิชาการ|ลิงก์งานวิจัย)\s*\n\s*([^\n]+)",
+        r"(ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบัน|หน่วยงาน|วารสารวิชาการ|ลิงก์งานวิจัย)\s*\n\s*([^\n]+)",
         text,
     )
     for k, v in gdoc_matches:
@@ -296,25 +296,40 @@ def main():
     raw_papers_list = []
     seen_titles = {}
 
-    for md_file in sorted(raw_dir.glob("*.md")):
-        if md_file.name.startswith("."):
-            continue
-        paper = parse_paper(md_file)
+    raw_files = []
+    for ext in ("*.md", "*.txt"):
+        for f in raw_dir.glob(ext):
+            if not f.name.startswith("."):
+                raw_files.append(f)
+    raw_files = sorted(raw_files, key=lambda p: p.name)
 
-        # Deduplication check: if a paper with identical normalized title exists, keep the latest
+    FORMAT_PRIORITY = {".md": 2, ".txt": 1}
+
+    for paper_file in raw_files:
+        paper = parse_paper(paper_file)
+
+        # Deduplication check: if a paper with identical normalized title exists, preserve higher-priority format (.md > .txt)
         norm_title = re.sub(r"[^\w\u0E00-\u0E7F]+", "", paper["title"].lower())
         if norm_title in seen_titles:
             prev_idx = seen_titles[norm_title]["index"]
             prev_file = seen_titles[norm_title]["file"]
-            print(
-                f"⚠️ [DUPLICATE DETECTED] '{paper['title']}' in '{md_file.name}' already loaded from '{prev_file}'. Merging with latest."
-            )
-            raw_papers_list[prev_idx] = paper
-            seen_titles[norm_title]["file"] = md_file.name
+            prev_prio = FORMAT_PRIORITY.get(Path(prev_file).suffix.lower(), 0)
+            curr_prio = FORMAT_PRIORITY.get(paper_file.suffix.lower(), 0)
+
+            if curr_prio > prev_prio:
+                print(
+                    f"⚠️ [DUPLICATE DETECTED] Replacing lower-priority '{prev_file}' with '{paper_file.name}' for '{paper['title']}'."
+                )
+                raw_papers_list[prev_idx] = paper
+                seen_titles[norm_title]["file"] = paper_file.name
+            else:
+                print(
+                    f"⚠️ [DUPLICATE DETECTED] Retaining existing '{prev_file}' over '{paper_file.name}' for '{paper['title']}'."
+                )
         else:
             seen_titles[norm_title] = {
                 "index": len(raw_papers_list),
-                "file": md_file.name,
+                "file": paper_file.name,
             }
             raw_papers_list.append(paper)
 
