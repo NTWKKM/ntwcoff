@@ -2,7 +2,8 @@
 
 คลังความรู้และพอร์ทัลวิเคราะห์งานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (**Coffee Science Deep Research**) ซิงค์ข้อมูลอัตโนมัติจาก **Google Drive** ผ่าน **GitHub Actions** ทุกวันเวลา **12:00 น. (เวลาไทย)** พร้อมระบบวิเคราะห์จัดแท็กอัตโนมัติ (Taxonomy Engine) และหน้าเว็บสไตล์ **ElevenLabs Bauhaus Studio Notebook (Dual-Spark Accent Edition)**
 
-[![Sync & Deploy](https://github.com/NTWKKM/ntwcoff/actions/workflows/sync.yml/badge.svg)](https://github.com/NTWKKM/ntwcoff/actions/workflows/sync.yml)
+[![Deploy Web App](https://github.com/NTWKKM/ntwcoff/actions/workflows/deploy.yml/badge.svg)](https://github.com/NTWKKM/ntwcoff/actions/workflows/deploy.yml)
+[![Sync Content](https://github.com/NTWKKM/ntwcoff/actions/workflows/sync.yml/badge.svg)](https://github.com/NTWKKM/ntwcoff/actions/workflows/sync.yml)
 [![Live Site](https://img.shields.io/badge/Live%20Portal-ntwkkm.github.io%2Fntwcoff-0447ff?style=flat&logo=safari)](https://ntwkkm.github.io/ntwcoff/)
 [![License](https://img.shields.io/badge/License-MIT-stone)](LICENSE)
 
@@ -10,8 +11,9 @@
 
 ## 🌟 ฟังก์ชันการทำงานหลัก (Core Capabilities)
 
-### 1. ระบบซิงค์คลาวด์อัตโนมัติ (Automated Drive Sync Pipeline)
-- **Daily Automated Schedule**: ซิงค์ข้อมูลอัตโนมัติทุกวันเวลา **12:00 น. ICT** (Indochina Time, UTC+7 / `05:00 UTC`) ผ่าน GitHub Actions
+### 1. ระบบ CI/CD & ซิงค์คลาวด์แยกส่วน (Decoupled Sync & Dedicated Deployment Pipeline)
+- **Dedicated Web Deploy Action (`deploy.yml`)**: บิลด์และดีพลอย Vite SPA ขึ้นสู่ GitHub Pages ทันทีทุกครั้งที่มีการ `git push` เข้าสู่ branch `main` หรือเมื่อการซิงค์ข้อมูลเสร็จสมบูรณ์ รวดเร็วภายใน 1-2 นาที
+- **Automated Drive Sync Action (`sync.yml`)**: ซิงค์ข้อมูลงานวิจัยอัตโนมัติจาก Google Drive ทุกวันเวลา **12:00 น. ICT** (Indochina Time, UTC+7 / `05:00 UTC`) หรือกดสั่งรันด้วยมือผ่าน `workflow_dispatch`
 - **On-Demand Dispatch**: รองรับการกดรันซิงค์ด้วยมือได้ทันทีผ่าน `workflow_dispatch` บนแท็บ Actions
 - **Multi-Format Ingestion**: รองรับทั้งไฟล์ Markdown (`.md`), ข้อความธรรมดา (`.txt`), และเอกสาร Google Docs (แปลงเป็น Text/Markdown อัตโนมัติ)
 - **Smart Manifest Cache (`.sync_manifest.json`)**: ตรวจสอบ `modifiedTime` ของไฟล์บน Google Drive หากไฟล์ไม่มีการแก้ไขจะข้ามการดาวน์โหลดทันที (`[UNCHANGED]`) ช่วยประหยัดเวลาและ Bandwidth

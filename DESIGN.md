@@ -37,3 +37,15 @@
   - **Component Hierarchy**: Fully-pilled buttons and tags (all `9999px` radius), Feature cards at `20px` radius, large modal panels at `24px` radius. Hairline `1px` stone dividers replace heavy drop shadows.
 - **Rationale**: Combines the calm readability of a Bauhaus editorial paper canvas with the vibrant product energy of ElevenLabs' signature violet-orange gradient sparks.
 
+## ADR-005: Decoupled Web Deployment Pipeline from Content Sync
+
+- **Status**: Accepted
+- **Context**: The existing `sync.yml` workflow was tightly coupled to Google Drive cron schedules and manual triggers, without triggering on `push: branches: [main]`. Consequently, frontend changes pushed to `main` were not rebuilding GitHub Pages. Furthermore, the combined workflow took 6+ minutes due to Python sync, dependencies, and frontend builds running sequentially.
+- **Decision**:
+  - Separate CI/CD into two dedicated workflows:
+    1. `.github/workflows/deploy.yml`: Dedicated Vite build and deployment action triggering on `push: branches: [main]`, `workflow_dispatch`, and `workflow_run` after Google Drive sync completes.
+    2. `.github/workflows/sync.yml`: Streamlined Google Drive sync running on daily cron and manual dispatch.
+- **Rationale**:
+  - Ensures every push to `main` deploys in under 1-2 minutes without blocking on Google Drive sync.
+  - Reactive trigger via `workflow_run` automatically rebuilds the web app whenever new research papers are fetched and committed from Google Drive.
+
