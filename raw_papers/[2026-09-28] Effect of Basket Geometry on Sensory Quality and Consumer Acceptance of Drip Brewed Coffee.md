@@ -1,6 +1,6 @@
-﻿รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)
+รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)
 วันที่: 28 กันยายน 2026
-หมวดหมู่: การชงและการสกัด (Brewing & Extraction Science)
+หมวดหมู่: การสกัดและการชง (Brewing & Extraction Science)
 ข้อมูลงานวิจัย (Research Metadata)
 หัวข้อ
 	รายละเอียด

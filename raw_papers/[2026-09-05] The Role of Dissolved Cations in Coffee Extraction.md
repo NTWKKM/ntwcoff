@@ -1,11 +1,17 @@
-﻿รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)
+# รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)
+
 วันที่: 5 กันยายน 2026
 หมวดหมู่: การสกัดและการชง (Brewing & Extraction Science)
-ข้อมูลงานวิจัย
-* ชื่อบทความวิจัย: The Role of Dissolved Cations in Coffee Extraction
-* คณะผู้วิจัย: Christopher H. Hendon, Lesley Colonna-Dashwood, และ Maxwell Colonna-Dashwood
-* วารสารวิชาการ: Journal of Agricultural and Food Chemistry (American Chemical Society, 2014, Vol. 62, No. 21, pp. 4947–4950)
-* ลิงก์งานวิจัย: The Role of Dissolved Cations in Coffee Extraction
+
+## ข้อมูลงานวิจัย (Research Metadata)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| ชื่อบทความวิจัย | The Role of Dissolved Cations in Coffee Extraction |
+| คณะผู้วิจัย | Christopher H. Hendon, Lesley Colonna-Dashwood, และ Maxwell Colonna-Dashwood |
+| วารสารวิชาการ | Journal of Agricultural and Food Chemistry (American Chemical Society, 2014, Vol. 62, No. 21, pp. 4947–4950) |
+| ลิงก์งานวิจัย | The Role of Dissolved Cations in Coffee Extraction |
+
 1. วัตถุประสงค์และที่มาของงานวิจัย
 งานวิจัยฉบับนี้ใช้การจำลองทางกลศาสตร์ควอนตัม (Quantum Mechanical Density Functional Theory - DFT) เพื่อศึกษาปฏิสัมพันธ์ระดับโมเลกุลระหว่างไอออนบวกที่ละลายในน้ำ (Dissolved Cations ได้แก่ Na+, Mg2+, Ca2+, K+) กับสารประกอบสำคัญที่ให้รสและกลิ่นในเมล็ดกาแฟ เพื่ออธิบายเชิงเคมีฟิสิกส์ว่าเหตุใดองค์ประกอบของแร่ธาตุในน้ำจึงส่งผลต่อคุณภาพและรสชาติการสกัดกาแฟอย่างมีนัยสำคัญ
 2. ระเบียบวิธีวิจัย (Methodology)
