@@ -116,8 +116,8 @@ export const App: React.FC = () => {
         totalTags={taxonomyData.tags.length}
       />
 
-      {/* Feature & Catalog Stage: Full-width Dew Drop (#f7efe9) Warm Band */}
-      <section id="catalog" className="flex-1 w-full bg-dew-drop border-b-[1.5px] border-charcoal/20 py-10 sm:py-14 transition-colors">
+      {/* Feature & Catalog Stage: Full-width Dew Drop (#f7efe9) Warm Band with Notebook Dots */}
+      <section id="catalog" className="flex-1 w-full bg-dew-drop bg-notebook-dots border-b-[1.5px] border-charcoal/20 py-10 sm:py-14 transition-colors">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Category & Tag Filter Bar */}
@@ -183,13 +183,9 @@ export const App: React.FC = () => {
       {/* Superr Footer Brand Band: Marker Orange (#ff6f1e) with 56px Top Border Radius */}
       <footer className="w-full bg-marker-orange text-charcoal rounded-t-[56px] pt-10 pb-8 px-6 sm:px-10 mt-auto transition-colors shadow-card">
         <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-center sm:text-left">
+          <div className="flex items-center text-center sm:text-left">
             <span className="font-gelica font-semibold text-[20px] lowercase text-charcoal">
               ntwk coffee
-            </span>
-            <span className="hidden sm:inline text-charcoal/40">•</span>
-            <span className="font-geist text-[13px] text-charcoal/90">
-              schoolyard research notebook & scientific knowledge portal
             </span>
           </div>
 

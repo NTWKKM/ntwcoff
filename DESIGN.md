@@ -101,6 +101,20 @@
     - Below-the-fold catalog cards optimized with `content-visibility: auto` and `contain-intrinsic-size: auto none auto 260px`.
 - **Rationale**: Merges warm, tactile schoolyard notebook aesthetics with evidence-based reading ergonomics, ensuring dense scientific monographs are legible and fatigue-free.
 
+## ADR-009: Scientific Editorial Ergonomics, Category Color-Coding & Tactile Notebook Texturing
+
+- **Status**: Accepted
+- **Context**: The user identified that the previous interface appeared visually plain and monotonous (a flat sea of identical white cards and raw unparsed metadata dumps in the monograph reader).
+- **Decision**:
+  - **Redundant Metadata Stripping**: Eliminated repetitive preamble metadata tables from monograph body text so the reader immediately begins with Section 01, while the top laminated specifications card authoritatively presents research metadata.
+  - **Editorial Section Hierarchy**: Standardized 4 primary scientific sections (`01 | Research Objectives`, `02 | Methodology`, `03 | Key Scientific Findings`, `04 | Practical Applications`) with mono-badge numbering, and highlighted Section 03 with an executive findings callout badge (`💡 Key Findings`).
+  - **Scientific Metric Formatting**: Augmented temperature parameters (`4°C`, `92°C`) and durations (`24 ชั่วโมง`, `6 นาที`) with distinct micro-parameter pills.
+  - **Category Color-Coding**: Equipped `PaperCard` with a 4px category color accent top stripe and matching dot badges (Sky Blue for Extraction, Marker Orange for Sensory, Amber for Roasting, Emerald for Fermentation).
+  - **Subtle Notebook Dot Texture**: Implemented `.bg-notebook-dots` via pure CSS `radial-gradient` (per `modern-web-guidance` visual-effects) across Hero and Catalog stages for a tactile lab notebook paper feel.
+  - **Footer Subtitle Removal**: Cleaned the footer brand band by removing the verbose subtitle text.
+- **Rationale**: Elevates the platform from a plain text list into a vibrant, peer-reviewed scientific editorial notebook with effortless scanability and rich visual rhythm.
+
+
 
 
 

@@ -179,6 +179,17 @@
   contain-intrinsic-size: auto none auto 260px;
 }
 
+/* Tactile Notebook Dot Grid per modern-web-guidance visual-effects */
+.bg-notebook-dots {
+  background-image: radial-gradient(circle, rgba(23, 23, 23, 0.055) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.dark .bg-notebook-dots {
+  background-image: radial-gradient(circle, rgba(237, 232, 227, 0.065) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
 /* Native CSS Scroll-Driven Progress Bar using Named Scroll Timeline */
 @media (prefers-reduced-motion: no-preference) {
   @supports ((animation-timeline: --reader-scroll) and (timeline-scope: --reader-scroll)) {

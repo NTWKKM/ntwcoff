@@ -197,6 +197,43 @@ def extract_metadata(text: str, slug: str = "") -> dict:
     return metadata
 
 
+def clean_paper_content(content: str) -> str:
+    content = content.lstrip("\ufeff")
+    # Find start of section 1
+    m = re.search(
+        r"(?:^|\n)\s*(?:##\s*)?1\.\s*(?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|[^\n]+)", content
+    )
+    if m:
+        content = content[m.start() :].strip()
+
+    # Remove mock signature at bottom
+    content = re.sub(r"\n+ลงชื่อผู้ตรวจสอบรายงาน:[^\n]*", "", content)
+
+    # Standardize main section headings with markdown '## '
+    content = re.sub(
+        r"(?:^|\n)\s*(?:##\s*)?1\.\s*(วัตถุประสงค์[^\n]*)", r"\n\n## 1. \1\n\n", content
+    )
+    content = re.sub(
+        r"(?:^|\n)\s*(?:##\s*)?2\.\s*(ระเบียบวิธี[^\n]*)", r"\n\n## 2. \1\n\n", content
+    )
+    content = re.sub(
+        r"(?:^|\n)\s*(?:##\s*)?3\.\s*(ผลการค้นพบ[^\n]*)", r"\n\n## 3. \1\n\n", content
+    )
+    content = re.sub(
+        r"(?:^|\n)\s*(?:##\s*)?4\.\s*(การนำไปประยุกต์[^\n]*)",
+        r"\n\n## 4. \1\n\n",
+        content,
+    )
+
+    # Subsections e.g. 3.1, 3.2
+    content = re.sub(
+        r"(?:^|\n)\s*(?:###\s*)?(\d+\.\d+)\.?\s+([^\n]+)", r"\n\n### \1 \2\n\n", content
+    )
+
+    content = re.sub(r"\n{3,}", "\n\n", content).strip()
+    return content
+
+
 def parse_paper(file_path: Path):
     content = file_path.read_text(encoding="utf-8")
     slug = file_path.stem
@@ -265,6 +302,9 @@ def parse_paper(file_path: Path):
     word_count = len(re.findall(r"\w+", content))
     reading_time = max(1, round(word_count / 180))
 
+    # Clean body content to strip redundant preamble metadata
+    cleaned_body = clean_paper_content(content)
+
     return {
         "id": slug,
         "slug": slug,
@@ -280,7 +320,7 @@ def parse_paper(file_path: Path):
         "tags": matched_tags,
         "wordCount": word_count,
         "readingTimeMinutes": reading_time,
-        "content": content,
+        "content": cleaned_body,
     }
 
 

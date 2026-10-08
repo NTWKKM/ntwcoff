@@ -107,12 +107,39 @@ export const slugifyHeading = (
   return candidate;
 };
 
+export const cleanArticleContent = (content: string): string => {
+  if (!content) return '';
+  let cleaned = content.replace(/^\ufeff/, '');
+  const m = cleaned.search(/(?:^|\n)\s*(?:##\s*)?1\.\s*(?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|[^\n]+)/);
+  if (m !== -1) {
+    cleaned = cleaned.slice(m).trim();
+  }
+  // Remove mock signature line
+  cleaned = cleaned.replace(/\n+ลงชื่อผู้ตรวจสอบรายงาน:[^\n]*/g, '');
+  // Standardize ## headings
+  cleaned = cleaned.replace(/(?:^|\n)\s*(?:##\s*)?1\.\s*(วัตถุประสงค์[^\n]*)/g, '\n\n## 1. $1\n\n');
+  cleaned = cleaned.replace(/(?:^|\n)\s*(?:##\s*)?2\.\s*(ระเบียบวิธี[^\n]*)/g, '\n\n## 2. $1\n\n');
+  cleaned = cleaned.replace(/(?:^|\n)\s*(?:##\s*)?3\.\s*(ผลการค้นพบ[^\n]*)/g, '\n\n## 3. $1\n\n');
+  cleaned = cleaned.replace(/(?:^|\n)\s*(?:##\s*)?4\.\s*(การนำไปประยุกต์[^\n]*)/g, '\n\n## 4. $1\n\n');
+  cleaned = cleaned.replace(/(?:^|\n)\s*(?:###\s*)?(\d+\.\d+)\.?\s+([^\n]+)/g, '\n\n### $1 $2\n\n');
+  return cleaned.replace(/\n{3,}/g, '\n\n').trim();
+};
+
+export const formatParameters = (text: string): string => {
+  // Format temperature e.g. 4°C, 92°C
+  let res = text.replace(/\b(\d+(?:\.\d+)?°C)\b/g, '<span class="inline-flex items-center px-1.5 py-0.5 rounded-[6px] bg-dew-drop border border-charcoal/25 text-[12px] font-mono font-medium text-cocoa-ink mx-0.5 shadow-subtle">$1</span>');
+  // Format hours/minutes e.g. 24 ชั่วโมง, 6 นาที
+  res = res.replace(/\b(\d+\s*(?:ชั่วโมง|ชม\.|นาที))\b/g, '<span class="inline-flex items-center px-1.5 py-0.5 rounded-[6px] bg-dew-drop border border-charcoal/25 text-[12px] font-mono font-medium text-cocoa-ink mx-0.5 shadow-subtle">$1</span>');
+  return res;
+};
+
 export const KatexRenderer: React.FC<KatexRendererProps> = ({
   content,
   fontSize = 'md',
 }) => {
   const renderedHtml = useMemo(() => {
-    const lines = content.split('\n');
+    const sanitized = cleanArticleContent(content);
+    const lines = sanitized.split('\n');
     const processedLines: string[] = [];
     const tracker = createHeadingTracker();
     let inTable = false;
@@ -189,18 +216,37 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
         const headingText = line.replace('### ', '').trim();
         const id = slugifyHeading(headingText, tracker);
         processedLines.push(
-          `<h3 id="${id}" class="text-lg sm:text-xl font-gelica font-semibold lowercase mt-9 mb-3 text-cocoa-ink scroll-mt-24 flex items-center gap-2">${renderWithKatex(
-            escapeSourceText(headingText)
-          )}</h3>`
+          `<h3 id="${id}" class="text-base sm:text-lg font-gelica font-semibold lowercase mt-8 mb-3 text-cocoa-ink scroll-mt-24 flex items-center gap-2.5">
+            <span class="w-2 h-2 rounded-full bg-marker-orange shrink-0"></span>
+            <span>${renderWithKatex(escapeSourceText(headingText))}</span>
+          </h3>`
         );
       } else if (line.startsWith('## ')) {
         const headingText = line.replace('## ', '').trim();
         const id = slugifyHeading(headingText, tracker);
-        processedLines.push(
-          `<h2 id="${id}" class="text-xl sm:text-2xl font-gelica font-semibold lowercase mt-12 mb-4 pb-2 border-b-[1.5px] border-charcoal/20 text-cocoa-ink scroll-mt-24"><span>${renderWithKatex(
-            escapeSourceText(headingText)
-          )}</span></h2>`
-        );
+        const sectionMatch = headingText.match(/^([1-9])\.\s*(.+)$/);
+
+        if (sectionMatch) {
+          const secNum = '0' + sectionMatch[1];
+          const secTitle = sectionMatch[2];
+          const isKeyFindings = sectionMatch[1] === '3' || headingText.includes('ผลการค้นพบ');
+
+          processedLines.push(
+            `<h2 id="${id}" class="text-xl sm:text-2xl font-gelica font-semibold lowercase mt-12 mb-5 pb-3 border-b-[1.5px] border-charcoal/20 text-cocoa-ink scroll-mt-24 flex items-center justify-between gap-3 flex-wrap">
+              <span class="flex items-center gap-3">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-[8px] bg-charcoal text-cream-paper text-[13px] font-mono font-bold shrink-0 shadow-subtle">${secNum}</span>
+                <span>${renderWithKatex(escapeSourceText(secTitle))}</span>
+              </span>
+              ${isKeyFindings ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-[20px] bg-marker-orange text-cream-paper text-[11px] font-gelica font-medium shadow-subtle shrink-0">💡 ข้อค้นพบหลัก (Key Findings)</span>` : ''}
+            </h2>`
+          );
+        } else {
+          processedLines.push(
+            `<h2 id="${id}" class="text-xl sm:text-2xl font-gelica font-semibold lowercase mt-12 mb-4 pb-2 border-b-[1.5px] border-charcoal/20 text-cocoa-ink scroll-mt-24"><span>${renderWithKatex(
+              escapeSourceText(headingText)
+            )}</span></h2>`
+          );
+        }
       } else if (line.startsWith('# ')) {
         const headingText = line.replace('# ', '');
         processedLines.push(
@@ -219,8 +265,8 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
         formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
-          `<li class="ml-5 list-disc my-1.5 text-charcoal font-geist">${renderWithKatex(
-            formatted
+          `<li class="ml-5 list-disc my-2 text-charcoal font-geist leading-relaxed">${renderWithKatex(
+            formatParameters(formatted)
           )}</li>`
         );
       } else if (/^\d+\.\s/.test(line.trim())) {
@@ -230,8 +276,8 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
         formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
-          `<li class="ml-5 list-decimal my-1.5 text-charcoal font-geist">${renderWithKatex(
-            formatted
+          `<li class="ml-5 list-decimal my-2 text-charcoal font-geist leading-relaxed">${renderWithKatex(
+            formatParameters(formatted)
           )}</li>`
         );
       } else if (line.trim().length === 0) {
@@ -243,8 +289,8 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         
         processedLines.push(
-          `<p class="my-4 text-charcoal font-geist text-pretty">${renderWithKatex(
-            formatted
+          `<p class="my-4 text-charcoal font-geist text-pretty leading-relaxed">${renderWithKatex(
+            formatParameters(formatted)
           )}</p>`
         );
       }
