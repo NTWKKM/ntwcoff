@@ -28,18 +28,18 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   return (
     <section id="taxonomy" className="w-full pt-8 pb-6 space-y-5">
       
-      {/* Category Tab Pills — ElevenLabs Product Switcher Pattern */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
+      {/* Category Navigation Pills — Segmented Control */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-hairline-silver/60">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-3 scrollbar-none">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
+            className={`px-3.5 py-1.5 rounded-full text-[12px] font-normal tracking-[-0.12px] whitespace-nowrap transition-colors ${
               selectedCategory === null
-                ? 'bg-gradient-to-r from-violet-spark to-ember-orange text-white border-transparent shadow-sm shadow-violet-spark/20'
-                : 'bg-eggshell hover:bg-warm-taupe text-graphite border-[#e5e5e5] hover:border-violet-spark/30'
+                ? 'bg-ink text-white'
+                : 'bg-gallery-white text-slate hover:text-ink hover:bg-studio-mist border border-hairline-silver'
             }`}
           >
-            ทั้งหมด ({totalCount})
+            All Papers ({totalCount})
           </button>
 
           {categories.map((cat) => {
@@ -48,10 +48,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(isSelected ? null : cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
+                className={`px-3.5 py-1.5 rounded-full text-[12px] font-normal tracking-[-0.12px] whitespace-nowrap transition-colors ${
                   isSelected
-                    ? 'bg-gradient-to-r from-violet-spark to-ember-orange text-white border-transparent shadow-sm shadow-violet-spark/20'
-                    : 'bg-eggshell hover:bg-warm-taupe text-graphite border-[#e5e5e5] hover:border-violet-spark/30'
+                    ? 'bg-ink text-white'
+                    : 'bg-gallery-white text-slate hover:text-ink hover:bg-studio-mist border border-hairline-silver'
                 }`}
               >
                 {cat}
@@ -60,16 +60,16 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           })}
         </div>
 
-        {/* Filter Summary */}
-        <div className="text-xs text-smoke font-mono shrink-0">
-          แสดงผล {filteredCount} จาก {totalCount} งานวิจัย
+        {/* Filter Summary Counter */}
+        <div className="text-[12px] text-slate font-sf-text shrink-0 pb-1">
+          Showing {filteredCount} of {totalCount} monographs
         </div>
       </div>
 
-      {/* Scientific Auto-Tag Cloud — Fully-Pilled 9999px with Spark Highlights */}
+      {/* Scientific Auto-Tag Cloud — Quiet Hairline Pills */}
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-xs font-sans text-ash mr-1.5">
-          คีย์เวิร์ด:
+        <span className="text-[12px] font-sf-text text-steel mr-1.5">
+          Keywords:
         </span>
 
         {tags.map((tag) => {
@@ -78,16 +78,16 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <button
               key={tag.name}
               onClick={() => setSelectedTag(isSelected ? null : tag.name)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans transition-all border ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-sf-text tracking-[-0.12px] transition-colors ${
                 isSelected
-                  ? 'bg-gradient-to-r from-violet-spark to-ember-orange text-white border-transparent font-medium shadow-sm'
-                  : 'bg-warm-taupe hover:bg-eggshell hover:border-violet-spark/40 text-smoke border-stone'
+                  ? 'bg-pricing-blue text-white font-normal'
+                  : 'bg-gallery-white hover:bg-studio-mist text-slate hover:text-ink border border-hairline-silver'
               }`}
             >
               <span>#{tag.name}</span>
               <span
                 className={`text-[10px] px-1 rounded-full font-mono ${
-                  isSelected ? 'bg-black/30 text-white' : 'bg-stone text-smoke'
+                  isSelected ? 'bg-white/25 text-white' : 'bg-studio-mist text-slate'
                 }`}
               >
                 {tag.count}
@@ -96,17 +96,17 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           );
         })}
 
-        {/* Clear Filter Outline Pill Button */}
+        {/* Clear Filter Control — Outlined Explore Pill */}
         {hasFilter && (
           <button
             onClick={() => {
               setSelectedCategory(null);
               setSelectedTag(null);
             }}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-eggshell hover:bg-warm-taupe text-ink hover:text-ember-orange border border-[#e5e5e5] hover:border-ember-orange/40 transition-colors ml-1"
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[12px] font-normal text-apple-blue hover:underline transition-colors ml-1"
           >
-            <X className="w-3 h-3 text-smoke" />
-            <span>ล้างตัวกรอง</span>
+            <X className="w-3 h-3 text-apple-blue" />
+            <span>Reset filters</span>
           </button>
         )}
       </div>
@@ -114,4 +114,5 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     </section>
   );
 };
+
 

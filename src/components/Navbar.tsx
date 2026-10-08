@@ -9,74 +9,74 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme, totalPapers }) => {
   return (
-    <header className="sticky top-0 z-30 w-full bg-eggshell/95 backdrop-blur-sm border-b border-stone transition-colors">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-[52px] flex items-center justify-between">
+    <header className="sticky top-0 z-30 w-full bg-gallery-white/85 backdrop-blur-md border-b border-hairline-silver transition-colors">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
         
-        {/* Brand Wordmark — Restrained Bauhaus Editorial with Spark Accent */}
+        {/* Brand: Product Local Bar Style (SF Pro Display 19px/600) */}
         <div className="flex items-center gap-3">
           <a
             href="/"
-            className="group flex items-center gap-2 text-ink hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 text-ink hover:opacity-85 transition-opacity"
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-violet-spark to-ember-orange shadow-sm group-hover:scale-125 transition-transform" />
-            <span className="font-semibold text-[17px] tracking-tight text-ink font-sans">
+            <span className="font-semibold text-[19px] tracking-[0.228px] text-ink font-sf-display">
               NTWK Coffee
             </span>
           </a>
-          <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-warm-taupe text-graphite border border-stone">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-spark mr-1.5" />
-            Research Notebook
+          <span className="hidden sm:inline-block text-[12px] font-normal text-slate tracking-[-0.12px]">
+            Science Notebook
           </span>
         </div>
 
-        {/* Center / Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1.5 text-[13px] text-smoke">
-          <span className="text-ash">•</span>
-          <span className="font-sans text-graphite">
-            {totalPapers} Scientific Monographs
+        {/* Center Navigation Links (SF Pro Text 12px/400) */}
+        <nav className="hidden md:flex items-center gap-6 text-[12px] font-normal text-slate tracking-[-0.12px]">
+          <span className="text-ink font-medium">
+            Overview
           </span>
-          <span className="text-ash">•</span>
-          <span className="text-smoke">Google Drive Sync (12:00 ICT)</span>
+          <a href="#catalog" className="hover:text-apple-blue transition-colors">
+            {totalPapers} Monographs
+          </a>
+          <a href="#taxonomy" className="hover:text-apple-blue transition-colors">
+            Taxonomy
+          </a>
+          <span className="text-slate/70">
+            Sync: 12:00 ICT
+          </span>
         </nav>
 
-        {/* Right Actions — Pill Buttons Hierarchy with Spark Accents */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Sync schedule badge with Spark Pulse */}
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-warm-taupe text-xs text-smoke border border-stone">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ember-orange opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-gradient-to-r from-violet-spark to-ember-orange" />
-            </span>
-            <Clock className="w-3 h-3 text-smoke ml-0.5" />
-            <span>Auto-Sync 12:00 ICT</span>
+        {/* Right Controls: Outlined Explore Pill & Pricing Blue Pill */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Sync schedule badge */}
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-studio-mist text-[12px] text-slate border border-hairline-silver">
+            <Clock className="w-3 h-3 text-slate" />
+            <span className="tracking-[-0.12px]">Daily 12:00 ICT</span>
           </div>
 
-          {/* Theme Switcher — Outline Pill */}
+          {/* Theme Switcher — Outlined Explore Pill */}
           <button
             onClick={toggleTheme}
-            className="p-1.5 sm:px-3 sm:py-1 rounded-full text-xs font-medium text-ink bg-eggshell hover:bg-warm-taupe border border-[#e5e5e5] hover:border-violet-spark/40 transition-all flex items-center gap-1.5"
-            title={isDark ? "Switch to Light Canvas" : "Switch to Dark Canvas"}
+            className="px-2.5 py-1 rounded-full text-[12px] text-ink bg-transparent hover:bg-studio-mist border border-steel hover:border-ink transition-colors flex items-center gap-1.5"
+            title={isDark ? "Switch to Light Gallery" : "Switch to Dark Gallery"}
             aria-label="Toggle Canvas Theme"
           >
             {isDark ? (
               <>
-                <Sun className="w-3.5 h-3.5 text-ember-orange" />
-                <span className="hidden sm:inline">Light</span>
+                <Sun className="w-3 h-3 text-ink" />
+                <span className="hidden sm:inline tracking-[-0.12px]">Light</span>
               </>
             ) : (
               <>
-                <Moon className="w-3.5 h-3.5 text-violet-spark" />
-                <span className="hidden sm:inline">Dark</span>
+                <Moon className="w-3 h-3 text-ink" />
+                <span className="hidden sm:inline tracking-[-0.12px]">Dark</span>
               </>
             )}
           </button>
 
-          {/* GitHub Repo — Filled Pill Button with Spark Hover */}
+          {/* GitHub Repo — Pricing Blue Pill (#0071e3 filled conversion control) */}
           <a
             href="https://github.com/NTWKKM/ntwcoff"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-white bg-ink hover:bg-gradient-to-r hover:from-violet-spark hover:to-ember-orange border border-[#e5e5e5] hover:border-transparent transition-all shadow-none"
+            className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12px] font-normal text-white bg-pricing-blue hover:bg-[#0077ed] active:bg-[#0062c4] transition-colors tracking-[-0.12px]"
             title="View on GitHub"
           >
             <Github className="w-3.5 h-3.5" />
@@ -88,4 +88,5 @@ export const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme, totalPapers
     </header>
   );
 };
+
 
