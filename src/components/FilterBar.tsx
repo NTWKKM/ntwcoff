@@ -35,8 +35,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             onClick={() => setSelectedCategory(null)}
             className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
               selectedCategory === null
-                ? 'bg-ink text-white border-ink shadow-none'
-                : 'bg-eggshell hover:bg-warm-taupe text-graphite border-[#e5e5e5]'
+                ? 'bg-gradient-to-r from-violet-spark to-ember-orange text-white border-transparent shadow-sm shadow-violet-spark/20'
+                : 'bg-eggshell hover:bg-warm-taupe text-graphite border-[#e5e5e5] hover:border-violet-spark/30'
             }`}
           >
             ทั้งหมด ({totalCount})
@@ -50,8 +50,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 onClick={() => setSelectedCategory(isSelected ? null : cat)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
                   isSelected
-                    ? 'bg-ink text-white border-ink shadow-none'
-                    : 'bg-eggshell hover:bg-warm-taupe text-graphite border-[#e5e5e5]'
+                    ? 'bg-gradient-to-r from-violet-spark to-ember-orange text-white border-transparent shadow-sm shadow-violet-spark/20'
+                    : 'bg-eggshell hover:bg-warm-taupe text-graphite border-[#e5e5e5] hover:border-violet-spark/30'
                 }`}
               >
                 {cat}
@@ -66,7 +66,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
       </div>
 
-      {/* Scientific Auto-Tag Cloud — Fully-Pilled 9999px */}
+      {/* Scientific Auto-Tag Cloud — Fully-Pilled 9999px with Spark Highlights */}
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-xs font-sans text-ash mr-1.5">
           คีย์เวิร์ด:
@@ -80,14 +80,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               onClick={() => setSelectedTag(isSelected ? null : tag.name)}
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans transition-all border ${
                 isSelected
-                  ? 'bg-ink text-white border-ink font-medium'
-                  : 'bg-warm-taupe hover:bg-stone/80 text-smoke border-stone'
+                  ? 'bg-gradient-to-r from-violet-spark to-ember-orange text-white border-transparent font-medium shadow-sm'
+                  : 'bg-warm-taupe hover:bg-eggshell hover:border-violet-spark/40 text-smoke border-stone'
               }`}
             >
               <span>#{tag.name}</span>
               <span
                 className={`text-[10px] px-1 rounded-full font-mono ${
-                  isSelected ? 'bg-graphite text-white' : 'bg-stone text-smoke'
+                  isSelected ? 'bg-black/30 text-white' : 'bg-stone text-smoke'
                 }`}
               >
                 {tag.count}
@@ -103,7 +103,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               setSelectedCategory(null);
               setSelectedTag(null);
             }}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-eggshell hover:bg-warm-taupe text-ink border border-[#e5e5e5] transition-colors ml-1"
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-eggshell hover:bg-warm-taupe text-ink hover:text-ember-orange border border-[#e5e5e5] hover:border-ember-orange/40 transition-colors ml-1"
           >
             <X className="w-3 h-3 text-smoke" />
             <span>ล้างตัวกรอง</span>

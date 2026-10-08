@@ -38,7 +38,10 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           {/* Left Column: Whisper-Weight Headline & Actions */}
           <div className="lg:col-span-7 space-y-6">
             <h1 className="text-4xl sm:text-5xl lg:text-[48px] font-light tracking-whisper text-ink font-waldenburg leading-[1.08] text-balance">
-              Coffee Science Deep Research
+              Coffee Science{' '}
+              <span className="bg-gradient-to-r from-violet-spark to-ember-orange bg-clip-text text-transparent font-normal">
+                Deep Research
+              </span>
             </h1>
 
             <p className="text-base sm:text-lg text-smoke font-sans leading-relaxed text-pretty max-w-xl">
@@ -46,17 +49,17 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               และสัมผัสเชิง Tribology สู่การยกระดับกาแฟพิเศษในทางปฏิบัติ
             </p>
 
-            {/* Quick Action Pill Buttons */}
+            {/* Quick Action Pill Buttons with Spark Gradient */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href="#catalog"
-                className="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium bg-ink text-white border border-[#e5e5e5] hover:bg-graphite transition-colors"
+                className="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-violet-spark to-ember-orange text-white hover:opacity-90 shadow-sm shadow-violet-spark/25 hover:shadow-md hover:shadow-ember-orange/25 transition-all"
               >
                 อ่าน {totalPapers} งานวิจัยฉบับเต็ม
               </a>
               <a
                 href="#taxonomy"
-                className="inline-flex items-center justify-center px-3.5 py-2 rounded-full text-sm font-medium bg-eggshell text-ink border border-[#e5e5e5] hover:bg-warm-taupe transition-colors"
+                className="inline-flex items-center justify-center px-3.5 py-2 rounded-full text-sm font-medium bg-eggshell text-ink border border-[#e5e5e5] hover:border-violet-spark/50 hover:bg-warm-taupe transition-all"
               >
                 จำแนกตาม {totalCategories} หมวดหมู่
               </a>
@@ -69,7 +72,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               
               {/* Product Visual Audio Sphere: Radial Violet #0447ff + Ember Orange #ff4704 */}
               <div
-                className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full flex items-center justify-center select-none shadow-sm transition-transform hover:scale-[1.02] duration-500"
+                className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full flex items-center justify-center select-none shadow-md shadow-violet-spark/10 transition-transform hover:scale-[1.03] duration-500"
                 style={{
                   background: `radial-gradient(circle at 35% 35%, #0447ff 0%, #ff4704 55%, #f5f3f1 90%)`,
                   filter: 'blur(0.5px)',
@@ -83,10 +86,10 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                   }}
                 />
 
-                {/* Center Play Pill Button — ElevenLabs Signature */}
+                {/* Center Play Pill Button — ElevenLabs Signature with Spark Ring */}
                 <button
                   onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-                  className="relative z-10 w-12 h-12 rounded-full bg-white/95 text-ink flex items-center justify-center shadow-subtle hover:scale-105 active:scale-95 transition-all focus:outline-none"
+                  className="relative z-10 w-12 h-12 rounded-full bg-white text-ink flex items-center justify-center shadow-subtle hover:scale-110 active:scale-95 transition-all focus:outline-none ring-2 ring-violet-spark/20 hover:ring-ember-orange/40"
                   aria-label="Toggle Audio Monograph Brief"
                   title="จำลองเสียงบรรยายสรุปงานวิจัย"
                 >
@@ -100,9 +103,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
               {/* Sphere Caption */}
               <div className="mt-3 text-center">
-                <span className="text-[12px] font-mono text-smoke flex items-center justify-center gap-1.5">
-                  <Volume2 className="w-3.5 h-3.5 text-graphite" />
-                  <span>{isPlayingAudio ? 'เล่นเสียงสรุปงานวิจัย (Audio Synthesis)' : 'Audio Synthesis Sphere'}</span>
+                <span className="text-[12px] font-mono text-graphite flex items-center justify-center gap-1.5 font-medium">
+                  <Volume2 className="w-3.5 h-3.5 text-violet-spark" />
+                  <span>{isPlayingAudio ? 'กำลังเล่นเสียงสรุปงานวิจัย (Audio Synthesis)' : 'Audio Synthesis Sphere'}</span>
                 </span>
                 <span className="text-[11px] text-ash">
                   Violet Spark (#0447ff) & Ember Orange (#ff4704)
@@ -114,7 +117,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
         </div>
 
-        {/* Minimalist Search Bar — ElevenLabs Bauhaus Style */}
+        {/* Search Bar with Spark Focus */}
         <div className="relative max-w-3xl mt-4">
           <div className="relative flex items-center">
             <Search className="w-4 h-4 text-ash absolute left-4 pointer-events-none" />
@@ -123,7 +126,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นคว้าสารประกอบ (เช่น 5-HMF, Acrylamide, Melanoidins, Astringency, ชื่อผู้วิจัย)..."
-              className="w-full pl-11 pr-10 py-3 rounded-full bg-eggshell border border-stone text-ink placeholder:text-ash text-sm focus:outline-none focus:border-graphite transition-colors shadow-none"
+              className="w-full pl-11 pr-10 py-3 rounded-full bg-eggshell border border-stone text-ink placeholder:text-ash text-sm focus:outline-none focus:border-violet-spark focus:ring-2 focus:ring-violet-spark/20 transition-all shadow-none"
             />
             {searchQuery && (
               <button
@@ -137,25 +140,28 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           </div>
         </div>
 
-        {/* Metric Badges — Minimalist Hairline Taupe Plates */}
+        {/* Metric Badges — With Spark Accents */}
         <div className="mt-6 flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-smoke font-sans">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warm-taupe border border-stone">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-spark" />
             <span className="font-medium text-graphite">{totalPapers}</span>
             <span>บทความวิจัย</span>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warm-taupe border border-stone">
+            <span className="w-1.5 h-1.5 rounded-full bg-ember-orange" />
             <span className="font-medium text-graphite">{totalCategories}</span>
             <span>สาขาวิชา</span>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warm-taupe border border-stone">
+            <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-violet-spark to-ember-orange" />
             <span className="font-medium text-graphite">{totalTags}</span>
             <span>ระบบแท็กวิทยาศาสตร์</span>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warm-taupe border border-stone">
-            <span className="w-1.5 h-1.5 rounded-full bg-ink inline-block" />
+            <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-violet-spark to-ember-orange" />
             <span>Google Drive Sync Active</span>
           </div>
         </div>

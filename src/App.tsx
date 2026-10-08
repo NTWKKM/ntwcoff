@@ -159,7 +159,7 @@ export const App: React.FC = () => {
                 setSelectedCategory(null);
                 setSelectedTag(null);
               }}
-              className="px-4 py-2 rounded-full text-xs font-medium bg-ink hover:bg-graphite text-white border border-[#e5e5e5] transition-colors"
+              className="px-4 py-2 rounded-full text-xs font-medium bg-gradient-to-r from-violet-spark to-ember-orange hover:opacity-90 text-white shadow-sm shadow-violet-spark/20 transition-all"
             >
               ล้างตัวกรองทั้งหมด
             </button>
@@ -175,10 +175,11 @@ export const App: React.FC = () => {
         onTagClick={(tag) => setSelectedTag(tag)}
       />
 
-      {/* Compact Single Band Footer — ElevenLabs Bauhaus Reference */}
+      {/* Compact Single Band Footer — ElevenLabs Bauhaus Reference with Spark Dot */}
       <footer className="border-t border-stone bg-warm-taupe py-6 px-4 sm:px-6 lg:px-8 text-xs text-smoke font-sans">
         <div className="max-w-[1280px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-gradient-to-tr from-violet-spark to-ember-orange" />
             <span className="font-medium text-ink font-sans">
               NTWK Coffee
             </span>
@@ -193,7 +194,7 @@ export const App: React.FC = () => {
               href="https://github.com/NTWKKM/ntwcoff"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-graphite hover:text-ink underline decoration-stone hover:decoration-ink transition-colors"
+              className="text-graphite hover:text-violet-spark underline decoration-stone hover:decoration-violet-spark transition-colors"
             >
               GitHub Source
             </a>

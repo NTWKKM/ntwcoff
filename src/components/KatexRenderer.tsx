@@ -91,12 +91,12 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({ content }) => {
         flushTable();
       }
 
-      // Headings — Whisper-Weight 300 & Tight -0.02em tracking
+      // Headings — Whisper-Weight 300 & Tight -0.02em tracking with Spark Dot
       if (line.startsWith('### ')) {
         const headingText = line.replace('### ', '');
         const id = headingText.replace(/[^\w\u0E00-\u0E7F]+/g, '-').toLowerCase();
         processedLines.push(
-          `<h3 id="${id}" class="text-xl font-light tracking-whisper mt-8 mb-3 text-ink font-waldenburg scroll-mt-24">${renderWithKatex(
+          `<h3 id="${id}" class="text-xl font-light tracking-whisper mt-8 mb-3 text-ink font-waldenburg scroll-mt-24 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-violet-spark to-ember-orange inline-block"></span>${renderWithKatex(
             headingText
           )}</h3>`
         );
