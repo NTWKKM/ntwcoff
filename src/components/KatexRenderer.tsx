@@ -5,6 +5,15 @@ interface KatexRendererProps {
   content: string;
 }
 
+const escapeHtml = (unsafe: string): string => {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 export const renderWithKatex = (text: string): string => {
   if (!text) return '';
 
@@ -16,7 +25,7 @@ export const renderWithKatex = (text: string): string => {
         { displayMode: true, throwOnError: false }
       )}</div>`;
     } catch {
-      return math;
+      return escapeHtml(math);
     }
   });
 
@@ -28,20 +37,11 @@ export const renderWithKatex = (text: string): string => {
         throwOnError: false,
       });
     } catch {
-      return math;
+      return escapeHtml(math);
     }
   });
 
   return result;
-};
-
-const escapeHtml = (unsafe: string): string => {
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 };
 
 export const escapeSourceText = (text: string): string => {
