@@ -1,0 +1,358 @@
+#!/usr/bin/env python3
+"""
+Content preparation and auto-tagging pipeline.
+Parses markdown files in `raw_papers/` and compiles them into structured JSON
+at `src/data/papers.json` and `src/data/taxonomy.json`.
+
+Supports:
+- Markdown tables
+- Bullet lists (* Key: Value)
+- Google Docs plain text / tab indented exports
+- Deduplication by normalized title and slug
+"""
+
+import datetime
+import json
+import re
+from pathlib import Path
+
+# Coffee Science Auto-Tagging Taxonomy
+TAXONOMY_RULES = {
+    "SensoryScience": [
+        "ประสาทสัมผัส",
+        "sensory",
+        "flavor",
+        "กลิ่นรส",
+        "ความฝาด",
+        "บอดี้",
+        "astringency",
+        "lexicon",
+        "cupping",
+    ],
+    "CoffeeBody": [
+        "บอดี้",
+        "coffee body",
+        "mouthcoating",
+        "thickness",
+        "สัมผัสในช่องปาก",
+        "mouthfeel",
+    ],
+    "Astringency": ["ความฝาด", "astringency", "แห้งสาก", "puckering"],
+    "Melanoidins": ["เมลาโนอิดิน", "melanoidin", "melanoidins"],
+    "RoastingChemistry": [
+        "การคั่ว",
+        "roasting",
+        "roast",
+        "อุณหพลศาสตร์",
+        "first crack",
+        "second crack",
+        "degassing",
+    ],
+    "MaillardReaction": ["เมลลาร์ด", "maillard", "ปฏิกิริยาเมลลาร์ด"],
+    "Acrylamide": ["อะคริลาไมด์", "acrylamide"],
+    "5-HMF": ["5-hmf", "5-hydroxymethylfurfural", "furfural"],
+    "SucrosePyrolysis": [
+        "ซูโครส",
+        "sucrose",
+        "ไพโรไลซิส",
+        "pyrolysis",
+        "fructofuranosyl",
+    ],
+    "Phenolics": [
+        "ฟีนอลิก",
+        "phenolic",
+        "โพลีฟีนอล",
+        "polyphenol",
+        "chlorogenic",
+        "กรดคลอโรจีนิก",
+        "5-cqa",
+    ],
+    "Extraction": [
+        "การสกัด",
+        "extraction",
+        "เอสเปรสโซ",
+        "ดริป",
+        "drip",
+        "yield",
+        "ช็อต",
+        "brewing",
+        "cold brew",
+        "immersion",
+    ],
+    "SpecialtyCoffee": [
+        "กาแฟพิเศษ",
+        "specialty coffee",
+        "sca",
+        "third-wave",
+        "คลื่นลูกที่สาม",
+    ],
+    "Q-Grader": ["q-grader", "q-arabica", "คัพปิ้ง", "cupping", "ผู้ประเมินคุณภาพ"],
+    "FoodSafety": [
+        "ความปลอดภัยทางอาหาร",
+        "ก่อมะเร็ง",
+        "สารปนเปื้อน",
+        "carcinogen",
+        "iarc",
+        "efsa",
+    ],
+    "Tribology": ["ไตรโบโลยี", "tribology", "แรงเสียดทาน", "น้ำลาย", "salivary"],
+    "KineticModeling": [
+        "kinetic",
+        "จลนศาสตร์",
+        "แบบจำลองจลนศาสตร์",
+        "arrhenius",
+        "สมการอนุพันธ์",
+        "modeling",
+    ],
+    "FT-ICR-MS": [
+        "ft-icr",
+        "mass spectrometry",
+        "แมสสเปกโทรเมตรี",
+        "uplc-qqq-ms",
+        "lc-ms",
+        "nmr",
+    ],
+    "Fermentation": [
+        "การหมัก",
+        "fermentation",
+        "yeast",
+        "ยีสต์",
+        "anaerobic",
+        "carbonic maceration",
+        "lactiplantibacillus",
+    ],
+    "WaterChemistry": [
+        "น้ำสำหรับการสกัด",
+        "water recipe",
+        "cations",
+        "hardness",
+        "mg2+",
+        "ca2+",
+        "ไบคาร์บอเนต",
+        "alkalinity",
+    ],
+    "GrindingPhysics": [
+        "การบด",
+        "grinding",
+        "fines",
+        "particle size",
+        "triboelectrification",
+        "ผงละเอียด",
+    ],
+}
+
+
+def _assign_meta(meta: dict, key: str, val: str):
+    val = val.strip()
+    if not val or val == "รายละเอียด":
+        return
+    if "ชื่อบทความวิจัย" in key and not meta.get("englishTitle"):
+        meta["englishTitle"] = val
+    elif "คณะผู้วิจัย" in key and not meta.get("authors"):
+        meta["authors"] = val
+    elif "สถาบัน" in key and not meta.get("institution"):
+        meta["institution"] = val
+    elif "วารสารวิชาการ" in key and not meta.get("journal"):
+        meta["journal"] = val
+    elif "ลิงก์งานวิจัย" in key and not meta.get("links"):
+        meta["links"] = val
+
+
+def extract_metadata(text: str, slug: str = "") -> dict:
+    metadata = {}
+
+    # 1. Filename pattern: e.g. [2026-09-05] The Role of Dissolved Cations in Coffee Extraction
+    fn_match = re.match(r"^\[(\d{4}-\d{2}-\d{2})\]\s*(.+)$", slug)
+    if fn_match:
+        metadata["dateFromFilename"] = fn_match.group(1)
+        metadata["englishTitle"] = fn_match.group(2).strip()
+
+    # 2. Markdown Table Pattern
+    table_match = re.search(
+        r"## ข้อมูลงานวิจัย.*?\n\s*\|[^\n]+\|\s*\n\s*\|[^\n]+\|\s*\n((?:\|[^\n]+\|\s*\n)+)",
+        text,
+    )
+    if table_match:
+        rows = table_match.group(1).strip().split("\n")
+        for row in rows:
+            cols = [c.strip() for c in row.split("|")[1:-1]]
+            if len(cols) >= 2:
+                key = re.sub(r"[*_]", "", cols[0]).strip()
+                val = cols[1].strip()
+                _assign_meta(metadata, key, val)
+
+    # 3. Bullet Point Pattern: * ชื่อบทความวิจัย: ...
+    bullet_matches = re.findall(r"^[*\-•]\s*([^\n:]+):\s*([^\n]+)", text, re.MULTILINE)
+    for k, v in bullet_matches:
+        _assign_meta(metadata, k.strip(), v.strip())
+
+    # 4. Google Docs plain text / tab format
+    gdoc_matches = re.findall(
+        r"(ชื่อบทความวิจัย|คณะผู้วิจัย|สถาบัน|วารสารวิชาการ|ลิงก์งานวิจัย)\s*\n\s*([^\n]+)",
+        text,
+    )
+    for k, v in gdoc_matches:
+        _assign_meta(metadata, k.strip(), v.strip())
+
+    return metadata
+
+
+def parse_paper(file_path: Path):
+    content = file_path.read_text(encoding="utf-8")
+    slug = file_path.stem
+
+    # Extract metadata from table / bullets / tabs
+    meta = extract_metadata(content, slug)
+
+    # Extract Date
+    date_str = meta.get("dateFromFilename", "")
+    if not date_str:
+        date_match = re.search(r"\*\*วันที่:\*\*\s*([^\n]+)", content)
+        if not date_match:
+            date_match = re.search(r"วันที่:\s*([^\n]+)", content)
+        if date_match:
+            date_str = date_match.group(1).strip()
+
+    # Extract Category
+    category = "วิทยาศาสตร์กาแฟทั่วไป (General Coffee Science)"
+    cat_match = re.search(r"\*\*หมวดหมู่:\*\*\s*([^\n]+)", content)
+    if not cat_match:
+        cat_match = re.search(r"หมวดหมู่:\s*([^\n]+)", content)
+    if cat_match:
+        category = cat_match.group(1).strip()
+
+    # Title: English research paper title if available, else clean header
+    title = meta.get("englishTitle")
+    if not title:
+        # Check first line
+        lines = [line.strip() for line in content.split("\n") if line.strip()]
+        if lines and lines[0].startswith("# "):
+            title = lines[0].replace("# ", "").strip()
+        else:
+            title = slug.replace("-", " ").title()
+
+    # Document Header (e.g. รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก)
+    doc_header = "รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)"
+    header_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
+    if header_match:
+        doc_header = header_match.group(1).strip()
+
+    # Extract Excerpt (from Section 1)
+    excerpt = ""
+    sec1_match = re.search(
+        r"(?:##\s*)?1\.\s*วัตถุประสงค์และที่มาของงานวิจัย\s*\n\s*(.+?)(?=\n\n|\n\d\.|\n##)",
+        content,
+        re.DOTALL,
+    )
+    if sec1_match:
+        cleaned = re.sub(r"[*_#]", "", sec1_match.group(1)).strip()
+        excerpt = cleaned[:240] + ("..." if len(cleaned) > 240 else "")
+    else:
+        # Fallback excerpt: first substantial paragraph
+        paragraphs = [p.strip() for p in content.split("\n\n") if len(p.strip()) > 80]
+        if paragraphs:
+            cleaned = re.sub(r"[*_#]", "", paragraphs[0]).strip()
+            excerpt = cleaned[:240] + ("..." if len(cleaned) > 240 else "")
+
+    # Auto-Tagging
+    content_lower = content.lower()
+    matched_tags = []
+    for tag, keywords in TAXONOMY_RULES.items():
+        if any(kw.lower() in content_lower for kw in keywords):
+            matched_tags.append(tag)
+
+    # Word count and reading time
+    word_count = len(re.findall(r"\w+", content))
+    reading_time = max(1, round(word_count / 180))
+
+    return {
+        "id": slug,
+        "slug": slug,
+        "title": title,
+        "documentHeader": doc_header,
+        "date": date_str,
+        "category": category,
+        "authors": meta.get("authors", ""),
+        "institution": meta.get("institution", ""),
+        "journal": meta.get("journal", ""),
+        "links": meta.get("links", ""),
+        "excerpt": excerpt,
+        "tags": matched_tags,
+        "wordCount": word_count,
+        "readingTimeMinutes": reading_time,
+        "content": content,
+    }
+
+
+def main():
+    raw_dir = Path("raw_papers")
+    data_dir = Path("src/data")
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    if not raw_dir.exists():
+        print(f"⚠️ [WARNING] {raw_dir} does not exist.")
+        return
+
+    raw_papers_list = []
+    seen_titles = {}
+
+    for md_file in sorted(raw_dir.glob("*.md")):
+        if md_file.name.startswith("."):
+            continue
+        paper = parse_paper(md_file)
+
+        # Deduplication check: if a paper with identical normalized title exists, keep the latest
+        norm_title = re.sub(r"[^\w\u0E00-\u0E7F]+", "", paper["title"].lower())
+        if norm_title in seen_titles:
+            prev_idx = seen_titles[norm_title]["index"]
+            prev_file = seen_titles[norm_title]["file"]
+            print(
+                f"⚠️ [DUPLICATE DETECTED] '{paper['title']}' in '{md_file.name}' already loaded from '{prev_file}'. Merging with latest."
+            )
+            raw_papers_list[prev_idx] = paper
+            seen_titles[norm_title]["file"] = md_file.name
+        else:
+            seen_titles[norm_title] = {
+                "index": len(raw_papers_list),
+                "file": md_file.name,
+            }
+            raw_papers_list.append(paper)
+
+    papers = raw_papers_list
+    category_counts = {}
+    tag_counts = {}
+
+    for paper in papers:
+        cat = paper["category"]
+        category_counts[cat] = category_counts.get(cat, 0) + 1
+        for t in paper["tags"]:
+            tag_counts[t] = tag_counts.get(t, 0) + 1
+
+        print(f"📄 Processed: {paper['slug']} -> {len(paper['tags'])} tags assigned")
+
+    # Sort tags by frequency
+    sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
+
+    taxonomy = {
+        "lastUpdated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "totalPapers": len(papers),
+        "categories": category_counts,
+        "tags": [{"name": t, "count": c} for t, c in sorted_tags],
+    }
+
+    papers_file = data_dir / "papers.json"
+    taxonomy_file = data_dir / "taxonomy.json"
+
+    papers_file.write_text(
+        json.dumps(papers, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    taxonomy_file.write_text(
+        json.dumps(taxonomy, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    print(f"\n✨ Generated {papers_file} with {len(papers)} unique papers.")
+    print(f"✨ Generated {taxonomy_file} with {len(taxonomy['tags'])} unique tags.")
+
+
+if __name__ == "__main__":
+    main()
