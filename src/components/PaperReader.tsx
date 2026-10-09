@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Paper } from '../types';
-import { KatexRenderer, slugifyHeading, createHeadingTracker } from './KatexRenderer';
+import {
+  KatexRenderer,
+  slugifyHeading,
+  createHeadingTracker,
+  cleanArticleContent,
+} from './KatexRenderer';
 import {
   X,
   ArrowLeft,
@@ -72,7 +77,8 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
     if (!paper) return [];
     const items: TocItem[] = [];
     const tracker = createHeadingTracker();
-    const lines = paper.content.split('\n');
+    const sanitized = cleanArticleContent(paper.content);
+    const lines = sanitized.split('\n');
 
     for (const line of lines) {
       if (line.startsWith('## ')) {

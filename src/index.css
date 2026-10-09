@@ -179,6 +179,17 @@
   contain-intrinsic-size: auto none auto 260px;
 }
 
+/* Tactile Notebook Dot Grid per modern-web-guidance visual-effects */
+.bg-notebook-dots {
+  background-image: radial-gradient(circle, rgba(23, 23, 23, 0.055) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.dark .bg-notebook-dots {
+  background-image: radial-gradient(circle, rgba(237, 232, 227, 0.065) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
 /* Native CSS Scroll-Driven Progress Bar using Named Scroll Timeline */
 @media (prefers-reduced-motion: no-preference) {
   @supports ((animation-timeline: --reader-scroll) and (timeline-scope: --reader-scroll)) {
@@ -257,6 +268,59 @@
   border-radius: 8px;
   color: var(--color-cocoa-ink);
   font-style: normal;
+}
+
+/* Editorial Section & Parameter Badges for Markdown / KaTeX Content */
+.param-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.375rem;
+  border-radius: 6px;
+  background-color: var(--color-dew-drop);
+  border: 1px solid rgba(23, 23, 23, 0.25);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 500;
+  color: var(--color-cocoa-ink);
+  margin-left: 0.125rem;
+  margin-right: 0.125rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .param-badge {
+  border-color: rgba(237, 232, 227, 0.25);
+  color: var(--color-charcoal);
+}
+
+.section-number-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background-color: var(--color-charcoal);
+  color: var(--color-cream-paper);
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 1px 2px 0px;
+}
+
+.key-findings-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  background-color: var(--color-marker-orange);
+  color: #171717;
+  font-size: 11px;
+  font-family: var(--font-gelica);
+  font-weight: 600;
+  flex-shrink: 0;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 1px 2px 0px;
 }
 
 /* Markdown Table Styles */

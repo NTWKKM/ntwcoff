@@ -17,7 +17,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   totalTags,
 }) => {
   return (
-    <section className="relative w-full pt-14 pb-14 px-4 sm:px-6 lg:px-8 bg-cream-paper border-b-[1.5px] border-charcoal/20 transition-colors overflow-hidden">
+    <section className="relative w-full pt-14 pb-14 px-4 sm:px-6 lg:px-8 bg-cream-paper bg-notebook-dots border-b-[1.5px] border-charcoal/20 transition-colors overflow-hidden">
       
       {/* Decorative Stickers — Schoolyard notebook physical stickers */}
       <div className="absolute top-8 left-6 sm:left-12 hidden md:flex items-center gap-2 rotate-[-8deg] pointer-events-none select-none opacity-85">
