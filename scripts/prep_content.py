@@ -212,7 +212,9 @@ def clean_paper_content(content: str) -> str:
 
     # Standardize main section headings with markdown '## '
     content = re.sub(
-        r"(?:^|\n)\s*(?:##\s*)?1\.\s*(วัตถุประสงค์[^\n]*)", r"\n\n## 1. \1\n\n", content
+        r"(?:^|\n)\s*(?:##\s*)?1\.\s*((?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|ภาพรวม|บทคัดย่อ|จุดประสงค์)[^\n]*)",
+        r"\n\n## 1. \1\n\n",
+        content,
     )
     content = re.sub(
         r"(?:^|\n)\s*(?:##\s*)?2\.\s*(ระเบียบวิธี[^\n]*)", r"\n\n## 2. \1\n\n", content

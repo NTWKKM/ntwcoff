@@ -141,7 +141,10 @@ export const cleanArticleContent = (content: string): string => {
   // Remove mock signature line
   cleaned = cleaned.replace(/\n+ลงชื่อผู้ตรวจสอบรายงาน:[^\n]*/g, '');
   // Standardize ## headings
-  cleaned = cleaned.replace(/(?:^|\n)\s*(?:##\s*)?1\.\s*(วัตถุประสงค์[^\n]*)/g, '\n\n## 1. $1\n\n');
+  cleaned = cleaned.replace(
+    /(?:^|\n)\s*(?:##\s*)?1\.\s*((?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|ภาพรวม|บทคัดย่อ|จุดประสงค์)[^\n]*)/g,
+    '\n\n## 1. $1\n\n'
+  );
   cleaned = cleaned.replace(/(?:^|\n)\s*(?:##\s*)?2\.\s*(ระเบียบวิธี[^\n]*)/g, '\n\n## 2. $1\n\n');
   cleaned = cleaned.replace(/(?:^|\n)\s*(?:##\s*)?3\.\s*(ผลการค้นพบ[^\n]*)/g, '\n\n## 3. $1\n\n');
   cleaned = cleaned.replace(/(?:^|\n)\s*(?:##\s*)?4\.\s*(การนำไปประยุกต์[^\n]*)/g, '\n\n## 4. $1\n\n');
