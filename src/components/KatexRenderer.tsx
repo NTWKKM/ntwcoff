@@ -46,17 +46,19 @@ export const renderWithKatex = (text: string): string => {
 };
 
 export const formatParameters = (text: string): string => {
-  // Format temperature e.g. 4°C, 92°C
-  let res = text.replace(
-    /(?:\b|^)(\d+(?:\.\d+)?\s*°C)(?=[^\w\u0E00-\u0E7F]|$)/g,
-    '<span class="param-badge">$1</span>'
+  const thaiUnits =
+    'ชั่วโมง|ชม\\.|นาที|วินาที|วัน|กรัม|กิโลกรัม|มก\\.|กก\\.|มล\\.|ลิตร|บาร์|ไมครอน|ซม\\.|มม\\.';
+  const engUnits =
+    '°\\s*[CF]|K|%|kHz|Hz|MHz|rpm|ppm|ppb|bar|psi|µm|μm|um|mm|cm|mL|ml|mg\\/[Ll]|mg|kg|g|dB|Agtron';
+  const numPattern =
+    '(?:[~≈≤≥±]|&lt;|&gt;|<|>)?\\s*\\d+(?:\\.\\d+)?(?:\\s*(?:[-–—~]|to|ถึง)\\s*\\d+(?:\\.\\d+)?)*';
+
+  const paramRegex = new RegExp(
+    `(?<![\\w\\u0E00-\\u0E7F])(${numPattern}\\s*(?:(?:${thaiUnits})|(?:(?:${engUnits})(?![a-zA-Z]))))`,
+    'gu'
   );
-  // Format hours/minutes e.g. 24 ชั่วโมง, 6 นาที (explicit boundary for Thai duration units)
-  res = res.replace(
-    /(?:\b|^)(\d+(?:\.\d+)?\s*(?:ชั่วโมง|ชม\.|นาที|วินาที))(?=[^\w\u0E00-\u0E7F]|$)/g,
-    '<span class="param-badge">$1</span>'
-  );
-  return res;
+
+  return text.replace(paramRegex, '<span class="param-badge">$1</span>');
 };
 
 export const escapeSourceText = (text: string, applyParams = false): string => {
@@ -138,8 +140,11 @@ export const cleanArticleContent = (content: string): string => {
   if (m !== -1) {
     cleaned = cleaned.slice(m).trim();
   }
-  // Remove mock signature line
-  cleaned = cleaned.replace(/\n+ลงชื่อผู้ตรวจสอบรายงาน:[^\n]*/g, '');
+  // Remove mock signature / document metadata footer
+  cleaned = cleaned.replace(
+    /\n+(?:ลงชื่อผู้ตรวจสอบรายงาน|สถานที่จัดทำเอกสาร):[^\n]*/g,
+    ''
+  );
   // Standardize ## headings
   cleaned = cleaned.replace(
     /(?:^|\n)\s*(?:##\s*)?1\.\s*((?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|ภาพรวม|บทคัดย่อ|จุดประสงค์)[^\n]*)/g,
@@ -192,7 +197,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
           tableHtml += `<tr>`;
           row.forEach((cell, idx) => {
             const isLabel = idx === 0 && row.length === 2;
-            let formatted = escapeSourceText(cell);
+            let formatted = escapeSourceText(cell, true);
             formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
             formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
             tableHtml += `<td class="${isLabel ? 'markdown-table-label' : ''}">${renderWithKatex(formatted)}</td>`;
