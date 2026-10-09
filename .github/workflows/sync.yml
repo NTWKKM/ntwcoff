@@ -2,9 +2,14 @@ name: Sync Content from Google Drive
 
 on:
   schedule:
-    # รันทุกวันเวลา 12:00 น. เวลาไทย (ICT, UTC+7) = 05:00 UTC
-    - cron: '0 5 * * *'
+    # รันทุกวันเวลา 12:17 น. เวลาไทย (ICT, UTC+7) = 05:17 UTC
+    # ขยับเลี่ยงนาทีที่ 0 เพื่อลดคิวสะสมและความล่าช้าของ GitHub Actions
+    - cron: '17 5 * * *'
   workflow_dispatch:
+
+concurrency:
+  group: sync-gdrive
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -22,6 +27,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install Google API Dependencies
         run: pip install google-api-python-client google-auth
@@ -45,4 +51,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add raw_papers/ src/data/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: sync papers from Google Drive" && git push)
+          if ! git diff --quiet || ! git diff --staged --quiet; then
+            git commit -m "chore: sync papers from Google Drive"
+            git pull --rebase origin main
+            git push
+          fi

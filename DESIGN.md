@@ -114,6 +114,18 @@
   - **Footer Subtitle Removal**: Cleaned the footer brand band by removing the verbose subtitle text.
 - **Rationale**: Elevates the platform from a plain text list into a vibrant, peer-reviewed scientific editorial notebook with effortless scanability and rich visual rhythm.
 
+## ADR-010: Idempotent Daily Content Pipeline, Off-Peak Cron Scheduling, and Resilient Git Push
+
+- **Status**: Accepted
+- **Context**: The scheduled daily GitHub Action (`sync.yml`) was set to `0 5 * * *` (05:00 UTC / 12:00 ICT), experiencing severe runner queue delays (up to 7 hours) due to global top-of-hour contention. Furthermore, `prep_content.py` unconditionally regenerated `taxonomy.lastUpdated` with current timestamps, causing artificial git diffs, redundant daily git commits (`chore: sync papers from Google Drive`), and unnecessary redeployments even when no files in Google Drive changed.
+- **Decision**:
+  - **Off-Peak Cron Scheduling**: Shifted schedule to `17 5 * * *` (12:17 ICT / 05:17 UTC) to avoid top-of-the-hour runner queue saturation on GitHub Actions.
+  - **Single Concurrency Group**: Configured `concurrency: group: sync-gdrive, cancel-in-progress: false` to prevent race conditions between manual dispatches and scheduled triggers.
+  - **Content-Aware Idempotency**: Updated `prep_content.py` to compare compiled papers and taxonomy structures against disk before updating `lastUpdated`. If content is identical, the existing timestamp is preserved, yielding zero git diff and avoiding unnecessary commits and downstream deployments.
+  - **Resilient Rebase Push**: Enforced `git pull --rebase origin main` before `git push` in `sync.yml` to prevent non-fast-forward push rejections if remote `main` advances during job execution.
+- **Rationale**: Eliminates scheduler delays, preserves clean semantic git history without noise commits, and prevents wasted CI/CD runner minutes.
+
+
 
 
 
