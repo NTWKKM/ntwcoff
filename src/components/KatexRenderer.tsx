@@ -45,17 +45,39 @@ export const renderWithKatex = (text: string): string => {
   return result;
 };
 
-export const escapeSourceText = (text: string): string => {
+export const formatParameters = (text: string): string => {
+  // Format temperature e.g. 4°C, 92°C
+  let res = text.replace(
+    /(?:\b|^)(\d+(?:\.\d+)?\s*°C)(?=[^\w\u0E00-\u0E7F]|$)/g,
+    '<span class="param-badge">$1</span>'
+  );
+  // Format hours/minutes e.g. 24 ชั่วโมง, 6 นาที (explicit boundary for Thai duration units)
+  res = res.replace(
+    /(?:\b|^)(\d+(?:\.\d+)?\s*(?:ชั่วโมง|ชม\.|นาที|วินาที))(?=[^\w\u0E00-\u0E7F]|$)/g,
+    '<span class="param-badge">$1</span>'
+  );
+  return res;
+};
+
+export const escapeSourceText = (text: string, applyParams = false): string => {
   const parts: string[] = [];
   let lastIndex = 0;
   const regex = /(\$\$[\s\S]+?\$\$|\$[^\$\n]+?\$)/g;
   let match;
   while ((match = regex.exec(text)) !== null) {
-    parts.push(escapeHtml(text.slice(lastIndex, match.index)));
-    parts.push(match[0]);
+    let nonMath = escapeHtml(text.slice(lastIndex, match.index));
+    if (applyParams) {
+      nonMath = formatParameters(nonMath);
+    }
+    parts.push(nonMath);
+    parts.push(match[0]); // Preserve raw math blocks untouched
     lastIndex = regex.lastIndex;
   }
-  parts.push(escapeHtml(text.slice(lastIndex)));
+  let remaining = escapeHtml(text.slice(lastIndex));
+  if (applyParams) {
+    remaining = formatParameters(remaining);
+  }
+  parts.push(remaining);
   return parts.join('');
 };
 
@@ -110,7 +132,9 @@ export const slugifyHeading = (
 export const cleanArticleContent = (content: string): string => {
   if (!content) return '';
   let cleaned = content.replace(/^\ufeff/, '');
-  const m = cleaned.search(/(?:^|\n)\s*(?:##\s*)?1\.\s*(?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|[^\n]+)/);
+  const m = cleaned.search(
+    /(?:^|\n)\s*(?:##\s*)?1\.\s*(?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|ภาพรวม|บทคัดย่อ|จุดประสงค์)[^\n]*/
+  );
   if (m !== -1) {
     cleaned = cleaned.slice(m).trim();
   }
@@ -123,14 +147,6 @@ export const cleanArticleContent = (content: string): string => {
   cleaned = cleaned.replace(/(?:^|\n)\s*(?:##\s*)?4\.\s*(การนำไปประยุกต์[^\n]*)/g, '\n\n## 4. $1\n\n');
   cleaned = cleaned.replace(/(?:^|\n)\s*(?:###\s*)?(\d+\.\d+)\.?\s+([^\n]+)/g, '\n\n### $1 $2\n\n');
   return cleaned.replace(/\n{3,}/g, '\n\n').trim();
-};
-
-export const formatParameters = (text: string): string => {
-  // Format temperature e.g. 4°C, 92°C
-  let res = text.replace(/\b(\d+(?:\.\d+)?°C)\b/g, '<span class="inline-flex items-center px-1.5 py-0.5 rounded-[6px] bg-dew-drop border border-charcoal/25 text-[12px] font-mono font-medium text-cocoa-ink mx-0.5 shadow-subtle">$1</span>');
-  // Format hours/minutes e.g. 24 ชั่วโมง, 6 นาที
-  res = res.replace(/\b(\d+\s*(?:ชั่วโมง|ชม\.|นาที))\b/g, '<span class="inline-flex items-center px-1.5 py-0.5 rounded-[6px] bg-dew-drop border border-charcoal/25 text-[12px] font-mono font-medium text-cocoa-ink mx-0.5 shadow-subtle">$1</span>');
-  return res;
 };
 
 export const KatexRenderer: React.FC<KatexRendererProps> = ({
@@ -202,7 +218,7 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
       // Blockquotes
       if (line.trim().startsWith('>')) {
         const quoteText = line.trim().replace(/^>\s?/, '');
-        let formatted = escapeSourceText(quoteText);
+        let formatted = escapeSourceText(quoteText, true);
         formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
@@ -234,10 +250,10 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
           processedLines.push(
             `<h2 id="${id}" class="text-xl sm:text-2xl font-gelica font-semibold lowercase mt-12 mb-5 pb-3 border-b-[1.5px] border-charcoal/20 text-cocoa-ink scroll-mt-24 flex items-center justify-between gap-3 flex-wrap">
               <span class="flex items-center gap-3">
-                <span class="inline-flex items-center justify-center w-8 h-8 rounded-[8px] bg-charcoal text-cream-paper text-[13px] font-mono font-bold shrink-0 shadow-subtle">${secNum}</span>
+                <span class="section-number-badge">${secNum}</span>
                 <span>${renderWithKatex(escapeSourceText(secTitle))}</span>
               </span>
-              ${isKeyFindings ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-[20px] bg-marker-orange text-cream-paper text-[11px] font-gelica font-medium shadow-subtle shrink-0">💡 ข้อค้นพบหลัก (Key Findings)</span>` : ''}
+              ${isKeyFindings ? `<span class="key-findings-badge">💡 ข้อค้นพบหลัก (Key Findings)</span>` : ''}
             </h2>`
           );
         } else {
@@ -261,36 +277,36 @@ export const KatexRenderer: React.FC<KatexRendererProps> = ({
       } else if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) {
         // Bullet points
         const text = line.trim().replace(/^[\*\-]\s+/, '');
-        let formatted = escapeSourceText(text);
+        let formatted = escapeSourceText(text, true);
         formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
           `<li class="ml-5 list-disc my-2 text-charcoal font-geist leading-relaxed">${renderWithKatex(
-            formatParameters(formatted)
+            formatted
           )}</li>`
         );
       } else if (/^\d+\.\s/.test(line.trim())) {
         // Numbered list
         const text = line.trim().replace(/^\d+\.\s/, '');
-        let formatted = escapeSourceText(text);
+        let formatted = escapeSourceText(text, true);
         formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         processedLines.push(
           `<li class="ml-5 list-decimal my-2 text-charcoal font-geist leading-relaxed">${renderWithKatex(
-            formatParameters(formatted)
+            formatted
           )}</li>`
         );
       } else if (line.trim().length === 0) {
         processedLines.push(`<div class="h-2"></div>`);
       } else {
         // Normal paragraph
-        let formatted = escapeSourceText(line);
+        let formatted = escapeSourceText(line, true);
         formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-cocoa-ink">$1</strong>');
         formatted = formatted.replace(/\*([^*]+)\*/g, '<em class="italic text-charcoal/80">$1</em>');
         
         processedLines.push(
           `<p class="my-4 text-charcoal font-geist text-pretty leading-relaxed">${renderWithKatex(
-            formatParameters(formatted)
+            formatted
           )}</p>`
         );
       }

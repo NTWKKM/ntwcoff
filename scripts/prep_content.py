@@ -199,9 +199,10 @@ def extract_metadata(text: str, slug: str = "") -> dict:
 
 def clean_paper_content(content: str) -> str:
     content = content.lstrip("\ufeff")
-    # Find start of section 1
+    # Find start of section 1 (restrict to genuine first-section headings, avoiding arbitrary numbered items)
     m = re.search(
-        r"(?:^|\n)\s*(?:##\s*)?1\.\s*(?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|[^\n]+)", content
+        r"(?:^|\n)\s*(?:##\s*)?1\.\s*(?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|ภาพรวม|บทคัดย่อ|จุดประสงค์)[^\n]*",
+        content,
     )
     if m:
         content = content[m.start() :].strip()
@@ -241,6 +242,9 @@ def parse_paper(file_path: Path):
     # Extract metadata from table / bullets / tabs
     meta = extract_metadata(content, slug)
 
+    # Clean body content to strip redundant preamble metadata
+    cleaned_body = clean_paper_content(content)
+
     # Extract Date
     date_str = meta.get("dateFromFilename", "")
     if not date_str:
@@ -274,36 +278,35 @@ def parse_paper(file_path: Path):
     if header_match:
         doc_header = header_match.group(1).strip()
 
-    # Extract Excerpt (from Section 1)
+    # Extract Excerpt (derived from Section 1 of cleaned_body)
     excerpt = ""
     sec1_match = re.search(
         r"(?:##\s*)?1\.\s*วัตถุประสงค์และที่มาของงานวิจัย\s*\n\s*(.+?)(?=\n\n|\n\d\.|\n##)",
-        content,
+        cleaned_body,
         re.DOTALL,
     )
     if sec1_match:
         cleaned = re.sub(r"[*_#]", "", sec1_match.group(1)).strip()
         excerpt = cleaned[:240] + ("..." if len(cleaned) > 240 else "")
     else:
-        # Fallback excerpt: first substantial paragraph
-        paragraphs = [p.strip() for p in content.split("\n\n") if len(p.strip()) > 80]
+        # Fallback excerpt: first substantial paragraph of cleaned_body
+        paragraphs = [
+            p.strip() for p in cleaned_body.split("\n\n") if len(p.strip()) > 80
+        ]
         if paragraphs:
             cleaned = re.sub(r"[*_#]", "", paragraphs[0]).strip()
             excerpt = cleaned[:240] + ("..." if len(cleaned) > 240 else "")
 
-    # Auto-Tagging
+    # Auto-Tagging (searches full content so no metadata keywords are missed)
     content_lower = content.lower()
     matched_tags = []
     for tag, keywords in TAXONOMY_RULES.items():
         if any(kw.lower() in content_lower for kw in keywords):
             matched_tags.append(tag)
 
-    # Word count and reading time
-    word_count = len(re.findall(r"\w+", content))
+    # Word count and reading time (derived from cleaned_body so removed preamble text is excluded)
+    word_count = len(re.findall(r"\w+", cleaned_body))
     reading_time = max(1, round(word_count / 180))
-
-    # Clean body content to strip redundant preamble metadata
-    cleaned_body = clean_paper_content(content)
 
     return {
         "id": slug,

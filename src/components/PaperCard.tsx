@@ -67,7 +67,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 
   return (
     <article
-      className={`group relative flex flex-col justify-between rounded-[12px] bg-cream-paper border-[1.5px] border-charcoal p-6 sm:p-8 shadow-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden ${
+      className={`group relative flex flex-col justify-between rounded-[12px] bg-cream-paper border-[1.5px] border-charcoal p-6 sm:p-8 shadow-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 motion-reduce:transform-none motion-reduce:transition-none overflow-hidden ${
         isDeferred ? 'paper-card-deferred' : ''
       }`}
     >
