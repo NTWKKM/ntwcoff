@@ -392,26 +392,56 @@ def main():
 
     # Sort tags by frequency
     sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
-
-    taxonomy = {
-        "lastUpdated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "totalPapers": len(papers),
-        "categories": category_counts,
-        "tags": [{"name": t, "count": c} for t, c in sorted_tags],
-    }
+    tags_list = [{"name": t, "count": c} for t, c in sorted_tags]
 
     papers_file = data_dir / "papers.json"
     taxonomy_file = data_dir / "taxonomy.json"
 
-    papers_file.write_text(
-        json.dumps(papers, ensure_ascii=False, indent=2), encoding="utf-8"
+    # Check if content has actually changed compared to existing files
+    new_papers_json = json.dumps(papers, ensure_ascii=False, indent=2)
+    papers_changed = True
+    if papers_file.exists():
+        try:
+            if papers_file.read_text(encoding="utf-8") == new_papers_json:
+                papers_changed = False
+        except Exception:
+            papers_changed = True
+
+    existing_taxonomy = {}
+    if taxonomy_file.exists():
+        try:
+            existing_taxonomy = json.loads(taxonomy_file.read_text(encoding="utf-8"))
+        except Exception:
+            existing_taxonomy = {}
+
+    tax_changed = (
+        existing_taxonomy.get("totalPapers") != len(papers)
+        or existing_taxonomy.get("categories") != category_counts
+        or existing_taxonomy.get("tags") != tags_list
     )
+
+    # Preserve lastUpdated timestamp if content is identical (prevents empty daily commits)
+    if not papers_changed and not tax_changed and existing_taxonomy.get("lastUpdated"):
+        last_updated = existing_taxonomy["lastUpdated"]
+    else:
+        last_updated = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+    taxonomy = {
+        "lastUpdated": last_updated,
+        "totalPapers": len(papers),
+        "categories": category_counts,
+        "tags": tags_list,
+    }
+
+    papers_file.write_text(new_papers_json, encoding="utf-8")
     taxonomy_file.write_text(
         json.dumps(taxonomy, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
     print(f"\n✨ Generated {papers_file} with {len(papers)} unique papers.")
     print(f"✨ Generated {taxonomy_file} with {len(taxonomy['tags'])} unique tags.")
+    if not papers_changed and not tax_changed:
+        print("ℹ️ Content unchanged. Preserved lastUpdated timestamp (idempotent run).")
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@
 ```
 [Google Drive Folder]
         │
-        │ (Daily 12:00 ICT / 05:00 UTC via Service Account)
+        │ (Daily 12:17 ICT / 05:17 UTC via Service Account)
         ▼
 [scripts/sync_drive.py] ──▶ saves to ──▶ [raw_papers/*.md]
                                                │
@@ -63,7 +63,9 @@
 - **Git Versioned Storage**: `raw_papers/` and `src/data/` capture paper updates in Git commits.
 - **Decoupled Workflows**:
    1. **`.github/workflows/sync.yml` (`Sync Content from Google Drive`)**:
-      - Dedicated Google Drive sync & content pipeline. Runs daily at 12:00 ICT (05:00 UTC) or on manual trigger. Commits updated papers and pushes to `main`.
+      - Dedicated Google Drive sync & content pipeline. Runs daily at 12:17 ICT (05:17 UTC, avoiding top-of-hour GitHub Actions congestion) or on manual trigger.
+      - Enforces single concurrency (`group: sync-gdrive`) and resilient `git pull --rebase` pushes.
+      - Runs idempotent content preparation in `scripts/prep_content.py` that preserves `taxonomy.lastUpdated` when content is unchanged, preventing redundant daily commits and zero-change deployments.
    2. **`.github/workflows/deploy.yml` (`Deploy Web Application to GitHub Pages`)**:
       - Dedicated Vite build and GitHub Pages deployment.
       - Triggers immediately on `push: branches: [main]`, manual `workflow_dispatch`, and reactively upon completion of `Sync Content from Google Drive` via `workflow_run`.
