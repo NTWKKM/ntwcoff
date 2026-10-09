@@ -5,7 +5,7 @@
 ```
 [Google Drive Folder]
         │
-        │ (Daily 12:00 ICT / 05:00 UTC via Service Account)
+        │ (Daily 12:17 ICT / 05:17 UTC via Service Account)
         ▼
 [scripts/sync_drive.py] ──▶ saves to ──▶ [raw_papers/*.md]
                                                │
