@@ -207,8 +207,8 @@ def clean_paper_content(content: str) -> str:
     if m:
         content = content[m.start() :].strip()
 
-    # Remove mock signature at bottom
-    content = re.sub(r"\n+ลงชื่อผู้ตรวจสอบรายงาน:[^\n]*", "", content)
+    # Remove mock signature / metadata at bottom
+    content = re.sub(r"\n+(?:ลงชื่อผู้ตรวจสอบรายงาน|สถานที่จัดทำเอกสาร):[^\n]*", "", content)
 
     # Standardize main section headings with markdown '## '
     content = re.sub(
