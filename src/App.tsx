@@ -9,9 +9,66 @@ import { PaperCard } from './components/PaperCard';
 import { SearchX, Sparkles } from 'lucide-react';
 
 // Code-split PaperReader & KaTeX engine to drastically reduce initial payload
-const PaperReader = React.lazy(() =>
-  import('./components/PaperReader').then((m) => ({ default: m.PaperReader }))
-);
+const loadPaperReader = () =>
+  import('./components/PaperReader').then((m) => ({ default: m.PaperReader }));
+
+let PaperReader = React.lazy(loadPaperReader);
+
+interface PaperReaderErrorBoundaryProps {
+  children: React.ReactNode;
+  onRetry: () => void;
+}
+
+interface PaperReaderErrorBoundaryState {
+  hasError: boolean;
+}
+
+class PaperReaderErrorBoundary extends React.Component<
+  PaperReaderErrorBoundaryProps,
+  PaperReaderErrorBoundaryState
+> {
+  constructor(props: PaperReaderErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Failed to load PaperReader chunk:', error, errorInfo);
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false });
+    this.props.onRetry();
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <aside
+          role="alert"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-50 max-w-md bg-cream-paper text-charcoal border-[1.5px] border-charcoal p-4 rounded-[12px] shadow-card flex items-center justify-between gap-4 animate-fadeIn"
+        >
+          <div className="text-[13px]">
+            <p className="font-semibold text-charcoal">ไม่สามารถโหลดเนื้อหางานวิจัยได้</p>
+            <p className="text-charcoal/70">โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</p>
+          </div>
+          <button
+            onClick={this.handleRetry}
+            className="superr-pill-btn !py-1.5 !px-3 !text-[12px] shrink-0"
+          >
+            ลองใหม่อีกครั้ง
+          </button>
+        </aside>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const papersData = rawPapers as Paper[];
 const taxonomyData = rawTaxonomy as Taxonomy;
@@ -33,6 +90,14 @@ export const App: React.FC = () => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
 
+  // Key to force reload/remount of lazy PaperReader on error retry
+  const [readerRetryKey, setReaderRetryKey] = useState(0);
+
+  const handleRetryReader = () => {
+    PaperReader = React.lazy(loadPaperReader);
+    setReaderRetryKey((prev) => prev + 1);
+  };
+
   // Focus restoration ref for accessibility
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
 
@@ -52,7 +117,12 @@ export const App: React.FC = () => {
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      const saved = localStorage.getItem('ntwcoff_theme');
+      let saved: string | null = null;
+      try {
+        saved = localStorage.getItem('ntwcoff_theme');
+      } catch {
+        // Storage access may be restricted (e.g. private browsing); treat as no saved preference
+      }
       if (!saved) {
         setIsDark(e.matches);
       }
@@ -211,14 +281,16 @@ export const App: React.FC = () => {
         </section>
       </main>
 
-      {/* Lazy-loaded Paper Reader Modal wrapped in Suspense */}
-      <Suspense fallback={null}>
-        <PaperReader
-          paper={selectedPaper}
-          onClose={handleCloseReader}
-          onTagClick={(tag) => setSelectedTag(tag)}
-        />
-      </Suspense>
+      {/* Lazy-loaded Paper Reader Modal wrapped in Error Boundary and Suspense */}
+      <PaperReaderErrorBoundary key={readerRetryKey} onRetry={handleRetryReader}>
+        <Suspense fallback={null}>
+          <PaperReader
+            paper={selectedPaper}
+            onClose={handleCloseReader}
+            onTagClick={(tag) => setSelectedTag(tag)}
+          />
+        </Suspense>
+      </PaperReaderErrorBoundary>
 
       {/* Superr Footer Brand Band: Marker Orange (#ff6f1e) with 56px Top Border Radius */}
       <footer className="w-full bg-marker-orange text-charcoal rounded-t-[56px] pt-10 pb-8 px-6 sm:px-10 mt-auto transition-colors shadow-card">

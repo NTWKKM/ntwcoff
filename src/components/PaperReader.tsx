@@ -77,16 +77,6 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
     };
   }, []);
 
-  // Keyboard shortcut: Escape to close
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
 
   // Reset scroll and progress when paper changes
   useEffect(() => {
@@ -126,6 +116,9 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
     const container = scrollContainerRef.current;
     if (!container || !paper || tocItems.length === 0) return;
 
+    const topOffsetPx = Math.round(container.clientHeight * 0.05);
+    const bottomOffsetPx = Math.round(container.clientHeight * 0.65);
+
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting);
@@ -136,7 +129,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
       },
       {
         root: container,
-        rootMargin: '-5% 0px -65% 0px',
+        rootMargin: `-${topOffsetPx}px 0px -${bottomOffsetPx}px 0px`,
         threshold: [0, 0.5, 1.0],
       }
     );
@@ -149,9 +142,20 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
     return () => observer.disconnect();
   }, [tocItems, paper?.id]);
 
-  // Track scroll progress with RAF fallback (only active when CSS scroll-timeline is not supported)
+  // Track scroll progress with RAF fallback (only active when CSS scroll-timeline is not supported or reduced motion requested)
   const handleScroll = () => {
-    if (typeof CSS !== 'undefined' && CSS.supports && CSS.supports('animation-timeline', 'scroll()')) {
+    const isCssProgressActive =
+      typeof CSS !== 'undefined' &&
+      typeof CSS.supports === 'function' &&
+      (CSS.supports('(animation-timeline: --reader-scroll) and (timeline-scope: --reader-scroll)') ||
+        (CSS.supports('animation-timeline', '--reader-scroll') && CSS.supports('timeline-scope', '--reader-scroll')));
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (isCssProgressActive && !prefersReducedMotion) {
       return;
     }
 
@@ -169,8 +173,6 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
       }
     });
   };
-
-  if (!paper) return null;
 
   // Handle native cancel event (e.g. Esc key pressed on modal)
   const handleCancel = (e: React.SyntheticEvent) => {
@@ -200,6 +202,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
   };
 
   const copyCitation = () => {
+    if (!paper) return;
     const citation = `${paper.authors || 'Unknown'} (${paper.date || '2026'}). ${paper.title}. ${paper.journal || ''}.`;
     navigator.clipboard.writeText(citation);
     setCopied(true);
@@ -236,13 +239,13 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
       onCancel={handleCancel}
       {...({ closedby: 'any' } as any)}
       className="reader-dialog animate-fadeIn"
-      aria-labelledby="reader-dialog-title"
+      aria-labelledby={paper ? 'reader-dialog-title' : undefined}
     >
-      {/* Modal Dialog Card — Superr Schoolyard Notebook Canvas */}
-      <div
-        ref={modalContentRef}
-        className="reader-modal-card bg-cream-paper text-charcoal w-full rounded-none sm:rounded-[16px] border-[1.5px] border-charcoal flex flex-col max-h-screen sm:max-h-[94vh] overflow-hidden shadow-card relative"
-      >
+      {paper && (
+        <div
+          ref={modalContentRef}
+          className="reader-modal-card bg-cream-paper text-charcoal w-full rounded-none sm:rounded-[16px] border-[1.5px] border-charcoal flex flex-col max-h-screen sm:max-h-[94vh] overflow-hidden shadow-card relative"
+        >
         {/* Native Scroll Progress Indicator in Marker Orange */}
         <div
           aria-hidden="true"
@@ -560,6 +563,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
         </div>
 
       </div>
+      )}
     </dialog>
   );
 };

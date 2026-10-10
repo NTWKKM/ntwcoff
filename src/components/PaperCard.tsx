@@ -57,7 +57,9 @@ const getCategoryTheme = (category: string) => {
 
 const prefetchReader = () => {
   // Speculatively load lazy PaperReader chunk into memory so click opens instantly
-  import('./PaperReader');
+  import('./PaperReader').catch(() => {
+    // Ignore speculative prefetch failures; App's real loading path handles errors
+  });
 };
 
 export const PaperCard: React.FC<PaperCardProps> = ({

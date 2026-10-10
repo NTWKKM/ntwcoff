@@ -10,10 +10,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('src/data/papers.json')) {
+          const normalizedId = id.replace(/\\/g, '/');
+          if (normalizedId.includes('src/data/papers.json')) {
             return 'papers-data';
           }
-          if (id.includes('node_modules/lucide-react')) {
+          if (normalizedId.includes('node_modules/lucide-react')) {
             return 'lucide-icons';
           }
         },
