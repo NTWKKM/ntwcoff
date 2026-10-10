@@ -1,44 +1,50 @@
 {
-  "lastUpdated": "2026-10-09T06:10:20.659622+00:00",
-  "totalPapers": 35,
+  "lastUpdated": "2026-10-10T11:07:16.935860+00:00",
+  "totalPapers": 37,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction Science)": 9,
     "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)": 9,
     "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 8,
     "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)": 8,
-    "เคมีและอุณหพลศาสตร์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 1
+    "เคมีและอุณหพลศาสตร์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 1,
+    "การแปรรูปสารกาแฟและการหมัก (Coffee Processing & Microbial Fermentation)": 1,
+    "การชงและการสกัด (Brewing & Extraction Science)": 1
   },
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 33
+      "count": 35
     },
     {
       "name": "RoastingChemistry",
-      "count": 31
+      "count": 32
     },
     {
       "name": "SensoryScience",
-      "count": 27
+      "count": 29
     },
     {
       "name": "Extraction",
-      "count": 25
+      "count": 26
     },
     {
       "name": "CoffeeBody",
-      "count": 22
+      "count": 24
     },
     {
       "name": "Phenolics",
-      "count": 12
+      "count": 13
     },
     {
       "name": "Q-Grader",
-      "count": 12
+      "count": 13
     },
     {
       "name": "KineticModeling",
+      "count": 13
+    },
+    {
+      "name": "GrindingPhysics",
       "count": 12
     },
     {
@@ -46,7 +52,7 @@
       "count": 11
     },
     {
-      "name": "GrindingPhysics",
+      "name": "Fermentation",
       "count": 11
     },
     {
@@ -54,16 +60,12 @@
       "count": 10
     },
     {
-      "name": "Fermentation",
+      "name": "FT-ICR-MS",
       "count": 10
     },
     {
-      "name": "FT-ICR-MS",
-      "count": 9
-    },
-    {
       "name": "Astringency",
-      "count": 8
+      "count": 9
     },
     {
       "name": "WaterChemistry",
