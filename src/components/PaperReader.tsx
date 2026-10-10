@@ -35,6 +35,10 @@ interface TocItem {
   level: number;
 }
 
+const closedByAttr: React.DialogHTMLAttributes<HTMLDialogElement> = {
+  closedby: 'any',
+};
+
 export const PaperReader: React.FC<PaperReaderProps> = ({
   paper,
   onClose,
@@ -237,7 +241,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
       ref={dialogRef}
       onClick={handleDialogClick}
       onCancel={handleCancel}
-      {...({ closedby: 'any' } as any)}
+      {...closedByAttr}
       className="reader-dialog animate-fadeIn"
       aria-labelledby={paper ? 'reader-dialog-title' : undefined}
     >

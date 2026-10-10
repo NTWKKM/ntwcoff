@@ -12,8 +12,6 @@ import { SearchX, Sparkles } from 'lucide-react';
 const loadPaperReader = () =>
   import('./components/PaperReader').then((m) => ({ default: m.PaperReader }));
 
-let PaperReader = React.lazy(loadPaperReader);
-
 interface PaperReaderErrorBoundaryProps {
   children: React.ReactNode;
   onRetry: () => void;
@@ -51,7 +49,7 @@ class PaperReaderErrorBoundary extends React.Component<
         <aside
           role="alert"
           aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 max-w-md bg-cream-paper text-charcoal border-[1.5px] border-charcoal p-4 rounded-[12px] shadow-card flex items-center justify-between gap-4 animate-fadeIn"
+          className="fixed bottom-6 right-6 z-50 max-w-md bg-cream-paper text-charcoal border-[1.5px] border-charcoal p-4 rounded-[12px] shadow-card flex items-center justify-between gap-4 motion-safe:animate-fadeIn"
         >
           <div className="text-[13px]">
             <p className="font-semibold text-charcoal">ไม่สามารถโหลดเนื้อหางานวิจัยได้</p>
@@ -90,11 +88,14 @@ export const App: React.FC = () => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
 
-  // Key to force reload/remount of lazy PaperReader on error retry
+  // Lazy component state & key to force reload/remount of PaperReader on error retry
+  const [PaperReaderComponent, setPaperReaderComponent] = useState(() =>
+    React.lazy(loadPaperReader)
+  );
   const [readerRetryKey, setReaderRetryKey] = useState(0);
 
   const handleRetryReader = () => {
-    PaperReader = React.lazy(loadPaperReader);
+    setPaperReaderComponent(() => React.lazy(loadPaperReader));
     setReaderRetryKey((prev) => prev + 1);
   };
 
@@ -284,7 +285,7 @@ export const App: React.FC = () => {
       {/* Lazy-loaded Paper Reader Modal wrapped in Error Boundary and Suspense */}
       <PaperReaderErrorBoundary key={readerRetryKey} onRetry={handleRetryReader}>
         <Suspense fallback={null}>
-          <PaperReader
+          <PaperReaderComponent
             paper={selectedPaper}
             onClose={handleCloseReader}
             onTagClick={(tag) => setSelectedTag(tag)}
