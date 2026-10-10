@@ -125,6 +125,20 @@
   - **Resilient Rebase Push**: Enforced `git pull --rebase origin main` before `git push` in `sync.yml` to prevent non-fast-forward push rejections if remote `main` advances during job execution.
 - **Rationale**: Eliminates scheduler delays, preserves clean semantic git history without noise commits, and prevents wasted CI/CD runner minutes.
 
+## ADR-011: Multi-Dimensional Modern Web Optimization & Ergonomics
+
+- **Status**: Accepted
+- **Context**: The web application was audited to maximize all dimensions (payload size, Core Web Vitals, native browser APIs, accessibility, and theme handling). Initial bundle size was 1,058 kB due to monolithic bundling of KaTeX and full paper contents, the reader modal used custom `div` overlays without top-layer semantics or focus trapping, dark mode suffered from initial paint flash (FOUC), and the TOC scrollspy suffered from layout thrashing loops on every scroll event.
+- **Decision**:
+  - **Dynamic Code-Splitting**: Code-split `PaperReader` via `React.lazy` with `<Suspense>`, and configured Vite Rollup `manualChunks` to isolate `papers-data` (602 kB), `lucide-icons` (17 kB), and lazy reader (280 kB). Reduced the critical application entry chunk from 1,058 kB down to 161 kB (51 kB gzip).
+  - **Speculative Prefetching**: Equipped `PaperCard` with `onMouseEnter` / `onFocus` dynamic `import('./PaperReader')` triggers to eliminate perceived latency when opening monographs.
+  - **Native `<dialog closedby="any">` Top Layer**: Migrated the modal from a bespoke fixed `div` to HTML standard `<dialog closedby="any">` opened via `.showModal()`. Leverages native top-layer isolation, native keyboard focus trap, native Esc dismissal, and native `::backdrop` styling with Safari click-boundary fallback.
+  - **Zero-FOUC Theme Architecture**: Declared `<meta name="color-scheme" content="light dark">`, paired with an inline synchronous head script that checks `localStorage` or `matchMedia('(prefers-color-scheme: dark)')` prior to first paint. Bound `:root { color-scheme: light dark; }` to automatically adapt native browser scrollbars and inputs.
+  - **Decoupled IntersectionObserver Scrollspy**: Replaced the per-scroll `getBoundingClientRect()` loop with an `IntersectionObserver` root-scoped to the reader scroll container. Gated JS scroll progress calculations behind `!CSS.supports('animation-timeline', 'scroll()')` wrapped in `requestAnimationFrame`.
+  - **WCAG Accessibility & Landmark Semantics**: Added skip-to-main-content keyboard link, wrapped search in accessible `<form role="search">` with screen-reader `<label>`, added `aria-pressed` to filter tabs/keywords, and added `aria-live="polite"` to filter result counts.
+- **Rationale**: Elevates web performance, accessibility, and modern standard conformance to the highest tier while strictly preserving the Superr Schoolyard Notebook aesthetics and reading ergonomics.
+
+
 
 
 

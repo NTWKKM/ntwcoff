@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: light dark;
+
   /* Superr Design System Tokens */
   --color-cream-paper: #fdfbf9;
   --color-charcoal: #171717;
@@ -393,3 +395,33 @@
 .animate-fadeIn {
   animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Native <dialog> Modal & Backdrop (Top Layer per modern-web-guidance) */
+dialog.reader-dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  max-width: 72rem; /* max-w-6xl */
+  width: calc(100% - 2rem);
+  margin: auto;
+  overflow: visible;
+  outline: none;
+}
+
+dialog.reader-dialog::backdrop {
+  background-color: rgba(23, 23, 23, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+@media (max-width: 640px) {
+  dialog.reader-dialog {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    margin: 0;
+  }
+}
+

@@ -64,28 +64,40 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           สมุดบันทึกและพอร์ทัลวิจัยวิทยาศาสตร์กาแฟเชิงลึก — อุณหพลศาสตร์การคั่ว จลนศาสตร์เคมี 5-HMF/Acrylamide และสัมผัส Oral Tribology จากงานวิจัย Peer-Reviewed
         </p>
 
-        {/* Search Input: 8px radius, 1.5px Charcoal border, Dew Drop background */}
-        <div className="w-full max-w-xl mb-7">
+        {/* Accessible Search Form: 8px radius, 1.5px Charcoal border, Dew Drop background */}
+        <form
+          role="search"
+          onSubmit={(e) => e.preventDefault()}
+          className="w-full max-w-xl mb-7"
+        >
+          <label htmlFor="paper-search" className="sr-only">
+            ค้นหางานวิจัย (5-HMF, Acrylamide, Melanoidins, Astringency)
+          </label>
           <div className="relative flex items-center">
-            <Search className="w-4 h-4 text-charcoal/60 absolute left-4 pointer-events-none" />
+            <Search className="w-4 h-4 text-charcoal/60 absolute left-4 pointer-events-none" aria-hidden="true" />
             <input
-              type="text"
+              id="paper-search"
+              type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหางานวิจัย (5-HMF, Acrylamide, Melanoidins, Astringency)..."
+              autoComplete="off"
+              spellCheck={false}
               className="w-full pl-11 pr-11 py-3 rounded-[8px] bg-dew-drop border-[1.5px] border-charcoal text-charcoal placeholder:text-charcoal/50 text-[14px] font-geist focus:outline-none focus:ring-2 focus:ring-marker-orange/40 shadow-subtle transition-all"
             />
             {searchQuery && (
               <button
+                type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute right-3.5 p-1 rounded-[6px] text-charcoal/60 hover:text-charcoal transition-colors"
                 title="ล้างคำค้นหา"
+                aria-label="ล้างคำค้นหา"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
-        </div>
+        </form>
 
         {/* Superr Pill Action Buttons: Cream Fill + 1.5px Charcoal border + 20px radius */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-8">

@@ -7,6 +7,35 @@
     <title>NTWK Coffee Science — Schoolyard Research Notebook</title>
     <meta name="description" content="Warm schoolyard notebook research portal for coffee science — A cream page, an orange marker uncapped, and deep scientific monographs." />
     
+    <!-- Color Scheme & Theme Color for Mobile Browser Chrome -->
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fdfbf9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#191614" media="(prefers-color-scheme: dark)" />
+
+    <!-- Open Graph & Social Cards -->
+    <meta property="og:title" content="NTWK Coffee Science — Schoolyard Research Notebook" />
+    <meta property="og:description" content="Warm schoolyard notebook research portal for coffee science — A cream page, an orange marker uncapped, and deep scientific monographs." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="th_TH" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NTWK Coffee Science — Schoolyard Research Notebook" />
+    <meta name="twitter:description" content="Warm schoolyard notebook research portal for coffee science — A cream page, an orange marker uncapped, and deep scientific monographs." />
+
+    <!-- Zero-FOUC Theme Script (executes before paint to prevent white flash) -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('ntwcoff_theme');
+          var isDark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    
     <!-- Google Fonts: Fraunces, Plus Jakarta Sans, Inter, Sarabun, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -35,6 +35,10 @@ interface TocItem {
   level: number;
 }
 
+const closedByAttr: React.DialogHTMLAttributes<HTMLDialogElement> = {
+  closedby: 'any',
+};
+
 export const PaperReader: React.FC<PaperReaderProps> = ({
   paper,
   onClose,
@@ -47,19 +51,36 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState<string>('');
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
+  const rafIdRef = useRef<number | null>(null);
 
-  // Keyboard shortcut: Escape to close
+  // Synchronize native <dialog> open state via showModal()
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (paper) {
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    } else {
+      if (dialog.open) {
+        dialog.close();
+      }
+    }
+  }, [paper]);
+
+  // Clean up RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, []);
+
 
   // Reset scroll and progress when paper changes
   useEffect(() => {
@@ -94,44 +115,98 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
     return items;
   }, [paper]);
 
-  // Track scroll progress and active section in reader
-  const handleScroll = () => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
+  // Scrollspy via IntersectionObserver: watches headings cleanly without layout thrashing
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !paper || tocItems.length === 0) return;
 
-    const scrollTop = el.scrollTop;
-    const scrollHeight = el.scrollHeight - el.clientHeight;
-    if (scrollHeight > 0) {
-      setScrollProgress(Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)));
-    }
+    const topOffsetPx = Math.round(container.clientHeight * 0.05);
+    const bottomOffsetPx = Math.round(container.clientHeight * 0.65);
 
-    // Determine active section for scroll-spy (clears selection if scrolled above all headings)
-    if (tocItems.length > 0) {
-      let currentMatch = '';
-      for (let i = tocItems.length - 1; i >= 0; i--) {
-        const sectionEl = document.getElementById(tocItems[i].id);
-        if (sectionEl) {
-          const rect = sectionEl.getBoundingClientRect();
-          if (rect.top <= 180) {
-            currentMatch = tocItems[i].id;
-            break;
-          }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) {
+          visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          setActiveSection(visible[0].target.id);
         }
+      },
+      {
+        root: container,
+        rootMargin: `-${topOffsetPx}px 0px -${bottomOffsetPx}px 0px`,
+        threshold: [0, 0.5, 1.0],
       }
-      setActiveSection(currentMatch);
+    );
+
+    tocItems.forEach((item) => {
+      const el = document.getElementById(item.id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [tocItems, paper?.id]);
+
+  // Track scroll progress with RAF fallback (only active when CSS scroll-timeline is not supported or reduced motion requested)
+  const handleScroll = () => {
+    const isCssProgressActive =
+      typeof CSS !== 'undefined' &&
+      typeof CSS.supports === 'function' &&
+      (CSS.supports('(animation-timeline: --reader-scroll) and (timeline-scope: --reader-scroll)') ||
+        (CSS.supports('animation-timeline', '--reader-scroll') && CSS.supports('timeline-scope', '--reader-scroll')));
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (isCssProgressActive && !prefersReducedMotion) {
+      return;
     }
+
+    if (rafIdRef.current !== null) return;
+
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      const el = scrollContainerRef.current;
+      if (!el) return;
+
+      const scrollTop = el.scrollTop;
+      const scrollHeight = el.scrollHeight - el.clientHeight;
+      if (scrollHeight > 0) {
+        setScrollProgress(Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)));
+      }
+    });
   };
 
-  if (!paper) return null;
+  // Handle native cancel event (e.g. Esc key pressed on modal)
+  const handleCancel = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    onClose();
+  };
 
-  // Light-dismiss: Click outside modal content box closes the reader
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (modalContentRef.current && !modalContentRef.current.contains(e.target as Node)) {
-      onClose();
+  // Light-dismiss click handler with Safari fallback
+  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    // If closedby is not supported, detect click outside content box
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+      const dialog = dialogRef.current;
+      if (!dialog || e.target !== dialog) return;
+
+      const rect = dialog.getBoundingClientRect();
+      const isInside = (
+        rect.top <= e.clientY &&
+        e.clientY <= rect.top + rect.height &&
+        rect.left <= e.clientX &&
+        e.clientX <= rect.left + rect.width
+      );
+
+      if (!isInside) {
+        onClose();
+      }
     }
   };
 
   const copyCitation = () => {
+    if (!paper) return;
     const citation = `${paper.authors || 'Unknown'} (${paper.date || '2026'}). ${paper.title}. ${paper.journal || ''}.`;
     navigator.clipboard.writeText(citation);
     setCopied(true);
@@ -162,15 +237,19 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
       : 'max-w-[72ch]';
 
   return (
-    <div
-      onClick={handleBackdropClick}
-      className="fixed inset-0 z-50 overflow-y-auto bg-charcoal/45 backdrop-blur-sm flex justify-center p-0 sm:p-4 md:p-6 animate-fadeIn"
+    <dialog
+      ref={dialogRef}
+      onClick={handleDialogClick}
+      onCancel={handleCancel}
+      {...closedByAttr}
+      className="reader-dialog animate-fadeIn"
+      aria-labelledby={paper ? 'reader-dialog-title' : undefined}
     >
-      {/* Modal Dialog Card — Superr Schoolyard Notebook Canvas */}
-      <div
-        ref={modalContentRef}
-        className="reader-modal-card bg-cream-paper text-charcoal w-full max-w-6xl rounded-none sm:rounded-[16px] border-[1.5px] border-charcoal flex flex-col my-auto max-h-screen sm:max-h-[94vh] overflow-hidden shadow-card relative"
-      >
+      {paper && (
+        <div
+          ref={modalContentRef}
+          className="reader-modal-card bg-cream-paper text-charcoal w-full rounded-none sm:rounded-[16px] border-[1.5px] border-charcoal flex flex-col max-h-screen sm:max-h-[94vh] overflow-hidden shadow-card relative"
+        >
         {/* Native Scroll Progress Indicator in Marker Orange */}
         <div
           aria-hidden="true"
@@ -351,7 +430,10 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
                 </div>
 
                 {/* Monograph Title: gelica 600 weight, Cocoa Ink, lowercase */}
-                <h1 className="text-3xl sm:text-4xl md:text-[42px] font-gelica font-semibold lowercase leading-[1.12] text-cocoa-ink tracking-normal text-balance">
+                <h1
+                  id="reader-dialog-title"
+                  className="text-3xl sm:text-4xl md:text-[42px] font-gelica font-semibold lowercase leading-[1.12] text-cocoa-ink tracking-normal text-balance"
+                >
                   {paper.title}
                 </h1>
 
@@ -485,6 +567,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
         </div>
 
       </div>
-    </div>
+      )}
+    </dialog>
   );
 };

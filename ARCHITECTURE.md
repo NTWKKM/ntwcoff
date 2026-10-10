@@ -52,10 +52,19 @@
    - Supports configurable reading font sizes (`sm` 15px, `md` 17px, `lg` 19px) with generous line-height 1.8.
 
 4. **`src/components/PaperReader.tsx`**:
-   - Focus reading experience with capped 65ch–75ch measure, sticky Table of Contents (TOC) sidebar, native Marker Orange scroll progress indicator, and light-dismiss backdrop.
+   - Focus reading experience with capped 65ch–75ch measure, sticky Table of Contents (TOC) sidebar, and native Marker Orange scroll progress indicator.
+   - Built on native HTML `<dialog closedby="any">` with `.showModal()`, `::backdrop` blur, and graceful Safari click-boundary light-dismiss fallback.
+   - Decoupled scrollspy powered by `IntersectionObserver` avoiding main-thread layout thrashing.
+   - Code-split via `React.lazy` to keep the critical initial bundle feather-light.
 
 5. **`src/components/PaperCard.tsx`**:
    - Superr 12px tactile card surfaces on Cream Paper / Dew Drop with top-3 tag curation, 20px pill buttons, and below-the-fold `content-visibility: auto` performance optimization.
+   - Speculative `PaperReader` prefetch on card hover / focus for zero-perceived-latency modal open.
+
+6. **`src/App.tsx` & Build Architecture**:
+   - Vite Rollup chunk optimization isolating `papers-data`, `lucide-icons`, and lazy `PaperReader` chunks.
+   - Zero-FOUC theme initialization with inline head script and `color-scheme: light dark` root property.
+   - Accessible navigation landmarks (`<main id="main-content">`, skip-to-content link, accessible search form, live regions).
 
 ## 3. Data Flow & Decoupled CI/CD Pipelines
 
