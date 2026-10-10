@@ -30,7 +30,7 @@ jobs:
           cache: 'pip'
 
       - name: Install Google API Dependencies
-        run: pip install google-api-python-client google-auth
+        run: pip install -r requirements.txt
 
       - name: Download Files from Google Drive
         env:
