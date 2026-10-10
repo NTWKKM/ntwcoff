@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import rawPapers from './data/papers.json';
 import rawTaxonomy from './data/taxonomy.json';
 import { Paper, Taxonomy } from './types';
@@ -6,17 +6,24 @@ import { Navbar } from './components/Navbar';
 import { HeroBanner } from './components/HeroBanner';
 import { FilterBar } from './components/FilterBar';
 import { PaperCard } from './components/PaperCard';
-import { PaperReader } from './components/PaperReader';
 import { SearchX, Sparkles } from 'lucide-react';
+
+// Code-split PaperReader & KaTeX engine to drastically reduce initial payload
+const PaperReader = React.lazy(() =>
+  import('./components/PaperReader').then((m) => ({ default: m.PaperReader }))
+);
 
 const papersData = rawPapers as Paper[];
 const taxonomyData = rawTaxonomy as Taxonomy;
 
 export const App: React.FC = () => {
-  // Theme state — Defaults to Light Cream Paper per Superr design system
+  // Theme state — Reads persisted preference, defaulting to system preference
   const [isDark, setIsDark] = useState<boolean>(() => {
     const saved = localStorage.getItem('ntwcoff_theme');
     if (saved) return saved === 'dark';
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
     return false;
   });
 
@@ -26,7 +33,10 @@ export const App: React.FC = () => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
 
-  // Sync theme with HTML root class
+  // Focus restoration ref for accessibility
+  const lastActiveElementRef = useRef<HTMLElement | null>(null);
+
+  // Sync theme with HTML root class and system media changes
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) {
@@ -37,6 +47,19 @@ export const App: React.FC = () => {
       localStorage.setItem('ntwcoff_theme', 'light');
     }
   }, [isDark]);
+
+  // Listen to OS system color-scheme changes if not manually overridden in this session
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      const saved = localStorage.getItem('ntwcoff_theme');
+      if (!saved) {
+        setIsDark(e.matches);
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   const toggleTheme = () => setIsDark((prev) => !prev);
 
@@ -59,6 +82,7 @@ export const App: React.FC = () => {
   }, []);
 
   const handleSelectPaper = (paper: Paper) => {
+    lastActiveElementRef.current = document.activeElement as HTMLElement | null;
     setSelectedPaper(paper);
     window.location.hash = `#paper=${encodeURIComponent(paper.slug)}`;
   };
@@ -68,6 +92,10 @@ export const App: React.FC = () => {
     if (window.location.hash.startsWith('#paper=')) {
       history.replaceState('', document.title, window.location.pathname + window.location.search);
     }
+    // Restore focus back to the triggering element
+    setTimeout(() => {
+      lastActiveElementRef.current?.focus();
+    }, 50);
   };
 
   // Filtered papers calculation
@@ -99,7 +127,14 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-cream-paper text-charcoal transition-colors selection:bg-marker-orange/20 selection:text-charcoal">
-      
+      {/* Skip to Main Content Link for Keyboard / Screen Reader Accessibility */}
+      <a
+        href="#catalog"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-marker-orange focus:text-charcoal focus:rounded-[20px] focus:font-gelica focus:shadow-subtle focus:border-[1.5px] focus:border-charcoal focus:outline-none"
+      >
+        ข้ามไปยังเนื้อหาหลัก (Skip to main content)
+      </a>
+
       {/* Global Navigation */}
       <Navbar
         isDark={isDark}
@@ -107,78 +142,83 @@ export const App: React.FC = () => {
         totalPapers={papersData.length}
       />
 
-      {/* Hero Visual Stage */}
-      <HeroBanner
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        totalPapers={papersData.length}
-        totalCategories={categories.length}
-        totalTags={taxonomyData.tags.length}
-      />
+      {/* Main Semantic Landmark */}
+      <main id="main-content" className="flex-1 flex flex-col">
+        {/* Hero Visual Stage */}
+        <HeroBanner
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          totalPapers={papersData.length}
+          totalCategories={categories.length}
+          totalTags={taxonomyData.tags.length}
+        />
 
-      {/* Feature & Catalog Stage: Full-width Dew Drop (#f7efe9) Warm Band with Notebook Dots */}
-      <section id="catalog" className="flex-1 w-full bg-dew-drop bg-notebook-dots border-b-[1.5px] border-charcoal/20 py-10 sm:py-14 transition-colors">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Category & Tag Filter Bar */}
-          <FilterBar
-            categories={categories}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            tags={taxonomyData.tags}
-            selectedTag={selectedTag}
-            setSelectedTag={setSelectedTag}
-            filteredCount={filteredPapers.length}
-            totalCount={papersData.length}
-          />
+        {/* Feature & Catalog Stage: Full-width Dew Drop (#f7efe9) Warm Band with Notebook Dots */}
+        <section id="catalog" className="flex-1 w-full bg-dew-drop bg-notebook-dots border-b-[1.5px] border-charcoal/20 py-10 sm:py-14 transition-colors">
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+            
+            {/* Category & Tag Filter Bar */}
+            <FilterBar
+              categories={categories}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              tags={taxonomyData.tags}
+              selectedTag={selectedTag}
+              setSelectedTag={setSelectedTag}
+              filteredCount={filteredPapers.length}
+              totalCount={papersData.length}
+            />
 
-          {/* Paper Grid — 2-Column Warm Notebook Cards with 12px Radius & Defer Rendering */}
-          {filteredPapers.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-7 mt-4">
-              {filteredPapers.map((paper, index) => (
-                <PaperCard
-                  key={paper.id}
-                  paper={paper}
-                  isDeferred={index >= 4}
-                  onSelect={handleSelectPaper}
-                  onTagClick={(tag) => setSelectedTag(tag)}
-                />
-              ))}
-            </div>
-          ) : (
-            /* Empty Search State */
-            <div className="py-20 text-center max-w-md mx-auto">
-              <div className="w-14 h-14 rounded-[12px] bg-cream-paper border-[1.5px] border-charcoal flex items-center justify-center mx-auto mb-4 text-charcoal shadow-subtle">
-                <SearchX className="w-6 h-6" />
+            {/* Paper Grid — 2-Column Warm Notebook Cards with 12px Radius & Defer Rendering */}
+            {filteredPapers.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-7 mt-4">
+                {filteredPapers.map((paper, index) => (
+                  <PaperCard
+                    key={paper.id}
+                    paper={paper}
+                    isDeferred={index >= 4}
+                    onSelect={handleSelectPaper}
+                    onTagClick={(tag) => setSelectedTag(tag)}
+                  />
+                ))}
               </div>
-              <h3 className="text-xl font-gelica font-semibold lowercase text-cocoa-ink mb-2">
-                no matching research monographs found
-              </h3>
-              <p className="text-sm text-charcoal/80 font-geist mb-6 leading-relaxed">
-                ลองค้นหาด้วยชื่อสารเคมี คำสำคัญ หรือรีเซ็ตตัวกรองเพื่อดูงานวิจัยทั้งหมด
-              </p>
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory(null);
-                  setSelectedTag(null);
-                }}
-                className="superr-pill-btn !py-2 !px-5"
-              >
-                รีเซ็ตตัวกรองทั้งหมด
-              </button>
-            </div>
-          )}
+            ) : (
+              /* Empty Search State */
+              <div className="py-20 text-center max-w-md mx-auto">
+                <div className="w-14 h-14 rounded-[12px] bg-cream-paper border-[1.5px] border-charcoal flex items-center justify-center mx-auto mb-4 text-charcoal shadow-subtle">
+                  <SearchX className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-gelica font-semibold lowercase text-cocoa-ink mb-2">
+                  no matching research monographs found
+                </h3>
+                <p className="text-sm text-charcoal/80 font-geist mb-6 leading-relaxed">
+                  ลองค้นหาด้วยชื่อสารเคมี คำสำคัญ หรือรีเซ็ตตัวกรองเพื่อดูงานวิจัยทั้งหมด
+                </p>
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory(null);
+                    setSelectedTag(null);
+                  }}
+                  className="superr-pill-btn !py-2 !px-5"
+                >
+                  รีเซ็ตตัวกรองทั้งหมด
+                </button>
+              </div>
+            )}
 
-        </div>
-      </section>
+          </div>
+        </section>
+      </main>
 
-      {/* Paper Reader Modal */}
-      <PaperReader
-        paper={selectedPaper}
-        onClose={handleCloseReader}
-        onTagClick={(tag) => setSelectedTag(tag)}
-      />
+      {/* Lazy-loaded Paper Reader Modal wrapped in Suspense */}
+      <Suspense fallback={null}>
+        <PaperReader
+          paper={selectedPaper}
+          onClose={handleCloseReader}
+          onTagClick={(tag) => setSelectedTag(tag)}
+        />
+      </Suspense>
 
       {/* Superr Footer Brand Band: Marker Orange (#ff6f1e) with 56px Top Border Radius */}
       <footer className="w-full bg-marker-orange text-charcoal rounded-t-[56px] pt-10 pb-8 px-6 sm:px-10 mt-auto transition-colors shadow-card">

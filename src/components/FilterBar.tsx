@@ -44,9 +44,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       
       {/* Category Navigation Pills — Schoolyard Segmented Control */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-[1.5px] border-charcoal/15">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none" role="toolbar" aria-label="หมวดหมู่วิทยาศาสตร์">
           <button
             onClick={() => setSelectedCategory(null)}
+            aria-pressed={selectedCategory === null}
             className={`px-4 py-1.5 rounded-[20px] text-[13px] font-gelica transition-all whitespace-nowrap shadow-subtle ${
               selectedCategory === null
                 ? 'bg-charcoal text-cream-paper border-[1.5px] border-charcoal font-medium'
@@ -62,6 +63,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(isSelected ? null : cat)}
+                aria-pressed={isSelected}
                 className={`px-4 py-1.5 rounded-[20px] text-[13px] font-gelica transition-all whitespace-nowrap shadow-subtle ${
                   isSelected
                     ? 'bg-charcoal text-cream-paper border-[1.5px] border-charcoal font-medium'
@@ -74,8 +76,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           })}
         </div>
 
-        {/* Filter Summary Counter */}
-        <div className="text-[13px] text-charcoal/70 font-gelica shrink-0">
+        {/* Filter Summary Counter with live announcement for assistive tech */}
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          className="text-[13px] text-charcoal/70 font-gelica shrink-0"
+        >
           showing {filteredCount} of {totalCount} monographs
         </div>
       </div>
@@ -92,6 +98,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <button
               key={tag.name}
               onClick={() => setSelectedTag(isSelected ? null : tag.name)}
+              aria-pressed={isSelected}
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-[20px] text-[12px] font-geist shadow-subtle transition-all ${
                 isSelected
                   ? 'bg-marker-orange text-cream-paper border-[1.5px] border-charcoal font-medium'

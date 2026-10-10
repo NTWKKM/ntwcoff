@@ -54,6 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme, totalPapers
           {/* Theme Switcher — Superr Pill */}
           <button
             onClick={toggleTheme}
+            aria-pressed={isDark}
             className="px-3 py-1.5 rounded-[20px] text-[13px] text-charcoal bg-cream-paper hover:bg-dew-drop border-[1.5px] border-charcoal shadow-subtle transition-all flex items-center gap-1.5"
             title={isDark ? "Switch to Light Notebook" : "Switch to Dark Notebook"}
             aria-label="Toggle Canvas Theme"

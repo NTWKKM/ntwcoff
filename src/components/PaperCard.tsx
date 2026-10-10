@@ -55,6 +55,11 @@ const getCategoryTheme = (category: string) => {
   };
 };
 
+const prefetchReader = () => {
+  // Speculatively load lazy PaperReader chunk into memory so click opens instantly
+  import('./PaperReader');
+};
+
 export const PaperCard: React.FC<PaperCardProps> = ({
   paper,
   isDeferred = false,
@@ -67,6 +72,8 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 
   return (
     <article
+      onMouseEnter={prefetchReader}
+      onFocus={prefetchReader}
       className={`group relative flex flex-col justify-between rounded-[12px] bg-cream-paper border-[1.5px] border-charcoal p-6 sm:p-8 shadow-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 motion-reduce:transform-none motion-reduce:transition-none overflow-hidden ${
         isDeferred ? 'paper-card-deferred' : ''
       }`}
@@ -159,11 +166,13 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 
         {/* Superr Pill Action Button */}
         <button
+          id={`read-monograph-${paper.id}`}
           onClick={() => onSelect(paper)}
+          aria-label={`อ่านงานวิจัย: ${paper.title}`}
           className="superr-pill-btn !py-1.5 !px-3.5 !text-[13px]"
         >
           <span>read monograph</span>
-          <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
         </button>
       </div>
 
