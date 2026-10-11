@@ -172,10 +172,17 @@ def extract_metadata(text: str, slug: str = "") -> dict:
         metadata["dateFromFilename"] = fn_match.group(1)
         metadata["englishTitle"] = fn_match.group(2).strip()
 
+    # Scope metadata extraction to the header block before Section 1
+    sec1_match = re.search(
+        r"(?:^|\n)\s*(?:##\s*)?1\.\s*(?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|ภาพรวม|บทคัดย่อ|จุดประสงค์)[^\n]*",
+        text,
+    )
+    meta_text = text[: sec1_match.start()] if sec1_match else text
+
     # 2. Markdown Table Pattern
     table_match = re.search(
         r"## ข้อมูลงานวิจัย.*?\n\s*\|[^\n]+\|\s*\n\s*\|[^\n]+\|\s*\n((?:\|[^\n]+\|\s*\n)+)",
-        text,
+        meta_text,
     )
     if table_match:
         rows = table_match.group(1).strip().split("\n")
@@ -187,21 +194,23 @@ def extract_metadata(text: str, slug: str = "") -> dict:
                 _assign_meta(metadata, key, val)
 
     # 3. Bullet Point Pattern: * ชื่อบทความวิจัย: ...
-    bullet_matches = re.findall(r"^[*\-•]\s*([^\n:]+):\s*([^\n]+)", text, re.MULTILINE)
+    bullet_matches = re.findall(
+        r"^[*\-•]\s*([^\n:]+):\s*([^\n]+)", meta_text, re.MULTILINE
+    )
     for k, v in bullet_matches:
         _assign_meta(metadata, k.strip(), v.strip())
 
     # 4. Google Docs plain text / tab format
     gdoc_matches = re.findall(
         r"(ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบัน|หน่วยงาน|วารสารวิชาการ|ลิงก์งานวิจัย|ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year)\s*\n\s*([^\n]+)",
-        text,
+        meta_text,
     )
     for k, v in gdoc_matches:
         _assign_meta(metadata, k.strip(), v.strip())
 
     header_year = re.search(
         r"^(?:ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year):\s*([^\n]+)",
-        text,
+        meta_text,
         re.MULTILINE | re.IGNORECASE,
     )
     if header_year and not metadata.get("publishedYear"):
