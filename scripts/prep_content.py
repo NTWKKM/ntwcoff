@@ -146,19 +146,22 @@ def _assign_meta(meta: dict, key: str, val: str):
     val = val.strip()
     if not val or val == "รายละเอียด":
         return
-    if "ชื่อบทความวิจัย" in key and not meta.get("englishTitle"):
+    k_clean = key.strip()
+    k_lower = k_clean.lower()
+    if "ชื่อบทความวิจัย" in k_clean and not meta.get("englishTitle"):
         meta["englishTitle"] = val
-    elif ("คณะผู้วิจัย" in key or "ผู้วิจัย" in key) and not meta.get("authors"):
+    elif ("คณะผู้วิจัย" in k_clean or "ผู้วิจัย" in k_clean) and not meta.get("authors"):
         meta["authors"] = val
-    elif ("สถาบัน" in key or "หน่วยงาน" in key) and not meta.get("institution"):
+    elif ("สถาบัน" in k_clean or "หน่วยงาน" in k_clean) and not meta.get("institution"):
         meta["institution"] = val
-    elif "วารสารวิชาการ" in key and not meta.get("journal"):
+    elif "วารสารวิชาการ" in k_clean and not meta.get("journal"):
         meta["journal"] = val
-    elif "ลิงก์งานวิจัย" in key and not meta.get("links"):
+    elif "ลิงก์งานวิจัย" in k_clean and not meta.get("links"):
         meta["links"] = val
     elif (
-        any(k in key for k in ["ปีที่ตีพิมพ์", "ปีที่เผยแพร่", "ปีพิมพ์", "ปี"])
-        or any(k in key.lower() for k in ["publication year", "published year", "year"])
+        any(k in k_clean for k in ["ปีที่ตีพิมพ์", "ปีที่เผยแพร่", "ปีพิมพ์"])
+        or k_clean == "ปี"
+        or k_lower in ["publication year", "published year", "year"]
     ) and not meta.get("publishedYear"):
         meta["publishedYear"] = val
 
