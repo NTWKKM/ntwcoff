@@ -146,16 +146,24 @@ def _assign_meta(meta: dict, key: str, val: str):
     val = val.strip()
     if not val or val == "รายละเอียด":
         return
-    if "ชื่อบทความวิจัย" in key and not meta.get("englishTitle"):
+    k_clean = key.strip()
+    k_lower = k_clean.lower()
+    if "ชื่อบทความวิจัย" in k_clean and not meta.get("englishTitle"):
         meta["englishTitle"] = val
-    elif ("คณะผู้วิจัย" in key or "ผู้วิจัย" in key) and not meta.get("authors"):
+    elif ("คณะผู้วิจัย" in k_clean or "ผู้วิจัย" in k_clean) and not meta.get("authors"):
         meta["authors"] = val
-    elif ("สถาบัน" in key or "หน่วยงาน" in key) and not meta.get("institution"):
+    elif ("สถาบัน" in k_clean or "หน่วยงาน" in k_clean) and not meta.get("institution"):
         meta["institution"] = val
-    elif "วารสารวิชาการ" in key and not meta.get("journal"):
+    elif "วารสารวิชาการ" in k_clean and not meta.get("journal"):
         meta["journal"] = val
-    elif "ลิงก์งานวิจัย" in key and not meta.get("links"):
+    elif "ลิงก์งานวิจัย" in k_clean and not meta.get("links"):
         meta["links"] = val
+    elif (
+        any(k in k_clean for k in ["ปีที่ตีพิมพ์", "ปีที่เผยแพร่", "ปีพิมพ์"])
+        or k_clean == "ปี"
+        or k_lower in ["publication year", "published year", "year"]
+    ) and not meta.get("publishedYear"):
+        meta["publishedYear"] = val
 
 
 def extract_metadata(text: str, slug: str = "") -> dict:
@@ -167,10 +175,17 @@ def extract_metadata(text: str, slug: str = "") -> dict:
         metadata["dateFromFilename"] = fn_match.group(1)
         metadata["englishTitle"] = fn_match.group(2).strip()
 
+    # Scope metadata extraction to the header block before Section 1
+    sec1_match = re.search(
+        r"(?:^|\n)\s*(?:##\s*)?1\.\s*(?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|ภาพรวม|บทคัดย่อ|จุดประสงค์)[^\n]*",
+        text,
+    )
+    meta_text = text[: sec1_match.start()] if sec1_match else text
+
     # 2. Markdown Table Pattern
     table_match = re.search(
         r"## ข้อมูลงานวิจัย.*?\n\s*\|[^\n]+\|\s*\n\s*\|[^\n]+\|\s*\n((?:\|[^\n]+\|\s*\n)+)",
-        text,
+        meta_text,
     )
     if table_match:
         rows = table_match.group(1).strip().split("\n")
@@ -182,19 +197,67 @@ def extract_metadata(text: str, slug: str = "") -> dict:
                 _assign_meta(metadata, key, val)
 
     # 3. Bullet Point Pattern: * ชื่อบทความวิจัย: ...
-    bullet_matches = re.findall(r"^[*\-•]\s*([^\n:]+):\s*([^\n]+)", text, re.MULTILINE)
+    bullet_matches = re.findall(
+        r"^[*\-•]\s*([^\n:]+):\s*([^\n]+)", meta_text, re.MULTILINE
+    )
     for k, v in bullet_matches:
         _assign_meta(metadata, k.strip(), v.strip())
 
     # 4. Google Docs plain text / tab format
     gdoc_matches = re.findall(
-        r"(ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบัน|หน่วยงาน|วารสารวิชาการ|ลิงก์งานวิจัย)\s*\n\s*([^\n]+)",
-        text,
+        r"(ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบัน|หน่วยงาน|วารสารวิชาการ|ลิงก์งานวิจัย|ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year)\s*\n\s*([^\n]+)",
+        meta_text,
     )
     for k, v in gdoc_matches:
         _assign_meta(metadata, k.strip(), v.strip())
 
+    header_year = re.search(
+        r"^(?:ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year):\s*([^\n]+)",
+        meta_text,
+        re.MULTILINE | re.IGNORECASE,
+    )
+    if header_year and not metadata.get("publishedYear"):
+        metadata["publishedYear"] = header_year.group(1).strip()
+
     return metadata
+
+
+def extract_published_year(journal_str: str, year_meta_str: str = "") -> int | None:
+    if journal_str:
+        m = re.search(r"\b(19\d{2}|20\d{2})\b", journal_str)
+        if m:
+            return int(m.group(1))
+    if year_meta_str:
+        m = re.search(
+            r"(?:ตีพิมพ์|เผยแพร่|published|year).*?\b(19\d{2}|20\d{2})\b",
+            year_meta_str,
+            re.IGNORECASE,
+        )
+        if m:
+            return int(m.group(1))
+        m = re.search(r"\b(19\d{2}|20\d{2})\b", year_meta_str)
+        if m:
+            return int(m.group(1))
+    return None
+
+
+def normalize_category(cat: str) -> str:
+    c = cat.strip()
+    c_lower = c.lower()
+    if "สกัด" in c or "brewing" in c_lower or "extraction" in c_lower:
+        return "การสกัดและการชง (Brewing & Extraction Science)"
+    if "กลิ่นรส" in c or "sensory" in c_lower or "flavor" in c_lower:
+        return "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)"
+    if "คั่ว" in c or "roasting" in c_lower or "thermodynamics" in c_lower:
+        return "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)"
+    if (
+        "หมัก" in c
+        or "แปรรูป" in c
+        or "fermentation" in c_lower
+        or "processing" in c_lower
+    ):
+        return "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)"
+    return c
 
 
 def clean_paper_content(content: str) -> str:
@@ -263,6 +326,13 @@ def parse_paper(file_path: Path):
         cat_match = re.search(r"หมวดหมู่:\s*([^\n]+)", content)
     if cat_match:
         category = cat_match.group(1).strip()
+    category = normalize_category(category)
+
+    # Extract Published Year from Journal or Publication Year Metadata
+    published_year = extract_published_year(
+        meta.get("journal", ""),
+        meta.get("publishedYear", ""),
+    )
 
     # Title: English research paper title if available, else clean header
     title = meta.get("englishTitle")
@@ -316,6 +386,7 @@ def parse_paper(file_path: Path):
         "title": title,
         "documentHeader": doc_header,
         "date": date_str,
+        "publishedYear": published_year,
         "category": category,
         "authors": meta.get("authors", ""),
         "institution": meta.get("institution", ""),
@@ -378,21 +449,41 @@ def main():
             }
             raw_papers_list.append(paper)
 
+    # Default sort: latest published year first (descending), followed by sync date
+    raw_papers_list.sort(
+        key=lambda p: (
+            p.get("publishedYear") or 0,
+            p.get("date") or "",
+            p.get("title") or "",
+        ),
+        reverse=True,
+    )
+
     papers = raw_papers_list
     category_counts = {}
     tag_counts = {}
+    year_counts = {}
 
     for paper in papers:
         cat = paper["category"]
         category_counts[cat] = category_counts.get(cat, 0) + 1
         for t in paper["tags"]:
             tag_counts[t] = tag_counts.get(t, 0) + 1
+        yr = paper.get("publishedYear")
+        if yr:
+            year_counts[yr] = year_counts.get(yr, 0) + 1
 
-        print(f"📄 Processed: {paper['slug']} -> {len(paper['tags'])} tags assigned")
+        print(
+            f"📄 Processed: {paper['slug']} -> Year: {paper.get('publishedYear')}, {len(paper['tags'])} tags assigned"
+        )
 
     # Sort tags by frequency
     sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
     tags_list = [{"name": t, "count": c} for t, c in sorted_tags]
+
+    # Sort publication years latest first
+    sorted_years = sorted(year_counts.items(), key=lambda x: x[0], reverse=True)
+    years_list = [{"year": y, "count": c} for y, c in sorted_years]
 
     papers_file = data_dir / "papers.json"
     taxonomy_file = data_dir / "taxonomy.json"
@@ -417,6 +508,7 @@ def main():
     tax_changed = (
         existing_taxonomy.get("totalPapers") != len(papers)
         or existing_taxonomy.get("categories") != category_counts
+        or existing_taxonomy.get("years") != years_list
         or existing_taxonomy.get("tags") != tags_list
     )
 
@@ -430,6 +522,7 @@ def main():
         "lastUpdated": last_updated,
         "totalPapers": len(papers),
         "categories": category_counts,
+        "years": years_list,
         "tags": tags_list,
     }
 

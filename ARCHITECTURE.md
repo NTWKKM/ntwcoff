@@ -43,6 +43,8 @@
 
 2. **`scripts/prep_content.py`**:
    - Parses Markdown AST & tables.
+   - Normalizes categories into 4 canonical scientific coffee domains.
+   - Extracts academic publication years (`publishedYear`) from journal citations.
    - Applies deterministic taxonomy keyword matching to assign domain tags.
    - Compiles search index, metadata summary, and reading time.
 
@@ -58,7 +60,7 @@
    - Code-split via `React.lazy` to keep the critical initial bundle feather-light.
 
 5. **`src/components/PaperCard.tsx`**:
-   - Superr 12px tactile card surfaces on Cream Paper / Dew Drop with top-3 tag curation, 20px pill buttons, and below-the-fold `content-visibility: auto` performance optimization.
+   - Superr 12px tactile card surfaces on Cream Paper / Dew Drop with top-3 tag curation, publication year badge (`[ 📅 ปี 2024 ]`), 20px pill buttons, and below-the-fold `content-visibility: auto` performance optimization.
    - Speculative `PaperReader` prefetch on card hover / focus for zero-perceived-latency modal open.
 
 6. **`src/App.tsx` & Build Architecture**:

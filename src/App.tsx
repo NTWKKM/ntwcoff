@@ -85,6 +85,7 @@ export const App: React.FC = () => {
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
 
@@ -101,6 +102,28 @@ export const App: React.FC = () => {
 
   // Focus restoration ref for accessibility
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
+
+  // Helper to extract or read publication year from paper metadata
+  const getPaperYear = (paper: Paper): number => {
+    if (paper.publishedYear) return paper.publishedYear;
+    const m = paper.journal.match(/\b(19\d{2}|20\d{2})\b/);
+    return m ? parseInt(m[1], 10) : 0;
+  };
+
+  // Available publication years with paper counts
+  const availableYears = useMemo(() => {
+    if (taxonomyData.years && taxonomyData.years.length > 0) {
+      return taxonomyData.years;
+    }
+    const counts: Record<number, number> = {};
+    papersData.forEach((p) => {
+      const y = getPaperYear(p);
+      if (y > 0) counts[y] = (counts[y] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([yr, count]) => ({ year: parseInt(yr, 10), count }))
+      .sort((a, b) => b.year - a.year);
+  }, []);
 
   // Sync theme with HTML root class and system media changes
   useEffect(() => {
@@ -169,11 +192,15 @@ export const App: React.FC = () => {
     }, 50);
   };
 
-  // Filtered papers calculation
+  // Filtered and sorted papers calculation: Always latest published year first
   const filteredPapers = useMemo(() => {
-    return papersData.filter((paper) => {
+    const list = papersData.filter((paper) => {
       // Category filter
       if (selectedCategory && paper.category !== selectedCategory) {
+        return false;
+      }
+      // Publication year filter
+      if (selectedYear !== null && getPaperYear(paper) !== selectedYear) {
         return false;
       }
       // Tag filter
@@ -192,7 +219,17 @@ export const App: React.FC = () => {
       }
       return true;
     });
-  }, [searchQuery, selectedCategory, selectedTag]);
+
+    // Always sort by latest published year first (descending)
+    return list.sort((a, b) => {
+      const yearA = getPaperYear(a);
+      const yearB = getPaperYear(b);
+      if (yearB !== yearA) {
+        return yearB - yearA; // Latest year first
+      }
+      return (b.date || '').localeCompare(a.date || '') || a.title.localeCompare(b.title);
+    });
+  }, [searchQuery, selectedCategory, selectedYear, selectedTag]);
 
   const categories = Object.keys(taxonomyData.categories || {});
 
@@ -228,11 +265,14 @@ export const App: React.FC = () => {
         <section id="catalog" className="flex-1 w-full bg-dew-drop bg-notebook-dots border-b-[1.5px] border-charcoal/20 py-10 sm:py-14 transition-colors">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             
-            {/* Category & Tag Filter Bar */}
+            {/* Category & Tag & Year Filter Bar */}
             <FilterBar
               categories={categories}
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
+              years={availableYears}
+              selectedYear={selectedYear}
+              setSelectedYear={setSelectedYear}
               tags={taxonomyData.tags}
               selectedTag={selectedTag}
               setSelectedTag={setSelectedTag}
@@ -250,6 +290,7 @@ export const App: React.FC = () => {
                     isDeferred={index >= 4}
                     onSelect={handleSelectPaper}
                     onTagClick={(tag) => setSelectedTag(tag)}
+                    onYearClick={(year) => setSelectedYear(year)}
                   />
                 ))}
               </div>
@@ -269,6 +310,7 @@ export const App: React.FC = () => {
                   onClick={() => {
                     setSearchQuery('');
                     setSelectedCategory(null);
+                    setSelectedYear(null);
                     setSelectedTag(null);
                   }}
                   className="superr-pill-btn !py-2 !px-5"

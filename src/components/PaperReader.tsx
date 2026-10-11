@@ -207,7 +207,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
 
   const copyCitation = () => {
     if (!paper) return;
-    const citation = `${paper.authors || 'Unknown'} (${paper.date || '2026'}). ${paper.title}. ${paper.journal || ''}.`;
+    const citation = `${paper.authors || 'Unknown'} (${paper.publishedYear || 'n.d.'}). ${paper.title}. ${paper.journal || ''}.`;
     navigator.clipboard.writeText(citation);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -416,10 +416,10 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
                     {paper.category}
                   </span>
 
-                  {paper.date && (
-                    <span className="flex items-center gap-1 text-[12px] text-charcoal/70 font-geist">
-                      <Calendar className="w-3.5 h-3.5 text-charcoal/50" />
-                      {paper.date}
+                  {(paper.publishedYear || paper.journal.match(/\b(19\d{2}|20\d{2})\b/)?.[1]) && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[20px] bg-dew-drop border-[1.5px] border-charcoal/30 text-[12px] font-mono text-cocoa-ink font-semibold">
+                      <Calendar className="w-3.5 h-3.5 text-marker-orange" />
+                      ตีพิมพ์ปี {paper.publishedYear || paper.journal.match(/\b(19\d{2}|20\d{2})\b/)?.[1]}
                     </span>
                   )}
 
@@ -451,6 +451,18 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[13px] font-geist">
+                  {(paper.publishedYear || paper.journal.match(/\b(19\d{2}|20\d{2})\b/)?.[1]) && (
+                    <div className="flex items-start gap-2">
+                      <Calendar className="w-4 h-4 text-marker-orange mt-0.5 shrink-0" />
+                      <div>
+                        <strong className="text-cocoa-ink font-medium">ปีที่เผยแพร่:</strong>
+                        <div className="text-charcoal/80 mt-0.5 font-mono">
+                          {paper.publishedYear || paper.journal.match(/\b(19\d{2}|20\d{2})\b/)?.[1]}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {paper.authors && (
                     <div className="flex items-start gap-2">
                       <GraduationCap className="w-4 h-4 text-marker-orange mt-0.5 shrink-0" />

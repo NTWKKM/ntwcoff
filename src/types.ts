@@ -4,6 +4,7 @@ export interface Paper {
   title: string;
   documentHeader: string;
   date: string;
+  publishedYear: number | null;
   category: string;
   authors: string;
   institution: string;
@@ -16,6 +17,11 @@ export interface Paper {
   content: string;
 }
 
+export interface YearInfo {
+  year: number;
+  count: number;
+}
+
 export interface TagInfo {
   name: string;
   count: number;
@@ -25,5 +31,6 @@ export interface Taxonomy {
   lastUpdated: string;
   totalPapers: number;
   categories: Record<string, number>;
+  years?: YearInfo[];
   tags: TagInfo[];
 }

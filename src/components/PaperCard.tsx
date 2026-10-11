@@ -7,6 +7,7 @@ interface PaperCardProps {
   isDeferred?: boolean;
   onSelect: (paper: Paper) => void;
   onTagClick: (tag: string) => void;
+  onYearClick?: (year: number) => void;
 }
 
 const getCategoryTheme = (category: string) => {
@@ -67,10 +68,17 @@ export const PaperCard: React.FC<PaperCardProps> = ({
   isDeferred = false,
   onSelect,
   onTagClick,
+  onYearClick,
 }) => {
   const topTags = paper.tags.slice(0, 3);
   const remainingTagsCount = Math.max(0, paper.tags.length - 3);
   const theme = getCategoryTheme(paper.category);
+  const publishedYear =
+    paper.publishedYear ||
+    (() => {
+      const m = paper.journal.match(/\b(19\d{2}|20\d{2})\b/);
+      return m ? parseInt(m[1], 10) : undefined;
+    })();
 
   return (
     <article
@@ -84,20 +92,34 @@ export const PaperCard: React.FC<PaperCardProps> = ({
       <div className={`absolute top-0 left-0 right-0 h-[4px] ${theme.topBorder}`} />
 
       <div>
-        {/* Top Category Badge & Micro-metadata */}
+        {/* Top Badges (Category & Published Year) & Micro-metadata */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5 pt-0.5">
-          <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-[20px] border-[1.5px] text-[12px] font-gelica ${theme.badgeBg} ${theme.badgeBorder} ${theme.badgeText} shadow-subtle`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${theme.dotColor}`} />
-            {paper.category}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-[20px] border-[1.5px] text-[12px] font-gelica ${theme.badgeBg} ${theme.badgeBorder} ${theme.badgeText} shadow-subtle`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${theme.dotColor}`} />
+              {paper.category}
+            </span>
+
+            {publishedYear && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onYearClick?.(publishedYear);
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[20px] border-[1.5px] border-charcoal/30 bg-dew-drop hover:bg-cream-paper hover:border-charcoal text-[12px] font-mono font-medium text-cocoa-ink transition-colors shadow-subtle cursor-pointer"
+                title={`คลิกเพื่อกรองงานวิจัยที่เผยแพร่ปี ${publishedYear}`}
+                aria-label={`งานวิจัยเผยแพร่ปี ${publishedYear}`}
+              >
+                <Calendar className="w-3 h-3 text-marker-orange" />
+                <span>ปี {publishedYear}</span>
+              </button>
+            )}
+          </div>
 
           <div className="flex items-center gap-3 text-[12px] text-charcoal/70 font-geist">
-            {paper.date && (
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-charcoal/50" />
-                {paper.date}
-              </span>
-            )}
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-charcoal/50" />
               {paper.readingTimeMinutes} min
