@@ -256,7 +256,7 @@ def normalize_category(cat: str) -> str:
         or "fermentation" in c_lower
         or "processing" in c_lower
     ):
-        return "การแปรรูปและการหมัก (Processing & Fermentation)"
+        return "การแปรรูปและหมัก (Processing & Fermentation)"
     return c
 
 
