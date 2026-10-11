@@ -245,18 +245,18 @@ def normalize_category(cat: str) -> str:
     c = cat.strip()
     c_lower = c.lower()
     if "สกัด" in c or "brewing" in c_lower or "extraction" in c_lower:
-        return "การสกัดและการชง (Brewing & Extraction Science)"
+        return "การสกัดและการชง (Brewing & Extraction)"
     if "กลิ่นรส" in c or "sensory" in c_lower or "flavor" in c_lower:
-        return "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)"
+        return "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)"
     if "คั่ว" in c or "roasting" in c_lower or "thermodynamics" in c_lower:
-        return "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)"
+        return "เคมีและฟิสิกส์การคั่ว (Roasting Science)"
     if (
         "หมัก" in c
         or "แปรรูป" in c
         or "fermentation" in c_lower
         or "processing" in c_lower
     ):
-        return "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)"
+        return "การแปรรูปและหมัก (Processing & Fermentation)"
     return c
 
 
