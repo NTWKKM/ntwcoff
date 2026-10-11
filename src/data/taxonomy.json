@@ -1,32 +1,31 @@
 {
-  "lastUpdated": "2026-10-11T11:27:22.609132+00:00",
+  "lastUpdated": "2026-10-11T13:26:15.666290+00:00",
   "totalPapers": 38,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction Science)": 9,
     "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)": 9,
     "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 8,
     "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)": 8,
-    "เคมีและอุณหพลศาสตร์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 1,
+    "เคมีและอุณหพลศาสตร์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 2,
     "การแปรรูปสารกาแฟและการหมัก (Coffee Processing & Microbial Fermentation)": 1,
-    "การชงและการสกัด (Brewing & Extraction Science)": 1,
-    "วิทยาศาสตร์กาแฟทั่วไป (General Coffee Science)": 1
+    "การชงและการสกัด (Brewing & Extraction Science)": 1
   },
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 35
+      "count": 36
     },
     {
       "name": "RoastingChemistry",
-      "count": 32
+      "count": 33
     },
     {
       "name": "SensoryScience",
-      "count": 29
+      "count": 30
     },
     {
       "name": "Extraction",
-      "count": 26
+      "count": 27
     },
     {
       "name": "CoffeeBody",
@@ -34,14 +33,14 @@
     },
     {
       "name": "Phenolics",
-      "count": 13
-    },
-    {
-      "name": "Q-Grader",
-      "count": 13
+      "count": 14
     },
     {
       "name": "KineticModeling",
+      "count": 14
+    },
+    {
+      "name": "Q-Grader",
       "count": 13
     },
     {
@@ -57,11 +56,11 @@
       "count": 11
     },
     {
-      "name": "MaillardReaction",
-      "count": 10
+      "name": "FT-ICR-MS",
+      "count": 11
     },
     {
-      "name": "FT-ICR-MS",
+      "name": "MaillardReaction",
       "count": 10
     },
     {
@@ -70,7 +69,7 @@
     },
     {
       "name": "WaterChemistry",
-      "count": 5
+      "count": 6
     },
     {
       "name": "Melanoidins",
