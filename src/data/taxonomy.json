@@ -1,11 +1,11 @@
 {
-  "lastUpdated": "2026-10-11T13:38:53.469923+00:00",
+  "lastUpdated": "2026-10-11T16:25:23.433296+00:00",
   "totalPapers": 38,
   "categories": {
-    "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)": 9,
-    "การสกัดและการชง (Brewing & Extraction Science)": 10,
-    "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)": 10,
-    "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)": 9
+    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 9,
+    "การสกัดและการชง (Brewing & Extraction)": 10,
+    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 10,
+    "การแปรรูปและการหมัก (Processing & Fermentation)": 9
   },
   "years": [
     {
