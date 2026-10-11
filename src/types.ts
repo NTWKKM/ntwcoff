@@ -4,7 +4,7 @@ export interface Paper {
   title: string;
   documentHeader: string;
   date: string;
-  publishedYear?: number;
+  publishedYear: number | null;
   category: string;
   authors: string;
   institution: string;

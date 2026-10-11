@@ -156,6 +156,11 @@ def _assign_meta(meta: dict, key: str, val: str):
         meta["journal"] = val
     elif "ลิงก์งานวิจัย" in key and not meta.get("links"):
         meta["links"] = val
+    elif (
+        any(k in key for k in ["ปีที่ตีพิมพ์", "ปีที่เผยแพร่", "ปีพิมพ์", "ปี"])
+        or any(k in key.lower() for k in ["publication year", "published year", "year"])
+    ) and not meta.get("publishedYear"):
+        meta["publishedYear"] = val
 
 
 def extract_metadata(text: str, slug: str = "") -> dict:
@@ -188,39 +193,57 @@ def extract_metadata(text: str, slug: str = "") -> dict:
 
     # 4. Google Docs plain text / tab format
     gdoc_matches = re.findall(
-        r"(ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบัน|หน่วยงาน|วารสารวิชาการ|ลิงก์งานวิจัย)\s*\n\s*([^\n]+)",
+        r"(ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบัน|หน่วยงาน|วารสารวิชาการ|ลิงก์งานวิจัย|ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year)\s*\n\s*([^\n]+)",
         text,
     )
     for k, v in gdoc_matches:
         _assign_meta(metadata, k.strip(), v.strip())
 
+    header_year = re.search(
+        r"^(?:ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year):\s*([^\n]+)",
+        text,
+        re.MULTILINE | re.IGNORECASE,
+    )
+    if header_year and not metadata.get("publishedYear"):
+        metadata["publishedYear"] = header_year.group(1).strip()
+
     return metadata
 
 
-def extract_published_year(journal_str: str, text: str = "") -> int | None:
+def extract_published_year(journal_str: str, year_meta_str: str = "") -> int | None:
     if journal_str:
         m = re.search(r"\b(19\d{2}|20\d{2})\b", journal_str)
         if m:
             return int(m.group(1))
-    m = re.search(
-        r"(?:ตีพิมพ์|เผยแพร่|published|year).*?\b(19\d{2}|20\d{2})\b",
-        text,
-        re.IGNORECASE,
-    )
-    if m:
-        return int(m.group(1))
+    if year_meta_str:
+        m = re.search(
+            r"(?:ตีพิมพ์|เผยแพร่|published|year).*?\b(19\d{2}|20\d{2})\b",
+            year_meta_str,
+            re.IGNORECASE,
+        )
+        if m:
+            return int(m.group(1))
+        m = re.search(r"\b(19\d{2}|20\d{2})\b", year_meta_str)
+        if m:
+            return int(m.group(1))
     return None
 
 
 def normalize_category(cat: str) -> str:
     c = cat.strip()
-    if "สกัด" in c or "Brewing" in c or "Extraction" in c:
+    c_lower = c.lower()
+    if "สกัด" in c or "brewing" in c_lower or "extraction" in c_lower:
         return "การสกัดและการชง (Brewing & Extraction Science)"
-    if "กลิ่นรส" in c or "Sensory" in c or "Flavor" in c:
+    if "กลิ่นรส" in c or "sensory" in c_lower or "flavor" in c_lower:
         return "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)"
-    if "คั่ว" in c or "Roasting" in c or "Thermodynamics" in c:
+    if "คั่ว" in c or "roasting" in c_lower or "thermodynamics" in c_lower:
         return "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)"
-    if "หมัก" in c or "แปรรูป" in c or "Fermentation" in c or "Processing" in c:
+    if (
+        "หมัก" in c
+        or "แปรรูป" in c
+        or "fermentation" in c_lower
+        or "processing" in c_lower
+    ):
         return "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)"
     return c
 
@@ -293,8 +316,11 @@ def parse_paper(file_path: Path):
         category = cat_match.group(1).strip()
     category = normalize_category(category)
 
-    # Extract Published Year from Journal or Content
-    published_year = extract_published_year(meta.get("journal", ""), content)
+    # Extract Published Year from Journal or Publication Year Metadata
+    published_year = extract_published_year(
+        meta.get("journal", ""),
+        meta.get("publishedYear", ""),
+    )
 
     # Title: English research paper title if available, else clean header
     title = meta.get("englishTitle")

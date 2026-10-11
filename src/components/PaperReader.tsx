@@ -207,7 +207,7 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
 
   const copyCitation = () => {
     if (!paper) return;
-    const citation = `${paper.authors || 'Unknown'} (${paper.date || '2026'}). ${paper.title}. ${paper.journal || ''}.`;
+    const citation = `${paper.authors || 'Unknown'} (${paper.publishedYear || 'n.d.'}). ${paper.title}. ${paper.journal || ''}.`;
     navigator.clipboard.writeText(citation);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
