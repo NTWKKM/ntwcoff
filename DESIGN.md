@@ -138,6 +138,18 @@
   - **WCAG Accessibility & Landmark Semantics**: Added skip-to-main-content keyboard link, wrapped search in accessible `<form role="search">` with screen-reader `<label>`, added `aria-pressed` to filter tabs/keywords, and added `aria-live="polite"` to filter result counts.
 - **Rationale**: Elevates web performance, accessibility, and modern standard conformance to the highest tier while strictly preserving the Superr Schoolyard Notebook aesthetics and reading ergonomics.
 
+## ADR-012: Zero-Horizontal-Scroll Category Wrapping, Publication Year Filter & Chronological Monograph Sorting
+
+- **Status**: Accepted
+- **Context**: The category tab navigation forced horizontal scrolling via `overflow-x-auto` on viewports, making scientific exploration awkward. Additionally, users needed the ability to filter papers by actual academic publication year (not the note synchronization date), inspect publication year badges directly on cards, and browse monographs with the most recently published papers ordered first.
+- **Decision**:
+  - **Zero-Horizontal-Scroll Wrapping**: Converted the category tab container to `flex flex-wrap items-center gap-2` and removed `overflow-x-auto pb-1 scrollbar-none`. Standardized the 4 canonical scientific coffee domains (`Brewing & Extraction`, `Sensory & Flavor`, `Roasting Chemistry`, `Processing & Microbial Fermentation`) so category pills wrap naturally onto 2 clean rows with zero horizontal scroll.
+  - **Publication Year Auto-Extraction & Taxonomy Index**: Augmented `prep_content.py` to extract true journal publication years (`publishedYear`) from academic citations and index them into `taxonomy.years` alongside paper counts.
+  - **Tactile Year Filter Pills**: Integrated a dedicated `published year:` row in `FilterBar` styled in Dew Drop and Marker Orange pills, sorted latest to oldest (`2025 (1)`, `2024 (4)`, `2023 (1)`...) with expandable `+more` toggle and synchronized reset button.
+  - **Publication Year Card Badge & Direct Filter**: Outfitted `PaperCard` with a prominent tactile publication year badge (`[ 📅 ปี 2024 ]`) that is clickable to filter papers by that year directly.
+  - **Latest-First Sorting**: Defaulted catalog sorting to publication year descending (`yearB - yearA`), ensuring latest peer-reviewed breakthroughs always lead the research archive.
+- **Rationale**: Eliminates horizontal scroll friction, provides intuitive chronological exploration, and highlights actual peer-reviewed publication dates across the entire reading experience.
+
 
 
 

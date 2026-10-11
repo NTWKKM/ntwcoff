@@ -197,6 +197,34 @@ def extract_metadata(text: str, slug: str = "") -> dict:
     return metadata
 
 
+def extract_published_year(journal_str: str, text: str = "") -> int | None:
+    if journal_str:
+        m = re.search(r"\b(19\d{2}|20\d{2})\b", journal_str)
+        if m:
+            return int(m.group(1))
+    m = re.search(
+        r"(?:ตีพิมพ์|เผยแพร่|published|year).*?\b(19\d{2}|20\d{2})\b",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return int(m.group(1))
+    return None
+
+
+def normalize_category(cat: str) -> str:
+    c = cat.strip()
+    if "สกัด" in c or "Brewing" in c or "Extraction" in c:
+        return "การสกัดและการชง (Brewing & Extraction Science)"
+    if "กลิ่นรส" in c or "Sensory" in c or "Flavor" in c:
+        return "วิทยาศาสตร์ด้านกลิ่นรสและประสาทสัมผัส (Sensory & Flavor Science)"
+    if "คั่ว" in c or "Roasting" in c or "Thermodynamics" in c:
+        return "เคมีและฟิสิกส์ของการคั่ว (Roasting Chemistry & Thermodynamics)"
+    if "หมัก" in c or "แปรรูป" in c or "Fermentation" in c or "Processing" in c:
+        return "กระบวนการแปรรูปและการหมักสารกาแฟ (Coffee Processing & Microbial Fermentation)"
+    return c
+
+
 def clean_paper_content(content: str) -> str:
     content = content.lstrip("\ufeff")
     # Find start of section 1 (restrict to genuine first-section headings, avoiding arbitrary numbered items)
@@ -263,6 +291,10 @@ def parse_paper(file_path: Path):
         cat_match = re.search(r"หมวดหมู่:\s*([^\n]+)", content)
     if cat_match:
         category = cat_match.group(1).strip()
+    category = normalize_category(category)
+
+    # Extract Published Year from Journal or Content
+    published_year = extract_published_year(meta.get("journal", ""), content)
 
     # Title: English research paper title if available, else clean header
     title = meta.get("englishTitle")
@@ -316,6 +348,7 @@ def parse_paper(file_path: Path):
         "title": title,
         "documentHeader": doc_header,
         "date": date_str,
+        "publishedYear": published_year,
         "category": category,
         "authors": meta.get("authors", ""),
         "institution": meta.get("institution", ""),
@@ -378,21 +411,41 @@ def main():
             }
             raw_papers_list.append(paper)
 
+    # Default sort: latest published year first (descending), followed by sync date
+    raw_papers_list.sort(
+        key=lambda p: (
+            p.get("publishedYear") or 0,
+            p.get("date") or "",
+            p.get("title") or "",
+        ),
+        reverse=True,
+    )
+
     papers = raw_papers_list
     category_counts = {}
     tag_counts = {}
+    year_counts = {}
 
     for paper in papers:
         cat = paper["category"]
         category_counts[cat] = category_counts.get(cat, 0) + 1
         for t in paper["tags"]:
             tag_counts[t] = tag_counts.get(t, 0) + 1
+        yr = paper.get("publishedYear")
+        if yr:
+            year_counts[yr] = year_counts.get(yr, 0) + 1
 
-        print(f"📄 Processed: {paper['slug']} -> {len(paper['tags'])} tags assigned")
+        print(
+            f"📄 Processed: {paper['slug']} -> Year: {paper.get('publishedYear')}, {len(paper['tags'])} tags assigned"
+        )
 
     # Sort tags by frequency
     sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
     tags_list = [{"name": t, "count": c} for t, c in sorted_tags]
+
+    # Sort publication years latest first
+    sorted_years = sorted(year_counts.items(), key=lambda x: x[0], reverse=True)
+    years_list = [{"year": y, "count": c} for y, c in sorted_years]
 
     papers_file = data_dir / "papers.json"
     taxonomy_file = data_dir / "taxonomy.json"
@@ -417,6 +470,7 @@ def main():
     tax_changed = (
         existing_taxonomy.get("totalPapers") != len(papers)
         or existing_taxonomy.get("categories") != category_counts
+        or existing_taxonomy.get("years") != years_list
         or existing_taxonomy.get("tags") != tags_list
     )
 
@@ -430,6 +484,7 @@ def main():
         "lastUpdated": last_updated,
         "totalPapers": len(papers),
         "categories": category_counts,
+        "years": years_list,
         "tags": tags_list,
     }
 
