@@ -1,11 +1,11 @@
 {
-  "lastUpdated": "2026-10-11T17:13:14.235329+00:00",
-  "totalPapers": 38,
+  "lastUpdated": "2026-10-13T12:46:35.833397+00:00",
+  "totalPapers": 39,
   "categories": {
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 9,
     "การสกัดและการชง (Brewing & Extraction)": 10,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 10,
-    "การแปรรูปและหมัก (Processing & Fermentation)": 9
+    "การแปรรูปและหมัก (Processing & Fermentation)": 10
   },
   "years": [
     {
@@ -26,7 +26,7 @@
     },
     {
       "year": 2021,
-      "count": 4
+      "count": 5
     },
     {
       "year": 2020,
@@ -80,55 +80,55 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 36
+      "count": 37
     },
     {
       "name": "RoastingChemistry",
-      "count": 33
+      "count": 34
     },
     {
       "name": "SensoryScience",
-      "count": 30
+      "count": 31
     },
     {
       "name": "Extraction",
-      "count": 27
+      "count": 28
     },
     {
       "name": "CoffeeBody",
-      "count": 24
+      "count": 25
+    },
+    {
+      "name": "KineticModeling",
+      "count": 15
     },
     {
       "name": "Phenolics",
       "count": 14
     },
     {
-      "name": "KineticModeling",
+      "name": "Q-Grader",
       "count": 14
     },
     {
-      "name": "Q-Grader",
-      "count": 13
+      "name": "FT-ICR-MS",
+      "count": 12
     },
     {
       "name": "GrindingPhysics",
       "count": 12
     },
     {
-      "name": "FT-ICR-MS",
+      "name": "Fermentation",
+      "count": 12
+    },
+    {
+      "name": "MaillardReaction",
       "count": 11
     },
     {
       "name": "SucrosePyrolysis",
       "count": 11
-    },
-    {
-      "name": "Fermentation",
-      "count": 11
-    },
-    {
-      "name": "MaillardReaction",
-      "count": 10
     },
     {
       "name": "Astringency",
@@ -143,11 +143,11 @@
       "count": 5
     },
     {
-      "name": "Tribology",
-      "count": 2
+      "name": "5-HMF",
+      "count": 3
     },
     {
-      "name": "5-HMF",
+      "name": "Tribology",
       "count": 2
     },
     {
