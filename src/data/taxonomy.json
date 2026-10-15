@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2026-10-13T12:46:35.833397+00:00",
-  "totalPapers": 39,
+  "lastUpdated": "2026-10-15T10:02:06.232244+00:00",
+  "totalPapers": 40,
   "categories": {
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 9,
     "การสกัดและการชง (Brewing & Extraction)": 10,
-    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 10,
+    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 11,
     "การแปรรูปและหมัก (Processing & Fermentation)": 10
   },
   "years": [
@@ -70,7 +70,7 @@
     },
     {
       "year": 2008,
-      "count": 1
+      "count": 2
     },
     {
       "year": 2007,
@@ -80,27 +80,27 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 37
+      "count": 38
     },
     {
       "name": "RoastingChemistry",
-      "count": 34
+      "count": 35
     },
     {
       "name": "SensoryScience",
-      "count": 31
+      "count": 32
     },
     {
       "name": "Extraction",
-      "count": 28
+      "count": 29
     },
     {
       "name": "CoffeeBody",
-      "count": 25
+      "count": 26
     },
     {
       "name": "KineticModeling",
-      "count": 15
+      "count": 16
     },
     {
       "name": "Phenolics",
@@ -112,6 +112,10 @@
     },
     {
       "name": "FT-ICR-MS",
+      "count": 13
+    },
+    {
+      "name": "MaillardReaction",
       "count": 12
     },
     {
@@ -119,16 +123,12 @@
       "count": 12
     },
     {
-      "name": "Fermentation",
+      "name": "SucrosePyrolysis",
       "count": 12
     },
     {
-      "name": "MaillardReaction",
-      "count": 11
-    },
-    {
-      "name": "SucrosePyrolysis",
-      "count": 11
+      "name": "Fermentation",
+      "count": 12
     },
     {
       "name": "Astringency",
@@ -136,7 +136,7 @@
     },
     {
       "name": "WaterChemistry",
-      "count": 6
+      "count": 7
     },
     {
       "name": "Melanoidins",
@@ -144,7 +144,7 @@
     },
     {
       "name": "5-HMF",
-      "count": 3
+      "count": 4
     },
     {
       "name": "Tribology",
