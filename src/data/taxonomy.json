@@ -1,8 +1,8 @@
 {
-  "lastUpdated": "2026-10-15T10:02:06.232244+00:00",
-  "totalPapers": 40,
+  "lastUpdated": "2026-10-16T09:54:59.992190+00:00",
+  "totalPapers": 41,
   "categories": {
-    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 9,
+    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 10,
     "การสกัดและการชง (Brewing & Extraction)": 10,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 11,
     "การแปรรูปและหมัก (Processing & Fermentation)": 10
@@ -22,7 +22,7 @@
     },
     {
       "year": 2022,
-      "count": 3
+      "count": 4
     },
     {
       "year": 2021,
@@ -80,19 +80,19 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 38
+      "count": 39
     },
     {
       "name": "RoastingChemistry",
-      "count": 35
+      "count": 36
     },
     {
       "name": "SensoryScience",
-      "count": 32
+      "count": 33
     },
     {
       "name": "Extraction",
-      "count": 29
+      "count": 30
     },
     {
       "name": "CoffeeBody",
@@ -104,22 +104,22 @@
     },
     {
       "name": "Phenolics",
-      "count": 14
+      "count": 15
     },
     {
       "name": "Q-Grader",
-      "count": 14
+      "count": 15
     },
     {
       "name": "FT-ICR-MS",
       "count": 13
     },
     {
-      "name": "MaillardReaction",
-      "count": 12
+      "name": "GrindingPhysics",
+      "count": 13
     },
     {
-      "name": "GrindingPhysics",
+      "name": "MaillardReaction",
       "count": 12
     },
     {
