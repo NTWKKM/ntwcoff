@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2026-10-18T09:41:49.425885+00:00",
-  "totalPapers": 43,
+  "lastUpdated": "2026-10-19T10:53:00.218521+00:00",
+  "totalPapers": 44,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 11,
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 10,
-    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 11,
+    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 12,
     "การแปรรูปและหมัก (Processing & Fermentation)": 10,
     "วิทยาศาสตร์กาแฟทั่วไป (General Coffee Science)": 1
   },
@@ -35,7 +35,7 @@
     },
     {
       "year": 2020,
-      "count": 5
+      "count": 6
     },
     {
       "year": 2019,
@@ -85,50 +85,50 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 40
+      "count": 41
     },
     {
       "name": "RoastingChemistry",
-      "count": 37
+      "count": 38
     },
     {
       "name": "SensoryScience",
-      "count": 34
+      "count": 35
     },
     {
       "name": "Extraction",
-      "count": 31
+      "count": 32
     },
     {
       "name": "CoffeeBody",
-      "count": 26
+      "count": 27
+    },
+    {
+      "name": "Phenolics",
+      "count": 17
     },
     {
       "name": "KineticModeling",
       "count": 17
     },
     {
-      "name": "Phenolics",
+      "name": "Q-Grader",
       "count": 16
     },
     {
-      "name": "Q-Grader",
-      "count": 15
-    },
-    {
       "name": "FT-ICR-MS",
-      "count": 13
+      "count": 14
     },
     {
       "name": "GrindingPhysics",
       "count": 13
     },
     {
-      "name": "MaillardReaction",
-      "count": 12
+      "name": "SucrosePyrolysis",
+      "count": 13
     },
     {
-      "name": "SucrosePyrolysis",
+      "name": "MaillardReaction",
       "count": 12
     },
     {
@@ -137,7 +137,7 @@
     },
     {
       "name": "Astringency",
-      "count": 10
+      "count": 11
     },
     {
       "name": "WaterChemistry",
@@ -149,7 +149,7 @@
     },
     {
       "name": "5-HMF",
-      "count": 4
+      "count": 5
     },
     {
       "name": "Tribology",
