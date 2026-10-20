@@ -1,9 +1,9 @@
 {
-  "lastUpdated": "2026-10-19T10:53:00.218521+00:00",
-  "totalPapers": 44,
+  "lastUpdated": "2026-10-20T10:08:50.376886+00:00",
+  "totalPapers": 45,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 11,
-    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 10,
+    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 11,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 12,
     "การแปรรูปและหมัก (Processing & Fermentation)": 10,
     "วิทยาศาสตร์กาแฟทั่วไป (General Coffee Science)": 1
@@ -15,7 +15,7 @@
     },
     {
       "year": 2025,
-      "count": 1
+      "count": 2
     },
     {
       "year": 2024,
@@ -85,19 +85,19 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 41
+      "count": 42
     },
     {
       "name": "RoastingChemistry",
-      "count": 38
+      "count": 39
     },
     {
       "name": "SensoryScience",
-      "count": 35
+      "count": 36
     },
     {
       "name": "Extraction",
-      "count": 32
+      "count": 33
     },
     {
       "name": "CoffeeBody",
