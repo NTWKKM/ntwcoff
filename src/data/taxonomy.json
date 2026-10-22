@@ -1,8 +1,8 @@
 {
-  "lastUpdated": "2026-10-21T10:16:40.073220+00:00",
-  "totalPapers": 46,
+  "lastUpdated": "2026-10-22T10:17:31.295035+00:00",
+  "totalPapers": 47,
   "categories": {
-    "การสกัดและการชง (Brewing & Extraction)": 11,
+    "การสกัดและการชง (Brewing & Extraction)": 12,
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 11,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 12,
     "การแปรรูปและหมัก (Processing & Fermentation)": 11,
@@ -19,7 +19,7 @@
     },
     {
       "year": 2024,
-      "count": 4
+      "count": 5
     },
     {
       "year": 2023,
@@ -85,7 +85,7 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 43
+      "count": 44
     },
     {
       "name": "RoastingChemistry",
@@ -93,15 +93,15 @@
     },
     {
       "name": "SensoryScience",
-      "count": 37
+      "count": 38
     },
     {
       "name": "Extraction",
-      "count": 34
+      "count": 35
     },
     {
       "name": "CoffeeBody",
-      "count": 28
+      "count": 29
     },
     {
       "name": "Phenolics",
@@ -117,7 +117,7 @@
     },
     {
       "name": "FT-ICR-MS",
-      "count": 15
+      "count": 16
     },
     {
       "name": "SucrosePyrolysis",
@@ -144,11 +144,11 @@
       "count": 8
     },
     {
-      "name": "Melanoidins",
-      "count": 5
+      "name": "5-HMF",
+      "count": 6
     },
     {
-      "name": "5-HMF",
+      "name": "Melanoidins",
       "count": 5
     },
     {
@@ -156,11 +156,11 @@
       "count": 2
     },
     {
-      "name": "Acrylamide",
-      "count": 1
+      "name": "FoodSafety",
+      "count": 2
     },
     {
-      "name": "FoodSafety",
+      "name": "Acrylamide",
       "count": 1
     }
   ]
