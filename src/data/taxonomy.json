@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2026-10-22T10:17:31.295035+00:00",
-  "totalPapers": 47,
+  "lastUpdated": "2026-10-23T10:10:56.478405+00:00",
+  "totalPapers": 48,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 12,
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 11,
-    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 12,
+    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 13,
     "การแปรรูปและหมัก (Processing & Fermentation)": 11,
     "วิทยาศาสตร์กาแฟทั่วไป (General Coffee Science)": 1
   },
@@ -59,7 +59,7 @@
     },
     {
       "year": 2014,
-      "count": 3
+      "count": 4
     },
     {
       "year": 2013,
@@ -85,11 +85,11 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 44
+      "count": 45
     },
     {
       "name": "RoastingChemistry",
-      "count": 40
+      "count": 41
     },
     {
       "name": "SensoryScience",
@@ -97,7 +97,7 @@
     },
     {
       "name": "Extraction",
-      "count": 35
+      "count": 36
     },
     {
       "name": "CoffeeBody",
@@ -105,11 +105,11 @@
     },
     {
       "name": "Phenolics",
-      "count": 17
+      "count": 18
     },
     {
       "name": "KineticModeling",
-      "count": 17
+      "count": 18
     },
     {
       "name": "Q-Grader",
@@ -121,11 +121,11 @@
     },
     {
       "name": "SucrosePyrolysis",
-      "count": 14
+      "count": 15
     },
     {
       "name": "GrindingPhysics",
-      "count": 13
+      "count": 14
     },
     {
       "name": "Fermentation",
