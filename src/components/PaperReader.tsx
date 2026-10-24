@@ -22,10 +22,45 @@ const closedByAttr: React.DialogHTMLAttributes<HTMLDialogElement> = {
   closedby: 'any',
 };
 
+const cleanTrailingPunctuation = (rawToken: string): string => {
+  let token = rawToken;
+
+  while (token.length > 0) {
+    const lastChar = token[token.length - 1];
+
+    if (/[.,;:!?]/.test(lastChar)) {
+      token = token.slice(0, -1);
+      continue;
+    }
+
+    if (lastChar === ')') {
+      const openCount = (token.match(/\(/g) || []).length;
+      const closeCount = (token.match(/\)/g) || []).length;
+      if (closeCount > openCount) {
+        token = token.slice(0, -1);
+        continue;
+      }
+    }
+
+    if (lastChar === ']') {
+      const openCount = (token.match(/\[/g) || []).length;
+      const closeCount = (token.match(/\]/g) || []).length;
+      if (closeCount > openCount) {
+        token = token.slice(0, -1);
+        continue;
+      }
+    }
+
+    break;
+  }
+
+  return token;
+};
+
 const renderSourceLinks = (linksText: string): React.ReactNode => {
   // Match DOIs (10.xxxx/...), PMCID (PMC...), PMID, or direct https:// URLs
   const tokenRegex =
-    /(https?:\/\/[^\s)]+|10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+|PMC\d+|PMID:\s*\d+)/g;
+    /(https?:\/\/[^\s]+|10\.\d{4,9}\/[-._;()/:A-Za-z0-9<>]+|PMC\d+|PMID:\s*\d+)/g;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -35,7 +70,7 @@ const renderSourceLinks = (linksText: string): React.ReactNode => {
       parts.push(linksText.slice(lastIndex, match.index));
     }
     const rawToken = match[0];
-    const cleanToken = rawToken.replace(/[.,;)]+$/, '');
+    const cleanToken = cleanTrailingPunctuation(rawToken);
     const trailing = rawToken.slice(cleanToken.length);
 
     let href = cleanToken;

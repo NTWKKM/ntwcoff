@@ -208,7 +208,7 @@ def extract_metadata(text: str, slug: str = "") -> dict:
     meta_labels = (
         r"ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบันวิจัย|สถาบัน|หน่วยงาน|"
         r"วารสารวิชาการ|ลิงก์งานวิจัยต้นฉบับ|ลิงก์งานวิจัย|"
-        r"ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year"
+        r"ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year|ปี"
     )
 
     # 4a. Inline label values: label and value on same line (e.g. ชื่อบทความวิจัย: Title or ชื่อบทความวิจัย\tTitle)
@@ -233,7 +233,7 @@ def extract_metadata(text: str, slug: str = "") -> dict:
             _assign_meta(metadata, k.strip(), val_clean)
 
     header_year = re.search(
-        r"^(?:ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year):\s*([^\n]+)",
+        r"^(?:ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year|ปี):\s*([^\n]+)",
         meta_text,
         re.MULTILINE | re.IGNORECASE,
     )
