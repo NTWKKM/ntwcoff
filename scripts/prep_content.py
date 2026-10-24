@@ -8,7 +8,7 @@ Supports:
 - Markdown tables
 - Bullet lists (* Key: Value)
 - Google Docs plain text / tab indented exports
-- Deduplication by normalized title and slug
+- Deduplication by normalized title (retaining latest / most detailed version)
 """
 
 import datetime
@@ -168,12 +168,13 @@ def _assign_meta(meta: dict, key: str, val: str):
 
 def extract_metadata(text: str, slug: str = "") -> dict:
     metadata = {}
+    filename_title = ""
 
     # 1. Filename pattern: e.g. [2026-09-05] The Role of Dissolved Cations in Coffee Extraction
     fn_match = re.match(r"^\[(\d{4}-\d{2}-\d{2})\]\s*(.+)$", slug)
     if fn_match:
         metadata["dateFromFilename"] = fn_match.group(1)
-        metadata["englishTitle"] = fn_match.group(2).strip()
+        filename_title = fn_match.group(2).strip()
 
     # Scope metadata extraction to the header block before Section 1
     sec1_match = re.search(
@@ -204,20 +205,51 @@ def extract_metadata(text: str, slug: str = "") -> dict:
         _assign_meta(metadata, k.strip(), v.strip())
 
     # 4. Google Docs plain text / tab format
-    gdoc_matches = re.findall(
-        r"(ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบัน|หน่วยงาน|วารสารวิชาการ|ลิงก์งานวิจัย|ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year)\s*\n\s*([^\n]+)",
-        meta_text,
+    meta_labels = (
+        r"ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบันวิจัย|สถาบัน|หน่วยงาน|"
+        r"วารสารวิชาการ|ลิงก์งานวิจัยต้นฉบับ|ลิงก์งานวิจัย|"
+        r"ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year|ปี"
     )
-    for k, v in gdoc_matches:
+
+    # 4a. Inline label values: label and value on same line (e.g. ชื่อบทความวิจัย: Title or ชื่อบทความวิจัย\tTitle)
+    inline_matches = re.findall(
+        rf"^[ \t]*[*\-•]?[ \t]*({meta_labels})[ \t]*(?::|\t)[ \t]*([^\n]+)",
+        meta_text,
+        re.MULTILINE,
+    )
+    for k, v in inline_matches:
         _assign_meta(metadata, k.strip(), v.strip())
 
+    # 4b. Following-line values: label occupies its own line, followed by value on next line
+    following_line_matches = re.findall(
+        rf"^[ \t]*[*\-•]?[ \t]*({meta_labels})[ \t]*:?[ \t]*\n[ \t]*([^\n]+)",
+        meta_text,
+        re.MULTILINE,
+    )
+    for k, v in following_line_matches:
+        val_clean = v.strip()
+        # Ensure a subsequent metadata line (e.g. ผู้วิจัย) is not captured as value
+        if not re.match(rf"^(?:{meta_labels})(?:[:\t]|\s*$)", val_clean):
+            _assign_meta(metadata, k.strip(), val_clean)
+
     header_year = re.search(
-        r"^(?:ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year):\s*([^\n]+)",
+        r"^(?:ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year|ปี):\s*([^\n]+)",
         meta_text,
         re.MULTILINE | re.IGNORECASE,
     )
     if header_year and not metadata.get("publishedYear"):
         metadata["publishedYear"] = header_year.group(1).strip()
+
+    # Fallback to filename title only if document metadata did not specify one
+    if not metadata.get("englishTitle") and filename_title:
+        metadata["englishTitle"] = filename_title
+
+    # Extract trailing parenthesized institution from authors if institution field is absent
+    if metadata.get("authors") and not metadata.get("institution"):
+        inst_match = re.search(r"\s*\(([^()]+(?:University|Institute|Center|Centre|College|ZHAW|ETH|USDA)[^()]*)\)\s*$", metadata["authors"])
+        if inst_match:
+            metadata["institution"] = inst_match.group(1).strip()
+            metadata["authors"] = metadata["authors"][: inst_match.start()].strip()
 
     return metadata
 
@@ -260,9 +292,20 @@ def normalize_category(cat: str) -> str:
     return c
 
 
+def _repair_dangling_bold_line(line: str) -> str:
+    """Repair Google Docs export lines where opening ** before a label colon was stripped."""
+    if line.count("**") % 2 == 0:
+        return line
+    return re.sub(
+        r"^(\s*(?:[*\-]\s+|\d+\.\s+)?)(?!\*\*)([^:\n*]+:\*\*)(?=\s|$)",
+        r"\1**\2",
+        line,
+    )
+
+
 def clean_paper_content(content: str) -> str:
     content = content.lstrip("\ufeff")
-    # Find start of section 1 (restrict to genuine first-section headings, avoiding arbitrary numbered items)
+    # Find start of section 1 (restrict to genuine first-section headings)
     m = re.search(
         r"(?:^|\n)\s*(?:##\s*)?1\.\s*(?:วัตถุประสงค์|บทนำ|ที่มา|ความสำคัญ|ภาพรวม|บทคัดย่อ|จุดประสงค์)[^\n]*",
         content,
@@ -270,8 +313,21 @@ def clean_paper_content(content: str) -> str:
     if m:
         content = content[m.start() :].strip()
 
-    # Remove mock signature / metadata at bottom
-    content = re.sub(r"\n+(?:ลงชื่อผู้ตรวจสอบรายงาน|สถานที่จัดทำเอกสาร):[^\n]*", "", content)
+    # Remove mock signature / automated generator footer at bottom
+    content = re.sub(
+        r"\n*(?:ลงชื่อผู้ตรวจสอบรายงาน|สถานที่จัดทำเอกสาร|รายงานนี้จัดทำขึ้นโดย)[^\n]*",
+        "",
+        content,
+    )
+
+    # Remove empty parentheses left behind by stripped equations in Google Docs exports
+    content = re.sub(r"\s*\(\s*\)", "", content)
+
+    # Fix corrupted CIE L*a*b* math token from Google Docs export ($L^*a^b^$ -> $L^*a^*b^*$)
+    content = content.replace("$L^*a^b^$", "$L^*a^*b^*$")
+
+    # Repair dangling bold markers (e.g. "* Label:** text") line by line
+    content = "\n".join(_repair_dangling_bold_line(ln) for ln in content.split("\n"))
 
     # Standardize main section headings with markdown '## '
     content = re.sub(
@@ -334,26 +390,19 @@ def parse_paper(file_path: Path):
         meta.get("publishedYear", ""),
     )
 
-    # Title: English research paper title if available, else clean header
+    # Title: Authoritative research paper title if available, else clean header
     title = meta.get("englishTitle")
     if not title:
-        # Check first line
         lines = [line.strip() for line in content.split("\n") if line.strip()]
         if lines and lines[0].startswith("# "):
             title = lines[0].replace("# ", "").strip()
         else:
             title = slug.replace("-", " ").title()
 
-    # Document Header (e.g. รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก)
-    doc_header = "รายงานวิจัยวิทยาศาสตร์กาแฟเชิงลึก (Coffee Science Deep Research)"
-    header_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
-    if header_match:
-        doc_header = header_match.group(1).strip()
-
     # Extract Excerpt (derived from Section 1 of cleaned_body)
     excerpt = ""
     sec1_match = re.search(
-        r"(?:##\s*)?1\.\s*วัตถุประสงค์และที่มาของงานวิจัย\s*\n\s*(.+?)(?=\n\n|\n\d\.|\n##)",
+        r"(?:##\s*)?1\.\s*วัตถุประสงค์และที่มาของงานวิจัย[^\n]*\n\s*(.+?)(?=\n\n|\n\d\.|\n##)",
         cleaned_body,
         re.DOTALL,
     )
@@ -361,7 +410,6 @@ def parse_paper(file_path: Path):
         cleaned = re.sub(r"[*_#]", "", sec1_match.group(1)).strip()
         excerpt = cleaned[:240] + ("..." if len(cleaned) > 240 else "")
     else:
-        # Fallback excerpt: first substantial paragraph of cleaned_body
         paragraphs = [
             p.strip() for p in cleaned_body.split("\n\n") if len(p.strip()) > 80
         ]
@@ -376,7 +424,7 @@ def parse_paper(file_path: Path):
         if any(kw.lower() in content_lower for kw in keywords):
             matched_tags.append(tag)
 
-    # Word count and reading time (derived from cleaned_body so removed preamble text is excluded)
+    # Word count and reading time (derived from cleaned_body)
     word_count = len(re.findall(r"\w+", cleaned_body))
     reading_time = max(1, round(word_count / 180))
 
@@ -384,7 +432,6 @@ def parse_paper(file_path: Path):
         "id": slug,
         "slug": slug,
         "title": title,
-        "documentHeader": doc_header,
         "date": date_str,
         "publishedYear": published_year,
         "category": category,
@@ -423,18 +470,32 @@ def main():
 
     for paper_file in raw_files:
         paper = parse_paper(paper_file)
+        if not paper.get("content", "").strip() or paper.get("wordCount", 0) == 0:
+            print(f"⚠️ [EMPTY FILE SKIPPED] Ignoring '{paper_file.name}' (no content).")
+            continue
 
-        # Deduplication check: if a paper with identical normalized title exists, preserve higher-priority format (.md > .txt)
+        # Deduplication check: if a paper with identical normalized title exists,
+        # prefer higher format priority (.md > .txt), then latest sync date, then higher wordCount.
         norm_title = re.sub(r"[^\w\u0E00-\u0E7F]+", "", paper["title"].lower())
         if norm_title in seen_titles:
             prev_idx = seen_titles[norm_title]["index"]
             prev_file = seen_titles[norm_title]["file"]
-            prev_prio = FORMAT_PRIORITY.get(Path(prev_file).suffix.lower(), 0)
-            curr_prio = FORMAT_PRIORITY.get(paper_file.suffix.lower(), 0)
+            prev_paper = raw_papers_list[prev_idx]
 
-            if curr_prio > prev_prio:
+            prev_key = (
+                FORMAT_PRIORITY.get(Path(prev_file).suffix.lower(), 0),
+                prev_paper.get("date") or "",
+                prev_paper.get("wordCount") or 0,
+            )
+            curr_key = (
+                FORMAT_PRIORITY.get(paper_file.suffix.lower(), 0),
+                paper.get("date") or "",
+                paper.get("wordCount") or 0,
+            )
+
+            if curr_key >= prev_key:
                 print(
-                    f"⚠️ [DUPLICATE DETECTED] Replacing lower-priority '{prev_file}' with '{paper_file.name}' for '{paper['title']}'."
+                    f"⚠️ [DUPLICATE DETECTED] Replacing older/shorter '{prev_file}' with '{paper_file.name}' for '{paper['title']}'."
                 )
                 raw_papers_list[prev_idx] = paper
                 seen_titles[norm_title]["file"] = paper_file.name

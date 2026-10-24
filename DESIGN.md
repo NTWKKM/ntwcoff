@@ -151,10 +151,12 @@
   - **Latest-First Sorting**: Defaulted catalog sorting to publication year descending (`yearB - yearA`), ensuring latest peer-reviewed breakthroughs always lead the research archive.
 - **Rationale**: Eliminates horizontal scroll friction, provides intuitive chronological exploration, and highlights actual peer-reviewed publication dates across the entire reading experience.
 
+## ADR-013: Minimal Editorial Consolidation, Single-Pass Markdown/KaTeX Engine & Authoritative Deduplication
 
-
-
-
-
-
-
+- **Status**: Accepted
+- **Context**: A deep architectural and code audit identified: (1) filename slugs overriding full document titles (`ชื่อบทความวิจัย`) in `prep_content.py`, causing 3 duplicate paper pairs to bypass deduplication and 2 duplicate pairs to retain older September drafts instead of comprehensive October monographs; (2) inline Markdown regexes colliding with scientific notation (`C.I.E. L*a*b*`, `B3LYP/6-311G**`) and unescaped `%` inside KaTeX math blocks; (3) duplicated two-pass heading scanning across `PaperReader.tsx` and `KatexRenderer.tsx` with raw LaTeX leaking into the TOC; and (4) dead `xs:` Tailwind classes and redundant runtime sorting in `App.tsx`.
+- **Decision**:
+  - **Authoritative Title & Latest-Monograph Deduplication**: Prioritize `ชื่อบทความวิจัย` from document metadata over truncated filenames, repair dangling Google Docs bold markers (`:**`), and rank duplicates by `(format_priority, date, wordCount)` so the latest, most complete monograph is always retained.
+  - **Single-Pass `parsePaperMarkdown` Engine**: Consolidate HTML generation and clean TOC extraction into a single pass in `KatexRenderer.tsx`. Isolate `$...$` and `$$...$$` math blocks before inline emphasis parsing, auto-escape `%` inside math expressions, and preserve nested list indentation.
+  - **Minimal Editorial UI Refinements**: Restrain visual noise with 1px hairline borders, unboxed metadata kickers, clickable DOI/PMID/PMCID reference links in `PaperReader`, and zero redundant runtime sorting in `App.tsx`.
+- **Rationale**: Guarantees data integrity across re-researched monographs, prevents LaTeX/scientific notation corruption, and removes unnecessary runtime and parser complexity.

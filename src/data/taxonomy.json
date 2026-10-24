@@ -1,11 +1,11 @@
 {
-  "lastUpdated": "2026-10-24T09:36:52.047889+00:00",
-  "totalPapers": 49,
+  "lastUpdated": "2026-10-24T15:25:30.388086+00:00",
+  "totalPapers": 46,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 12,
-    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 12,
-    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 13,
-    "การแปรรูปและหมัก (Processing & Fermentation)": 12
+    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 11,
+    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 12,
+    "การแปรรูปและหมัก (Processing & Fermentation)": 11
   },
   "years": [
     {
@@ -26,11 +26,11 @@
     },
     {
       "year": 2022,
-      "count": 4
+      "count": 3
     },
     {
       "year": 2021,
-      "count": 5
+      "count": 4
     },
     {
       "year": 2020,
@@ -78,7 +78,7 @@
     },
     {
       "year": 2008,
-      "count": 2
+      "count": 1
     },
     {
       "year": 2007,
@@ -88,23 +88,23 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 47
+      "count": 45
     },
     {
       "name": "RoastingChemistry",
-      "count": 43
+      "count": 42
     },
     {
       "name": "SensoryScience",
-      "count": 40
+      "count": 37
     },
     {
       "name": "Extraction",
-      "count": 38
+      "count": 37
     },
     {
       "name": "CoffeeBody",
-      "count": 30
+      "count": 27
     },
     {
       "name": "Phenolics",
@@ -112,23 +112,23 @@
     },
     {
       "name": "KineticModeling",
-      "count": 18
+      "count": 17
+    },
+    {
+      "name": "SucrosePyrolysis",
+      "count": 17
     },
     {
       "name": "Q-Grader",
-      "count": 17
+      "count": 16
     },
     {
       "name": "FT-ICR-MS",
       "count": 16
     },
     {
-      "name": "SucrosePyrolysis",
-      "count": 16
-    },
-    {
       "name": "GrindingPhysics",
-      "count": 15
+      "count": 16
     },
     {
       "name": "Fermentation",
@@ -140,7 +140,7 @@
     },
     {
       "name": "Astringency",
-      "count": 12
+      "count": 10
     },
     {
       "name": "WaterChemistry",
@@ -156,7 +156,7 @@
     },
     {
       "name": "Tribology",
-      "count": 2
+      "count": 3
     },
     {
       "name": "FoodSafety",

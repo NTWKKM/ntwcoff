@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { TagInfo, YearInfo } from '../types';
-import { X, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
+import { Search, X, SlidersHorizontal } from 'lucide-react';
 
 interface FilterBarProps {
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
   categories: string[];
   selectedCategory: string | null;
   setSelectedCategory: (cat: string | null) => void;
@@ -17,6 +19,8 @@ interface FilterBarProps {
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
+  searchQuery,
+  setSearchQuery,
   categories,
   selectedCategory,
   setSelectedCategory,
@@ -29,214 +33,200 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   filteredCount,
   totalCount,
 }) => {
-  const [showAllTags, setShowAllTags] = useState(false);
-  const [showAllYears, setShowAllYears] = useState(false);
+  const [showTagsDrawer, setShowTagsDrawer] = useState(false);
+
   const hasFilter =
-    selectedCategory !== null || selectedYear !== null || selectedTag !== null;
-
-  // Curate initial years to top 8 recent years, but preserve selectedYear
-  const visibleYears = useMemo(() => {
-    if (showAllYears) return years;
-    const initial = years.slice(0, 8);
-    if (selectedYear && !initial.some((y) => y.year === selectedYear)) {
-      const selected = years.find((y) => y.year === selectedYear);
-      if (selected) {
-        return [...initial, selected];
-      }
-    }
-    return initial;
-  }, [showAllYears, years, selectedYear]);
-
-  // Curate initial tags to top 12 to prevent visual overcrowding, but always preserve selectedTag
-  const visibleTags = useMemo(() => {
-    if (showAllTags) return tags;
-    const initial = tags.slice(0, 12);
-    if (selectedTag && !initial.some((t) => t.name === selectedTag)) {
-      const selected = tags.find((t) => t.name === selectedTag);
-      if (selected) {
-        return [...initial, selected];
-      }
-    }
-    return initial;
-  }, [showAllTags, tags, selectedTag]);
+    searchQuery.trim() !== '' ||
+    selectedCategory !== null ||
+    selectedYear !== null ||
+    selectedTag !== null;
 
   return (
-    <section id="taxonomy" className="w-full pt-4 pb-6 space-y-4">
-      {/* Category Navigation Pills — Wraps naturally, NO horizontal scroll */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b-[1.5px] border-charcoal/15">
-        <div
-          className="flex flex-wrap items-center gap-2"
-          role="toolbar"
-          aria-label="หมวดหมู่วิทยาศาสตร์"
+    <section id="taxonomy" className="w-full pb-6 mb-6 border-b border-charcoal/12 space-y-3.5">
+      
+      {/* Row 1: Search Input + Year Select + Keywords Toggle + Result Count */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        
+        {/* Search Form */}
+        <form
+          role="search"
+          onSubmit={(e) => e.preventDefault()}
+          className="relative flex-1 max-w-md"
         >
-          <button
-            onClick={() => setSelectedCategory(null)}
-            aria-pressed={selectedCategory === null}
-            className={`px-4 py-1.5 rounded-[20px] text-[13px] font-gelica transition-all shadow-subtle ${
-              selectedCategory === null
-                ? 'bg-charcoal text-cream-paper border-[1.5px] border-charcoal font-medium'
-                : 'bg-cream-paper text-charcoal border-[1.5px] border-charcoal/30 hover:border-charcoal hover:bg-dew-drop'
-            }`}
-          >
-            all papers ({totalCount})
-          </button>
+          <label htmlFor="paper-search" className="sr-only">
+            ค้นหางานวิจัย (5-HMF, Acrylamide, Melanoidins, Astringency)
+          </label>
+          <Search
+            className="w-4 h-4 text-charcoal/45 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            aria-hidden="true"
+          />
+          <input
+            id="paper-search"
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="ค้นหาสารเคมี หัวข้อ หรือชื่อผู้วิจัย..."
+            autoComplete="off"
+            spellCheck={false}
+            className="w-full pl-9 pr-8 py-2 rounded-[8px] bg-cream-paper border border-charcoal/18 text-charcoal placeholder:text-charcoal/45 text-[16px] sm:text-[13px] font-geist focus:outline-none focus:border-charcoal transition-colors"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-charcoal/50 hover:text-charcoal transition-colors"
+              title="ล้างคำค้นหา"
+              aria-label="ล้างคำค้นหา"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </form>
 
-          {categories.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(isSelected ? null : cat)}
-                aria-pressed={isSelected}
-                className={`px-4 py-1.5 rounded-[20px] text-[13px] font-gelica transition-all shadow-subtle ${
-                  isSelected
-                    ? 'bg-charcoal text-cream-paper border-[1.5px] border-charcoal font-medium'
-                    : 'bg-cream-paper text-charcoal border-[1.5px] border-charcoal/30 hover:border-charcoal hover:bg-dew-drop'
-                }`}
+        {/* Right Controls: Year Select + Keywords Drawer Button + Live Count */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Compact Year Filter Select */}
+          {years.length > 0 && (
+            <div className="flex items-center">
+              <label htmlFor="year-select" className="sr-only">
+                กรองตามปีที่ตีพิมพ์
+              </label>
+              <select
+                id="year-select"
+                value={selectedYear ?? ''}
+                onChange={(e) =>
+                  setSelectedYear(e.target.value ? Number(e.target.value) : null)
+                }
+                className="px-3 py-1.5 rounded-[8px] bg-cream-paper border border-charcoal/18 text-[16px] sm:text-[13px] font-geist text-charcoal focus:outline-none focus:border-charcoal transition-colors cursor-pointer tabular-nums"
               >
-                {cat.toLowerCase()}
-              </button>
-            );
-          })}
-        </div>
+                <option value="">ทุกปีที่ตีพิมพ์ (All years)</option>
+                {years.map(({ year, count }) => (
+                  <option key={year} value={year}>
+                    ปี {year} ({count})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-        {/* Filter Summary Counter with live announcement for assistive tech */}
-        <div
-          aria-live="polite"
-          aria-atomic="true"
-          className="text-[13px] text-charcoal/70 font-gelica shrink-0 self-start sm:self-center"
-        >
-          showing {filteredCount} of {totalCount} monographs
+          {/* Keywords Drawer Toggle */}
+          {tags.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedTag !== null) {
+                  setSelectedTag(null);
+                  setShowTagsDrawer(false);
+                } else {
+                  setShowTagsDrawer((prev) => !prev);
+                }
+              }}
+              aria-expanded={showTagsDrawer || selectedTag !== null}
+              className={`px-3 py-1.5 rounded-[8px] border text-[13px] font-geist inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+                showTagsDrawer || selectedTag
+                  ? 'bg-charcoal text-cream-paper border-charcoal font-medium'
+                  : 'bg-cream-paper text-charcoal border-charcoal/18 hover:border-charcoal'
+              }`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>{selectedTag ? `#${selectedTag}` : 'Keywords'}</span>
+            </button>
+          )}
+
+          {/* Reset All Filters */}
+          {hasFilter && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory(null);
+                setSelectedYear(null);
+                setSelectedTag(null);
+              }}
+              className="px-2.5 py-1.5 rounded-[8px] text-[12px] font-geist text-burnt-sienna hover:text-marker-orange inline-flex items-center gap-1 transition-colors whitespace-nowrap shrink-0"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Reset</span>
+            </button>
+          )}
+
+          {/* Unboxed Result Count */}
+          <span
+            aria-live="polite"
+            aria-atomic="true"
+            className="text-[12px] text-charcoal/60 font-mono tabular-nums ml-auto md:ml-1 whitespace-nowrap shrink-0"
+          >
+            {filteredCount} / {totalCount}
+          </span>
         </div>
       </div>
 
-      {/* Publication Year Filter Row — Dew Drop & Marker Orange Pills */}
-      {years.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 pb-3 border-b-[1.5px] border-charcoal/15">
-          <span className="text-[13px] font-gelica text-charcoal/70 mr-1 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-marker-orange" />
-            <span>published year:</span>
-          </span>
+      {/* Row 2: Clean Segmented Category Tabs */}
+      <div
+        className="flex flex-wrap items-center gap-1.5"
+        role="toolbar"
+        aria-label="หมวดหมู่วิทยาศาสตร์"
+      >
+        <button
+          type="button"
+          onClick={() => setSelectedCategory(null)}
+          aria-pressed={selectedCategory === null}
+          className={`px-3 py-1.5 rounded-[6px] text-[13px] font-geist transition-colors whitespace-nowrap shrink-0 ${
+            selectedCategory === null
+              ? 'bg-charcoal text-cream-paper font-medium'
+              : 'text-charcoal/70 hover:text-charcoal hover:bg-cream-paper/70'
+          }`}
+        >
+          All disciplines
+        </button>
 
-          <button
-            onClick={() => setSelectedYear(null)}
-            aria-pressed={selectedYear === null}
-            className={`px-3 py-1 rounded-[20px] text-[12px] font-gelica transition-all shadow-subtle ${
-              selectedYear === null
-                ? 'bg-charcoal text-cream-paper border-[1.5px] border-charcoal font-medium'
-                : 'bg-cream-paper text-charcoal border-[1.5px] border-charcoal/30 hover:border-charcoal hover:bg-dew-drop'
-            }`}
-          >
-            all years
-          </button>
-
-          {visibleYears.map(({ year, count }) => {
-            const isSelected = selectedYear === year;
-            return (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(isSelected ? null : year)}
-                aria-pressed={isSelected}
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-[20px] text-[12px] font-mono shadow-subtle transition-all ${
-                  isSelected
-                    ? 'bg-marker-orange text-cream-paper border-[1.5px] border-charcoal font-semibold'
-                    : 'bg-dew-drop text-charcoal border-[1.5px] border-charcoal/30 hover:border-charcoal hover:bg-cream-paper'
-                }`}
-              >
-                <span>{year}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-[10px] font-mono ${
-                    isSelected
-                      ? 'bg-black/20 text-cream-paper'
-                      : 'bg-charcoal/10 text-charcoal'
-                  }`}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-
-          {years.length > 8 && (
-            <button
-              onClick={() => setShowAllYears(!showAllYears)}
-              className="inline-flex items-center gap-1 px-3 py-1 rounded-[20px] text-[12px] font-gelica text-charcoal bg-cream-paper border-[1.5px] border-charcoal/30 hover:border-charcoal transition-colors shadow-subtle"
-            >
-              <span>{showAllYears ? 'less years' : `+${years.length - 8} more`}</span>
-              {showAllYears ? (
-                <ChevronUp className="w-3 h-3" />
-              ) : (
-                <ChevronDown className="w-3 h-3" />
-              )}
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Scientific Auto-Tag Cloud — Dew Drop & Sprout Green Pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[13px] font-gelica text-charcoal/70 mr-1">
-          keywords:
-        </span>
-
-        {visibleTags.map((tag) => {
-          const isSelected = selectedTag === tag.name;
+        {categories.map((cat) => {
+          const isSelected = selectedCategory === cat;
           return (
             <button
-              key={tag.name}
-              onClick={() => setSelectedTag(isSelected ? null : tag.name)}
+              key={cat}
+              type="button"
+              onClick={() => setSelectedCategory(isSelected ? null : cat)}
               aria-pressed={isSelected}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-[20px] text-[12px] font-geist shadow-subtle transition-all ${
+              className={`px-3 py-1.5 rounded-[6px] text-[13px] font-geist transition-colors whitespace-nowrap shrink-0 ${
                 isSelected
-                  ? 'bg-marker-orange text-cream-paper border-[1.5px] border-charcoal font-medium'
-                  : 'bg-dew-drop text-charcoal border-[1.5px] border-charcoal/30 hover:border-charcoal hover:bg-cream-paper'
+                  ? 'bg-charcoal text-cream-paper font-medium'
+                  : 'text-charcoal/70 hover:text-charcoal hover:bg-cream-paper/70'
               }`}
             >
-              <span>#{tag.name}</span>
-              <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-[10px] font-mono ${
-                  isSelected
-                    ? 'bg-black/20 text-cream-paper'
-                    : 'bg-charcoal/10 text-charcoal'
-                }`}
-              >
-                {tag.count}
-              </span>
+              {cat}
             </button>
           );
         })}
-
-        {/* Toggle more tags */}
-        {tags.length > 12 && (
-          <button
-            onClick={() => setShowAllTags(!showAllTags)}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-[20px] text-[12px] font-gelica text-charcoal bg-cream-paper border-[1.5px] border-charcoal/30 hover:border-charcoal transition-colors shadow-subtle"
-          >
-            <span>{showAllTags ? 'less tags' : `+${tags.length - 12} more`}</span>
-            {showAllTags ? (
-              <ChevronUp className="w-3 h-3" />
-            ) : (
-              <ChevronDown className="w-3 h-3" />
-            )}
-          </button>
-        )}
-
-        {/* Clear Filter Control */}
-        {hasFilter && (
-          <button
-            onClick={() => {
-              setSelectedCategory(null);
-              setSelectedYear(null);
-              setSelectedTag(null);
-            }}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-[20px] text-[12px] font-gelica text-burnt-sienna hover:text-marker-orange border-[1.5px] border-burnt-sienna/40 hover:border-marker-orange transition-colors ml-1"
-          >
-            <X className="w-3 h-3" />
-            <span>reset filters</span>
-          </button>
-        )}
       </div>
+
+      {/* Collapsible Keywords Index — Only visible when toggled or when a tag is active */}
+      {(showTagsDrawer || selectedTag !== null) && (
+        <div className="pt-3 border-t border-charcoal/10 flex flex-wrap items-center gap-1.5">
+          <span className="text-[12px] text-charcoal/55 font-geist mr-1">
+            Filter by keyword:
+          </span>
+          {tags.map((tag) => {
+            const isSelected = selectedTag === tag.name;
+            return (
+              <button
+                key={tag.name}
+                type="button"
+                onClick={() => setSelectedTag(isSelected ? null : tag.name)}
+                aria-pressed={isSelected}
+                className={`px-2.5 py-1 rounded-[6px] text-[12px] font-geist transition-colors whitespace-nowrap shrink-0 tabular-nums ${
+                  isSelected
+                    ? 'bg-marker-orange text-cream-paper font-medium'
+                    : 'bg-cream-paper/80 text-charcoal/75 border border-charcoal/12 hover:border-charcoal/40 hover:text-charcoal'
+                }`}
+              >
+                #{tag.name} <span className="opacity-60">({tag.count})</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
     </section>
   );
 };
-

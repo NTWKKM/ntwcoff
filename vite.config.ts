@@ -1,10 +1,24 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+// Prevent Vite CLI from exiting immediately when stdin is closed (/dev/null) in non-TTY container environments
+if (!process.stdin.isTTY) {
+  process.env.CI = 'true';
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   base: './', // Relative base path ensures deployment works seamlessly on GitHub Pages subpaths
+  server: {
+    host: process.env.HOST || undefined,
+    port: 3000,
+    hmr: process.env.DISABLE_HMR !== 'true',
+  },
+  preview: {
+    host: process.env.HOST || undefined,
+    port: 3000,
+  },
   build: {
     chunkSizeWarningLimit: 700,
     rollupOptions: {
