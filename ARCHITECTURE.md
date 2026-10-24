@@ -20,12 +20,12 @@
                                                │
                                                ▼
                                  [Vite + React Research Portal]
-                                 ├── Navbar (Schoolyard Notebook Brand & Pill Buttons)
-                                 ├── HeroBanner (Lowercase gelica Display, Marker Highlight & Stickers)
-                                 ├── FilterBar (Segmented Category Tabs & Curated Keywords)
-                                 ├── PaperCard Grid (12px Cards, 20px Pill Buttons & Deferred Render)
-                                 ├── PaperReader (Optimal 65-75ch Measure, Sticky TOC & Progress Bar)
-                                 └── Footer Brand Band (56px Rounded Marker Orange Stripe)
+                                 ├── Navbar (Minimal Editorial Brand & Theme Toggle)
+                                 ├── HeroBanner (Lowercase Fraunces Display & Marker Highlight)
+                                 ├── FilterBar (Search, Year Select, Disciplines & Keywords Drawer)
+                                 ├── PaperCard Grid (10px Hairline Cards & Deferred Render)
+                                 ├── PaperReader (Native <dialog>, 64-70ch Measure, Sticky TOC)
+                                 └── Footer (Minimal Archival Footer)
                                                │
                                                ▼ (npm run build)
                                           [dist/ Static]
@@ -38,35 +38,31 @@
 
 1. **`scripts/sync_drive.py`**:
    - Boundary interface to Google Drive v3 API.
-   - Converts Google Docs to text / plain markdown.
+   - Exports Google Docs to plain text / markdown and caches `modifiedTime` in `raw_papers/.sync_manifest.json`.
    - Non-blocking: Handles missing credentials gracefully without breaking subsequent pipeline stages.
 
 2. **`scripts/prep_content.py`**:
-   - Parses Markdown AST & tables.
-   - Normalizes categories into 4 canonical scientific coffee domains.
-   - Extracts academic publication years (`publishedYear`) from journal citations.
-   - Applies deterministic taxonomy keyword matching to assign domain tags.
-   - Compiles search index, metadata summary, and reading time.
+   - Parses Markdown tables, bullet metadata, and Google Docs header formats, prioritizing authoritative `ชื่อบทความวิจัย` titles with fallback to filename slugs.
+   - Repairs Google Docs plain-text export artifacts (such as dangling `:**` markers and stripped math asterisks).
+   - Deduplicates papers by normalized title, automatically retaining the latest and most comprehensive monograph version.
+   - Normalizes categories into 4 canonical scientific coffee domains, extracts `publishedYear`, and assigns domain tags.
 
 3. **`src/components/KatexRenderer.tsx`**:
-   - Renders inline math `$math$` and display math `$$math$$` using KaTeX without hydration issues.
-   - Converts standard markdown headings, tables, blockquotes, and lists into accessible HTML.
-   - Supports configurable reading font sizes (`sm` 15px, `md` 17px, `lg` 19px) with generous line-height 1.8.
+   - Exports `parsePaperMarkdown(content)` which compiles both accessible HTML and Table of Contents (`TocItem[]`) in a single pass.
+   - Isolates `$math$` and `$$math$$` blocks before inline Markdown formatting so scientific notation (`L*a*b*`, `B3LYP/6-311G**`) and LaTeX (`%`, superscripts) never collide.
+   - Renders nested bullet/numbered lists, semantic tables, blockquotes, and tabular monospace parameter badges (`.param-badge`).
 
 4. **`src/components/PaperReader.tsx`**:
-   - Focus reading experience with capped 65ch–75ch measure, sticky Table of Contents (TOC) sidebar, and native Marker Orange scroll progress indicator.
-   - Built on native HTML `<dialog closedby="any">` with `.showModal()`, `::backdrop` blur, and graceful Safari click-boundary light-dismiss fallback.
-   - Decoupled scrollspy powered by `IntersectionObserver` avoiding main-thread layout thrashing.
-   - Code-split via `React.lazy` to keep the critical initial bundle feather-light.
+   - Built on native HTML `<dialog closedby="any">` with `.showModal()`, `::backdrop` blur, and click-boundary light-dismiss fallback.
+   - Provides adjustable reading ergonomics (`A-`/`A`/`A+` font sizes, `focus` 64ch / `standard` 70ch column width), clickable DOI/PMID/PMCID reference links, and one-click citation copying.
+   - Uses `IntersectionObserver` for TOC scrollspy and direct DOM `scaleX` transforms on the scroll progress bar to avoid React re-renders during scroll.
 
 5. **`src/components/PaperCard.tsx`**:
-   - Superr 12px tactile card surfaces on Cream Paper / Dew Drop with top-3 tag curation, publication year badge (`[ 📅 ปี 2024 ]`), 20px pill buttons, and below-the-fold `content-visibility: auto` performance optimization.
-   - Speculative `PaperReader` prefetch on card hover / focus for zero-perceived-latency modal open.
+   - Minimal 10px hairline cards on Cream Paper with unboxed metadata kickers (category, publication year, reading time), Fraunces display titles, and `content-visibility: auto` for below-the-fold cards.
 
 6. **`src/App.tsx` & Build Architecture**:
-   - Vite Rollup chunk optimization isolating `papers-data`, `lucide-icons`, and lazy `PaperReader` chunks.
-   - Zero-FOUC theme initialization with inline head script and `color-scheme: light dark` root property.
-   - Accessible navigation landmarks (`<main id="main-content">`, skip-to-content link, accessible search form, live regions).
+   - Consumes pre-sorted `papers.json` and `taxonomy.json` for instant client-side filtering across search query, discipline, publication year, and keyword tag.
+   - Zero-FOUC theme initialization via inline head script in `index.html` and `color-scheme: light dark`.
 
 ## 3. Data Flow & Decoupled CI/CD Pipelines
 
@@ -74,11 +70,8 @@
 - **Git Versioned Storage**: `raw_papers/` and `src/data/` capture paper updates in Git commits.
 - **Decoupled Workflows**:
    1. **`.github/workflows/sync.yml` (`Sync Content from Google Drive`)**:
-      - Dedicated Google Drive sync & content pipeline. Runs daily at 12:17 ICT (05:17 UTC, avoiding top-of-hour GitHub Actions congestion) or on manual trigger.
-      - Enforces single concurrency (`group: sync-gdrive`) and resilient `git pull --rebase` pushes.
-      - Runs idempotent content preparation in `scripts/prep_content.py` that preserves `taxonomy.lastUpdated` when content is unchanged, preventing redundant daily commits and zero-change deployments.
+      - Runs daily at 12:17 ICT (05:17 UTC) or on manual trigger.
+      - Enforces single concurrency (`group: sync-gdrive`) and idempotent content preparation (`scripts/prep_content.py`), preserving `taxonomy.lastUpdated` when content is unchanged.
    2. **`.github/workflows/deploy.yml` (`Deploy Web Application to GitHub Pages`)**:
-      - Dedicated Vite build and GitHub Pages deployment.
-      - Triggers immediately on `push: branches: [main]`, manual `workflow_dispatch`, and reactively upon completion of `Sync Content from Google Drive` via `workflow_run`.
+      - Triggers on `push: branches: [main]`, `workflow_dispatch`, and upon completion of `Sync Content from Google Drive` via `workflow_run`.
       - Deploys static build in `dist/` using `actions/upload-pages-artifact@v3` and `actions/deploy-pages@v4`.
-- **Hosting**: GitHub Pages serving pre-rendered static artifacts at `https://ntwkkm.github.io/ntwcoff/`.

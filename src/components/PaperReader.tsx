@@ -2,25 +2,14 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Paper } from '../types';
 import {
   KatexRenderer,
-  slugifyHeading,
-  createHeadingTracker,
-  cleanArticleContent,
+  parsePaperMarkdown,
 } from './KatexRenderer';
 import {
   X,
   ArrowLeft,
-  Share2,
   Copy,
   Check,
-  Calendar,
-  Clock,
-  GraduationCap,
-  BookOpen,
-  Building,
   List,
-  Type,
-  Maximize2,
-  Minimize2,
 } from 'lucide-react';
 
 interface PaperReaderProps {
@@ -29,14 +18,58 @@ interface PaperReaderProps {
   onTagClick: (tag: string) => void;
 }
 
-interface TocItem {
-  id: string;
-  title: string;
-  level: number;
-}
-
 const closedByAttr: React.DialogHTMLAttributes<HTMLDialogElement> = {
   closedby: 'any',
+};
+
+const renderSourceLinks = (linksText: string): React.ReactNode => {
+  // Match DOIs (10.xxxx/...), PMCID (PMC...), PMID, or direct https:// URLs
+  const tokenRegex =
+    /(https?:\/\/[^\s)]+|10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+|PMC\d+|PMID:\s*\d+)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = tokenRegex.exec(linksText)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(linksText.slice(lastIndex, match.index));
+    }
+    const rawToken = match[0];
+    const cleanToken = rawToken.replace(/[.,;)]+$/, '');
+    const trailing = rawToken.slice(cleanToken.length);
+
+    let href = cleanToken;
+    if (cleanToken.startsWith('10.')) {
+      href = `https://doi.org/${cleanToken}`;
+    } else if (cleanToken.startsWith('PMC')) {
+      href = `https://pmc.ncbi.nlm.nih.gov/articles/${cleanToken}/`;
+    } else if (cleanToken.startsWith('PMID:')) {
+      const pmid = cleanToken.replace(/^PMID:\s*/, '');
+      href = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`;
+    }
+
+    parts.push(
+      <a
+        key={match.index}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-burnt-sienna hover:text-marker-orange underline underline-offset-2 transition-colors"
+      >
+        {cleanToken}
+      </a>
+    );
+    if (trailing) {
+      parts.push(trailing);
+    }
+    lastIndex = tokenRegex.lastIndex;
+  }
+
+  if (lastIndex < linksText.length) {
+    parts.push(linksText.slice(lastIndex));
+  }
+
+  return parts;
 };
 
 export const PaperReader: React.FC<PaperReaderProps> = ({
@@ -46,17 +79,23 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>('md');
-  const [columnWidth, setColumnWidth] = useState<'focus' | 'standard' | 'wide'>('standard');
+  const [columnWidth, setColumnWidth] = useState<'focus' | 'standard'>('standard');
   const [showTocMobile, setShowTocMobile] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState<string>('');
 
   const dialogRef = useRef<HTMLDialogElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const modalContentRef = useRef<HTMLDivElement>(null);
-  const rafIdRef = useRef<number | null>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const copyTimeoutRef = useRef<number | null>(null);
 
-  // Synchronize native <dialog> open state via showModal()
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current !== null) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -65,57 +104,31 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
       if (!dialog.open) {
         dialog.showModal();
       }
-    } else {
-      if (dialog.open) {
-        dialog.close();
-      }
+    } else if (dialog.open) {
+      dialog.close();
     }
   }, [paper]);
 
-  // Clean up RAF on unmount
-  useEffect(() => {
-    return () => {
-      if (rafIdRef.current !== null) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-    };
-  }, []);
-
-
-  // Reset scroll and progress when paper changes
   useEffect(() => {
     if (paper?.id) {
-      setScrollProgress(0);
       setActiveSection('');
+      setShowTocMobile(false);
+      setCopied(false);
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop = 0;
+      }
+      if (progressBarRef.current) {
+        progressBarRef.current.style.transform = 'scaleX(0)';
       }
     }
   }, [paper?.id]);
 
-  // Extract Table of Contents (TOC) from Markdown headings with unique IDs
-  const tocItems = useMemo<TocItem[]>(() => {
-    if (!paper) return [];
-    const items: TocItem[] = [];
-    const tracker = createHeadingTracker();
-    const sanitized = cleanArticleContent(paper.content);
-    const lines = sanitized.split('\n');
+  // Single-pass compilation of both HTML body and TOC items
+  const { html: renderedHtml, toc: tocItems } = useMemo(
+    () => parsePaperMarkdown(paper?.content || ''),
+    [paper?.content]
+  );
 
-    for (const line of lines) {
-      if (line.startsWith('## ')) {
-        const title = line.replace('## ', '').trim();
-        const id = slugifyHeading(title, tracker);
-        items.push({ id, title, level: 2 });
-      } else if (line.startsWith('### ')) {
-        const title = line.replace('### ', '').trim();
-        const id = slugifyHeading(title, tracker);
-        items.push({ id, title, level: 3 });
-      }
-    }
-    return items;
-  }, [paper]);
-
-  // Scrollspy via IntersectionObserver: watches headings cleanly without layout thrashing
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container || !paper || tocItems.length === 0) return;
@@ -146,58 +159,32 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
     return () => observer.disconnect();
   }, [tocItems, paper?.id]);
 
-  // Track scroll progress with RAF fallback (only active when CSS scroll-timeline is not supported or reduced motion requested)
   const handleScroll = () => {
-    const isCssProgressActive =
-      typeof CSS !== 'undefined' &&
-      typeof CSS.supports === 'function' &&
-      (CSS.supports('(animation-timeline: --reader-scroll) and (timeline-scope: --reader-scroll)') ||
-        (CSS.supports('animation-timeline', '--reader-scroll') && CSS.supports('timeline-scope', '--reader-scroll')));
+    const el = scrollContainerRef.current;
+    const bar = progressBarRef.current;
+    if (!el || !bar) return;
 
-    const prefersReducedMotion =
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (isCssProgressActive && !prefersReducedMotion) {
-      return;
-    }
-
-    if (rafIdRef.current !== null) return;
-
-    rafIdRef.current = requestAnimationFrame(() => {
-      rafIdRef.current = null;
-      const el = scrollContainerRef.current;
-      if (!el) return;
-
-      const scrollTop = el.scrollTop;
-      const scrollHeight = el.scrollHeight - el.clientHeight;
-      if (scrollHeight > 0) {
-        setScrollProgress(Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)));
-      }
-    });
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    const ratio = maxScroll > 0 ? Math.min(1, Math.max(0, el.scrollTop / maxScroll)) : 0;
+    bar.style.transform = `scaleX(${ratio})`;
   };
 
-  // Handle native cancel event (e.g. Esc key pressed on modal)
   const handleCancel = (e: React.SyntheticEvent) => {
     e.preventDefault();
     onClose();
   };
 
-  // Light-dismiss click handler with Safari fallback
   const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    // If closedby is not supported, detect click outside content box
     if (!('closedBy' in HTMLDialogElement.prototype)) {
       const dialog = dialogRef.current;
       if (!dialog || e.target !== dialog) return;
 
       const rect = dialog.getBoundingClientRect();
-      const isInside = (
+      const isInside =
         rect.top <= e.clientY &&
         e.clientY <= rect.top + rect.height &&
         rect.left <= e.clientX &&
-        e.clientX <= rect.left + rect.width
-      );
+        e.clientX <= rect.left + rect.width;
 
       if (!isInside) {
         onClose();
@@ -206,11 +193,20 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
   };
 
   const copyCitation = () => {
-    if (!paper) return;
+    if (!paper || !navigator.clipboard) return;
     const citation = `${paper.authors || 'Unknown'} (${paper.publishedYear || 'n.d.'}). ${paper.title}. ${paper.journal || ''}.`;
-    navigator.clipboard.writeText(citation);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard
+      .writeText(citation)
+      .then(() => {
+        setCopied(true);
+        if (copyTimeoutRef.current !== null) {
+          window.clearTimeout(copyTimeoutRef.current);
+        }
+        copyTimeoutRef.current = window.setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {
+        // Ignore clipboard permission errors in restricted contexts
+      });
   };
 
   const scrollToHeading = (id: string) => {
@@ -228,13 +224,8 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
     }
   };
 
-  // Determine prose column max-width for optimal reading measure
   const columnWidthClass =
-    columnWidth === 'focus'
-      ? 'max-w-[65ch]'
-      : columnWidth === 'wide'
-      ? 'max-w-[88ch]'
-      : 'max-w-[72ch]';
+    columnWidth === 'focus' ? 'max-w-[64ch]' : 'max-w-[70ch]';
 
   return (
     <dialog
@@ -246,339 +237,275 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
       aria-labelledby={paper ? 'reader-dialog-title' : undefined}
     >
       {paper && (
-        <div
-          ref={modalContentRef}
-          className="reader-modal-card bg-cream-paper text-charcoal w-full rounded-none sm:rounded-[16px] border-[1.5px] border-charcoal flex flex-col max-h-screen sm:max-h-[94vh] overflow-hidden shadow-card relative"
-        >
-        {/* Native Scroll Progress Indicator in Marker Orange */}
-        <div
-          aria-hidden="true"
-          style={{ width: `${scrollProgress}%` }}
-          className="reading-progress-bar absolute top-0 left-0 h-[3px] bg-marker-orange z-30 transition-[width] duration-75 ease-out motion-reduce:transition-none"
-        />
+        <div className="bg-cream-paper text-charcoal w-full rounded-none sm:rounded-[12px] border border-charcoal/20 flex flex-col max-h-screen sm:max-h-[92vh] overflow-hidden shadow-card relative">
+          {/* Thin Scroll Progress Bar (Direct DOM transform — zero React re-renders) */}
+          <div
+            ref={progressBarRef}
+            aria-hidden="true"
+            style={{ transform: 'scaleX(0)' }}
+            className="absolute top-0 left-0 w-full h-[2px] bg-marker-orange z-30 origin-left transition-transform duration-75 ease-out motion-reduce:transition-none"
+          />
 
-        {/* Sticky Reader Toolbar */}
-        <header className="sticky top-0 z-20 px-4 sm:px-6 py-2.5 bg-cream-paper/95 backdrop-blur-md border-b-[1.5px] border-charcoal/20 flex items-center justify-between gap-3">
-          {/* Left Action: Return Button */}
-          <button
-            onClick={onClose}
-            className="superr-pill-btn !py-1 !px-3 !text-[12px]"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 text-charcoal" />
-            <span>ย้อนกลับ</span>
-          </button>
-
-          {/* Center Reading Controls: Font Size, Column Width, TOC Drawer */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Font Size Adjuster */}
-            <div className="flex items-center rounded-[20px] bg-dew-drop border-[1.5px] border-charcoal/30 p-0.5 shadow-subtle">
-              <button
-                onClick={() => setFontSize('sm')}
-                className={`px-2 py-0.5 rounded-[16px] text-[11px] font-gelica transition-all ${
-                  fontSize === 'sm'
-                    ? 'bg-charcoal text-cream-paper font-semibold'
-                    : 'text-charcoal/70 hover:text-charcoal'
-                }`}
-                title="ขนาดตัวอักษรเล็ก (15px)"
-              >
-                A-
-              </button>
-              <button
-                onClick={() => setFontSize('md')}
-                className={`px-2 py-0.5 rounded-[16px] text-[11px] font-gelica transition-all ${
-                  fontSize === 'md'
-                    ? 'bg-charcoal text-cream-paper font-semibold'
-                    : 'text-charcoal/70 hover:text-charcoal'
-                }`}
-                title="ขนาดตัวอักษรมาตรฐาน (17px)"
-              >
-                A
-              </button>
-              <button
-                onClick={() => setFontSize('lg')}
-                className={`px-2 py-0.5 rounded-[16px] text-[11px] font-gelica transition-all ${
-                  fontSize === 'lg'
-                    ? 'bg-charcoal text-cream-paper font-semibold'
-                    : 'text-charcoal/70 hover:text-charcoal'
-                }`}
-                title="ขนาดตัวอักษรใหญ่ (19px)"
-              >
-                A+
-              </button>
-            </div>
-
-            {/* Reading Column Measure Adjuster */}
-            <div className="hidden sm:flex items-center rounded-[20px] bg-dew-drop border-[1.5px] border-charcoal/30 p-0.5 shadow-subtle">
-              <button
-                onClick={() => setColumnWidth('focus')}
-                className={`px-2.5 py-0.5 rounded-[16px] text-[11px] font-gelica transition-all ${
-                  columnWidth === 'focus'
-                    ? 'bg-charcoal text-cream-paper font-semibold'
-                    : 'text-charcoal/70 hover:text-charcoal'
-                }`}
-                title="คอลัมน์โฟกัส (65 ตัวอักษร/บรรทัด)"
-              >
-                focus
-              </button>
-              <button
-                onClick={() => setColumnWidth('standard')}
-                className={`px-2.5 py-0.5 rounded-[16px] text-[11px] font-gelica transition-all ${
-                  columnWidth === 'standard'
-                    ? 'bg-charcoal text-cream-paper font-semibold'
-                    : 'text-charcoal/70 hover:text-charcoal'
-                }`}
-                title="คอลัมน์มาตรฐาน (72 ตัวอักษร/บรรทัด)"
-              >
-                standard
-              </button>
-            </div>
-
-            {/* Mobile TOC Drawer Toggle */}
-            {tocItems.length > 0 && (
-              <button
-                onClick={() => setShowTocMobile(!showTocMobile)}
-                className="lg:hidden superr-pill-btn !py-1 !px-2.5 !text-[12px]"
-                title="สารบัญงานวิจัย (Table of Contents)"
-              >
-                <List className="w-3.5 h-3.5 text-charcoal" />
-                <span className="hidden xs:inline">สารบัญ</span>
-              </button>
-            )}
-          </div>
-
-          {/* Right Action: Copy Citation & Close */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={copyCitation}
-              className="superr-pill-btn !py-1 !px-3 !text-[12px]"
-              title="คัดลอกรายการอ้างอิง (Citation)"
-            >
-              {copied ? (
-                <Check className="w-3.5 h-3.5 text-marker-orange" />
-              ) : (
-                <Copy className="w-3.5 h-3.5 text-charcoal" />
-              )}
-              <span className="hidden xs:inline">{copied ? 'คัดลอกแล้ว' : 'citation'}</span>
-            </button>
-
+          {/* Sticky Reader Toolbar */}
+          <header className="sticky top-0 z-20 px-4 sm:px-6 py-2.5 bg-cream-paper/95 backdrop-blur-md border-b border-charcoal/12 flex items-center justify-between gap-3">
             <button
               onClick={onClose}
-              className="p-1.5 rounded-[20px] text-charcoal/70 hover:text-charcoal hover:bg-dew-drop transition-colors"
-              aria-label="Close reader"
+              className="superr-pill-btn"
             >
-              <X className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5 text-charcoal" />
+              <span>Back</span>
             </button>
-          </div>
-        </header>
 
-        {/* Mobile TOC Drawer (Collapsible) */}
-        {showTocMobile && tocItems.length > 0 && (
-          <div className="lg:hidden bg-dew-drop border-b-[1.5px] border-charcoal p-4 max-h-60 overflow-y-auto animate-fadeIn">
-            <div className="text-[13px] font-gelica font-semibold text-cocoa-ink mb-2">
-              สารบัญเนื้อหาวิจัย:
-            </div>
-            <ul className="space-y-1.5 text-[13px] font-geist">
-              {tocItems.map((item) => (
-                <li key={item.id}>
+            {/* Center Reading Controls */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center rounded-[8px] bg-dew-drop border border-charcoal/15 p-0.5">
+                {(['sm', 'md', 'lg'] as const).map((sz, i) => (
                   <button
-                    onClick={() => scrollToHeading(item.id)}
-                    className={`text-left w-full truncate transition-colors ${
-                      item.level === 3 ? 'pl-3 text-[12px]' : ''
-                    } ${
-                      activeSection === item.id
-                        ? 'text-marker-orange font-medium'
-                        : 'text-charcoal/80 hover:text-cocoa-ink'
+                    key={sz}
+                    onClick={() => setFontSize(sz)}
+                    className={`px-2.5 py-0.5 rounded-[6px] text-[11px] font-geist transition-colors whitespace-nowrap shrink-0 ${
+                      fontSize === sz
+                        ? 'bg-cream-paper text-cocoa-ink font-semibold shadow-sm'
+                        : 'text-charcoal/65 hover:text-charcoal'
                     }`}
                   >
-                    • {item.title}
+                    {i === 0 ? 'A-' : i === 1 ? 'A' : 'A+'}
                   </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Main Content Area: Split Stage with Sticky TOC Sidebar on Large Screens */}
-        <div
-          ref={scrollContainerRef}
-          onScroll={handleScroll}
-          className="reader-scroll-container flex-1 overflow-y-auto px-6 sm:px-10 lg:px-12 py-8 space-y-8"
-        >
-          <div className="max-w-5xl mx-auto flex gap-10 items-start">
-            
-            {/* Primary Reading Article Column (Capped Measure for Optimal Ergonomics) */}
-            <article className={`flex-1 mx-auto w-full ${columnWidthClass}`}>
-              
-              {/* Monograph Header */}
-              <div className="space-y-3.5 pb-6 border-b-[1.5px] border-charcoal/15">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-3 py-0.5 rounded-[20px] bg-dew-drop border-[1.5px] border-charcoal/30 text-[12px] font-gelica text-charcoal">
-                    {paper.category}
-                  </span>
-
-                  {(paper.publishedYear || paper.journal.match(/\b(19\d{2}|20\d{2})\b/)?.[1]) && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[20px] bg-dew-drop border-[1.5px] border-charcoal/30 text-[12px] font-mono text-cocoa-ink font-semibold">
-                      <Calendar className="w-3.5 h-3.5 text-marker-orange" />
-                      ตีพิมพ์ปี {paper.publishedYear || paper.journal.match(/\b(19\d{2}|20\d{2})\b/)?.[1]}
-                    </span>
-                  )}
-
-                  <span className="flex items-center gap-1 text-[12px] text-charcoal/70 font-geist">
-                    <Clock className="w-3.5 h-3.5 text-charcoal/50" />
-                    เวลาอ่าน {paper.readingTimeMinutes} นาที
-                  </span>
-                </div>
-
-                {/* Monograph Title: gelica 600 weight, Cocoa Ink, lowercase */}
-                <h1
-                  id="reader-dialog-title"
-                  className="text-3xl sm:text-4xl md:text-[42px] font-gelica font-semibold lowercase leading-[1.12] text-cocoa-ink tracking-normal text-balance"
-                >
-                  {paper.title}
-                </h1>
-
-                {paper.documentHeader && (
-                  <p className="text-[12px] text-charcoal/60 font-mono">
-                    ต้นฉบับ: {paper.documentHeader}
-                  </p>
-                )}
+                ))}
               </div>
 
-              {/* Research Specifications Card — School Laminated Name Label in Dew Drop */}
-              <div className="rounded-[12px] bg-dew-drop border-[1.5px] border-charcoal p-5 sm:p-6 my-6 border-l-4 border-l-marker-orange shadow-subtle">
-                <h3 className="text-[13px] font-gelica font-semibold text-cocoa-ink flex items-center gap-2 mb-3">
-                  ข้อมูลจำเพาะงานวิจัย (Research Specifications)
-                </h3>
+              <div className="hidden sm:flex items-center rounded-[8px] bg-dew-drop border border-charcoal/15 p-0.5">
+                {(['focus', 'standard'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setColumnWidth(mode)}
+                    className={`px-2.5 py-0.5 rounded-[6px] text-[11px] font-geist transition-colors whitespace-nowrap shrink-0 capitalize ${
+                      columnWidth === mode
+                        ? 'bg-cream-paper text-cocoa-ink font-semibold shadow-sm'
+                        : 'text-charcoal/65 hover:text-charcoal'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[13px] font-geist">
-                  {(paper.publishedYear || paper.journal.match(/\b(19\d{2}|20\d{2})\b/)?.[1]) && (
-                    <div className="flex items-start gap-2">
-                      <Calendar className="w-4 h-4 text-marker-orange mt-0.5 shrink-0" />
-                      <div>
-                        <strong className="text-cocoa-ink font-medium">ปีที่เผยแพร่:</strong>
-                        <div className="text-charcoal/80 mt-0.5 font-mono">
-                          {paper.publishedYear || paper.journal.match(/\b(19\d{2}|20\d{2})\b/)?.[1]}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+              {tocItems.length > 0 && (
+                <button
+                  onClick={() => setShowTocMobile(!showTocMobile)}
+                  className="lg:hidden superr-pill-btn"
+                  title="Table of Contents"
+                >
+                  <List className="w-3.5 h-3.5 text-charcoal" />
+                  <span className="hidden sm:inline">Contents</span>
+                </button>
+              )}
+            </div>
 
+            {/* Right Action: Copy Citation & Close */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={copyCitation}
+                className="superr-pill-btn"
+                title="Copy citation"
+              >
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-marker-orange" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-charcoal" />
+                )}
+                <span className="hidden sm:inline">{copied ? 'Copied' : 'Cite'}</span>
+              </button>
+
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-[8px] text-charcoal/60 hover:text-charcoal hover:bg-dew-drop transition-colors"
+                aria-label="Close reader"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </header>
+
+          {/* Mobile TOC Drawer */}
+          {showTocMobile && tocItems.length > 0 && (
+            <div className="lg:hidden bg-dew-drop border-b border-charcoal/15 p-4 max-h-60 overflow-y-auto animate-fadeIn">
+              <div className="text-[12px] font-geist font-semibold text-charcoal/60 mb-2">
+                Contents
+              </div>
+              <ul className="space-y-1.5 text-[13px] font-geist">
+                {tocItems.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => scrollToHeading(item.id)}
+                      className={`text-left w-full truncate transition-colors ${
+                        item.level === 3 ? 'pl-3 text-[12px]' : ''
+                      } ${
+                        activeSection === item.id
+                          ? 'text-marker-orange font-medium'
+                          : 'text-charcoal/75 hover:text-cocoa-ink'
+                      }`}
+                    >
+                      {item.title}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Main Scrollable Monograph Area */}
+          <div
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex-1 overflow-y-auto px-6 sm:px-10 lg:px-12 py-8 sm:py-10"
+          >
+            <div className="max-w-5xl mx-auto flex gap-12 items-start">
+              
+              {/* Primary Reading Column */}
+              <article className={`flex-1 mx-auto w-full ${columnWidthClass}`}>
+                
+                {/* Monograph Header — Clean Unboxed Metadata */}
+                <div className="space-y-3 pb-6 border-b border-charcoal/12">
+                  <div className="flex flex-wrap items-center gap-2 text-[12px] text-charcoal/60 font-geist tabular-nums">
+                    <span className="text-burnt-sienna font-medium">{paper.category}</span>
+                    {paper.publishedYear && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <span className="font-mono">{paper.publishedYear}</span>
+                      </>
+                    )}
+                    <span aria-hidden="true">·</span>
+                    <span>{paper.readingTimeMinutes} min read</span>
+                  </div>
+
+                  <h1
+                    id="reader-dialog-title"
+                    className="text-2xl sm:text-4xl font-gelica font-semibold lowercase leading-[1.14] text-cocoa-ink tracking-tight text-balance"
+                  >
+                    {paper.title}
+                  </h1>
+                </div>
+
+                {/* Archival Accession Metadata Grid */}
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 py-5 my-6 px-5 rounded-[8px] bg-dew-drop/70 border border-charcoal/12 text-[13px] font-geist">
                   {paper.authors && (
-                    <div className="flex items-start gap-2">
-                      <GraduationCap className="w-4 h-4 text-marker-orange mt-0.5 shrink-0" />
-                      <div>
-                        <strong className="text-cocoa-ink font-medium">คณะผู้วิจัย:</strong>
-                        <div className="text-charcoal/80 mt-0.5">{paper.authors}</div>
-                      </div>
-                    </div>
-                  )}
-
-                  {paper.institution && (
-                    <div className="flex items-start gap-2">
-                      <Building className="w-4 h-4 text-marker-orange mt-0.5 shrink-0" />
-                      <div>
-                        <strong className="text-cocoa-ink font-medium">สถาบันวิจัย:</strong>
-                        <div className="text-charcoal/80 mt-0.5">{paper.institution}</div>
-                      </div>
+                    <div>
+                      <dt className="text-[11px] text-charcoal/55 mb-0.5">Authors</dt>
+                      <dd className="text-cocoa-ink font-medium">{paper.authors}</dd>
                     </div>
                   )}
 
                   {paper.journal && (
-                    <div className="flex items-start gap-2">
-                      <BookOpen className="w-4 h-4 text-charcoal/60 mt-0.5 shrink-0" />
-                      <div>
-                        <strong className="text-cocoa-ink font-medium">วารสารวิชาการ:</strong>
-                        <div className="text-charcoal/80 mt-0.5">{paper.journal}</div>
-                      </div>
+                    <div>
+                      <dt className="text-[11px] text-charcoal/55 mb-0.5">Journal</dt>
+                      <dd className="text-charcoal/85">{paper.journal}</dd>
+                    </div>
+                  )}
+
+                  {paper.institution && (
+                    <div>
+                      <dt className="text-[11px] text-charcoal/55 mb-0.5">Institution</dt>
+                      <dd className="text-charcoal/85">{paper.institution}</dd>
+                    </div>
+                  )}
+
+                  {paper.publishedYear && (
+                    <div>
+                      <dt className="text-[11px] text-charcoal/55 mb-0.5">Published</dt>
+                      <dd className="text-charcoal/85 font-mono tabular-nums">{paper.publishedYear}</dd>
                     </div>
                   )}
 
                   {paper.links && (
-                    <div className="flex items-start gap-2">
-                      <Share2 className="w-4 h-4 text-charcoal/60 mt-0.5 shrink-0" />
-                      <div>
-                        <strong className="text-cocoa-ink font-medium">แหล่งอ้างอิง:</strong>
-                        <div className="text-burnt-sienna mt-0.5 break-all hover:underline">{paper.links}</div>
-                      </div>
+                    <div className="sm:col-span-2">
+                      <dt className="text-[11px] text-charcoal/55 mb-0.5">Source / Reference</dt>
+                      <dd className="text-charcoal/85 break-words">{renderSourceLinks(paper.links)}</dd>
                     </div>
                   )}
+
+                  {paper.tags.length > 0 && (
+                    <div className="sm:col-span-2 pt-2.5 mt-1 border-t border-charcoal/10 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <dt className="text-[11px] text-charcoal/55 mr-1">Keywords:</dt>
+                      {paper.tags.map((tag, idx) => (
+                        <React.Fragment key={tag}>
+                          <dd>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onClose();
+                                onTagClick(tag);
+                              }}
+                              className="text-[12px] text-charcoal/75 hover:text-marker-orange hover:underline underline-offset-2 transition-colors"
+                            >
+                              #{tag}
+                            </button>
+                          </dd>
+                          {idx < paper.tags.length - 1 && (
+                            <span className="text-charcoal/30" aria-hidden="true">·</span>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  )}
+                </dl>
+
+                {/* Markdown & KaTeX Main Content */}
+                <div className="pt-2">
+                  <KatexRenderer html={renderedHtml} fontSize={fontSize} />
                 </div>
 
-                {/* Keywords row with 20px pills */}
-                <div className="pt-3 mt-3 border-t-[1.5px] border-charcoal/15 flex flex-wrap items-center gap-1.5">
-                  <span className="text-[12px] font-gelica text-charcoal/70 mr-1">
-                    คีย์เวิร์ด:
-                  </span>
-                  {paper.tags.map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => {
-                        onClose();
-                        onTagClick(tag);
-                      }}
-                      className="px-2.5 py-0.5 rounded-[20px] text-[11px] font-geist bg-cream-paper text-charcoal hover:bg-dew-drop border-[1.5px] border-charcoal/30 transition-colors shadow-subtle"
-                    >
-                      #{tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                {/* Bottom Return Control */}
+                <div className="pt-10 pb-4 mt-10 border-t border-charcoal/12 flex justify-between items-center">
+                  <button
+                    onClick={onClose}
+                    className="superr-pill-btn"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5 text-charcoal" />
+                    <span>Back to archive</span>
+                  </button>
 
-              {/* Markdown & KaTeX Main Content */}
-              <div className="pt-2">
-                <KatexRenderer content={paper.content} fontSize={fontSize} />
-              </div>
-
-              {/* Bottom Return Button — Superr Pill Action Button */}
-              <div className="pt-10 pb-6 border-t-[1.5px] border-charcoal/15 flex justify-center">
-                <button
-                  onClick={onClose}
-                  className="superr-pill-btn !py-2.5 !px-6 !text-[14px]"
-                >
-                  <ArrowLeft className="w-4 h-4 text-charcoal" />
-                  <span>ปิดหน้าต่างนี้และกลับสู่คลังวิจัย</span>
-                </button>
-              </div>
-
-            </article>
-
-            {/* Sticky Table of Contents Sidebar (Desktop Screens) */}
-            {tocItems.length > 0 && (
-              <aside className="hidden lg:block w-64 shrink-0 sticky top-4 self-start rounded-[12px] bg-dew-drop border-[1.5px] border-charcoal p-4 shadow-subtle">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b-[1.5px] border-charcoal/15">
-                  <List className="w-4 h-4 text-marker-orange" />
-                  <span className="text-[13px] font-gelica font-semibold text-cocoa-ink lowercase">
-                    สารบัญเนื้อหา
+                  <span className="text-[12px] text-charcoal/50 font-mono tabular-nums">
+                    {paper.wordCount.toLocaleString()} words
                   </span>
                 </div>
 
-                <nav className="max-h-[60vh] overflow-y-auto space-y-1.5 pr-1 text-[13px] font-geist">
-                  {tocItems.map((item) => {
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => scrollToHeading(item.id)}
-                        className={`text-left w-full block transition-all rounded-[6px] px-2 py-1 ${
-                          item.level === 3 ? 'pl-4 text-[12px]' : ''
-                        } ${
-                          isActive
-                            ? 'bg-cream-paper text-marker-orange font-semibold border-l-2 border-l-marker-orange shadow-subtle'
-                            : 'text-charcoal/70 hover:text-cocoa-ink hover:bg-cream-paper/50'
-                        }`}
-                      >
-                        <span className="truncate block">{item.title}</span>
-                      </button>
-                    );
-                  })}
-                </nav>
-              </aside>
-            )}
+              </article>
 
+              {/* Minimal Sticky Table of Contents Rail (Desktop) */}
+              {tocItems.length > 0 && (
+                <aside className="hidden lg:block w-56 shrink-0 sticky top-4 self-start pl-5 border-l border-charcoal/12">
+                  <div className="text-[11px] font-geist font-semibold text-charcoal/50 mb-2.5">
+                    On this page
+                  </div>
+
+                  <nav className="max-h-[65vh] overflow-y-auto space-y-1 text-[12.5px] font-geist">
+                    {tocItems.map((item) => {
+                      const isActive = activeSection === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => scrollToHeading(item.id)}
+                          className={`text-left w-full block transition-colors py-1 ${
+                            item.level === 3 ? 'pl-3 text-[12px]' : ''
+                          } ${
+                            isActive
+                              ? 'text-marker-orange font-medium'
+                              : 'text-charcoal/60 hover:text-cocoa-ink'
+                          }`}
+                        >
+                          <span className="truncate block">{item.title}</span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </aside>
+              )}
+
+            </div>
           </div>
-        </div>
 
-      </div>
+        </div>
       )}
     </dialog>
   );

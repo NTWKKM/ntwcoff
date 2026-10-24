@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import rawPapers from './data/papers.json';
 import rawTaxonomy from './data/taxonomy.json';
 import { Paper, Taxonomy } from './types';
@@ -6,76 +6,21 @@ import { Navbar } from './components/Navbar';
 import { HeroBanner } from './components/HeroBanner';
 import { FilterBar } from './components/FilterBar';
 import { PaperCard } from './components/PaperCard';
-import { SearchX, Sparkles } from 'lucide-react';
-
-// Code-split PaperReader & KaTeX engine to drastically reduce initial payload
-const loadPaperReader = () =>
-  import('./components/PaperReader').then((m) => ({ default: m.PaperReader }));
-
-interface PaperReaderErrorBoundaryProps {
-  children: React.ReactNode;
-  onRetry: () => void;
-}
-
-interface PaperReaderErrorBoundaryState {
-  hasError: boolean;
-}
-
-class PaperReaderErrorBoundary extends React.Component<
-  PaperReaderErrorBoundaryProps,
-  PaperReaderErrorBoundaryState
-> {
-  constructor(props: PaperReaderErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Failed to load PaperReader chunk:', error, errorInfo);
-  }
-
-  handleRetry = () => {
-    this.setState({ hasError: false });
-    this.props.onRetry();
-  };
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <aside
-          role="alert"
-          aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 max-w-md bg-cream-paper text-charcoal border-[1.5px] border-charcoal p-4 rounded-[12px] shadow-card flex items-center justify-between gap-4 motion-safe:animate-fadeIn"
-        >
-          <div className="text-[13px]">
-            <p className="font-semibold text-charcoal">ไม่สามารถโหลดเนื้อหางานวิจัยได้</p>
-            <p className="text-charcoal/70">โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</p>
-          </div>
-          <button
-            onClick={this.handleRetry}
-            className="superr-pill-btn !py-1.5 !px-3 !text-[12px] shrink-0"
-          >
-            ลองใหม่อีกครั้ง
-          </button>
-        </aside>
-      );
-    }
-    return this.props.children;
-  }
-}
+import { PaperReader } from './components/PaperReader';
+import { SearchX } from 'lucide-react';
 
 const papersData = rawPapers as Paper[];
 const taxonomyData = rawTaxonomy as Taxonomy;
 
 export const App: React.FC = () => {
-  // Theme state — Reads persisted preference, defaulting to system preference
+  // Theme state — Reads persisted preference safely, defaulting to system preference
   const [isDark, setIsDark] = useState<boolean>(() => {
-    const saved = localStorage.getItem('ntwcoff_theme');
-    if (saved) return saved === 'dark';
+    try {
+      const saved = localStorage.getItem('ntwcoff_theme');
+      if (saved === 'dark' || saved === 'light') return saved === 'dark';
+    } catch {
+      // Ignore storage access errors in restricted frames
+    }
     if (typeof window !== 'undefined' && window.matchMedia) {
       return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
@@ -89,55 +34,15 @@ export const App: React.FC = () => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
 
-  // Lazy component state & key to force reload/remount of PaperReader on error retry
-  const [PaperReaderComponent, setPaperReaderComponent] = useState(() =>
-    React.lazy(loadPaperReader)
-  );
-  const [readerRetryKey, setReaderRetryKey] = useState(0);
-
-  const handleRetryReader = () => {
-    setPaperReaderComponent(() => React.lazy(loadPaperReader));
-    setReaderRetryKey((prev) => prev + 1);
-  };
-
   // Focus restoration ref for accessibility
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
 
-  // Helper to extract or read publication year from paper metadata
-  const getPaperYear = (paper: Paper): number => {
-    if (paper.publishedYear) return paper.publishedYear;
-    const m = paper.journal.match(/\b(19\d{2}|20\d{2})\b/);
-    return m ? parseInt(m[1], 10) : 0;
-  };
-
-  // Available publication years with paper counts
-  const availableYears = useMemo(() => {
-    if (taxonomyData.years && taxonomyData.years.length > 0) {
-      return taxonomyData.years;
-    }
-    const counts: Record<number, number> = {};
-    papersData.forEach((p) => {
-      const y = getPaperYear(p);
-      if (y > 0) counts[y] = (counts[y] || 0) + 1;
-    });
-    return Object.entries(counts)
-      .map(([yr, count]) => ({ year: parseInt(yr, 10), count }))
-      .sort((a, b) => b.year - a.year);
-  }, []);
-
-  // Sync theme with HTML root class and system media changes
+  // Sync theme with HTML root class
   useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.classList.add('dark');
-      localStorage.setItem('ntwcoff_theme', 'dark');
-    } else {
-      root.classList.remove('dark');
-      localStorage.setItem('ntwcoff_theme', 'light');
-    }
+    document.documentElement.classList.toggle('dark', isDark);
   }, [isDark]);
 
-  // Listen to OS system color-scheme changes if not manually overridden in this session
+  // Listen to OS system color-scheme changes if not manually overridden by the user
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
@@ -145,7 +50,7 @@ export const App: React.FC = () => {
       try {
         saved = localStorage.getItem('ntwcoff_theme');
       } catch {
-        // Storage access may be restricted (e.g. private browsing); treat as no saved preference
+        // Ignore storage errors
       }
       if (!saved) {
         setIsDark(e.matches);
@@ -155,7 +60,17 @@ export const App: React.FC = () => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const toggleTheme = () => setIsDark((prev) => !prev);
+  const toggleTheme = () => {
+    setIsDark((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('ntwcoff_theme', next ? 'dark' : 'light');
+      } catch {
+        // Ignore storage errors
+      }
+      return next;
+    });
+  };
 
   // Handle URL hash for deep linking
   useEffect(() => {
@@ -186,52 +101,33 @@ export const App: React.FC = () => {
     if (window.location.hash.startsWith('#paper=')) {
       history.replaceState('', document.title, window.location.pathname + window.location.search);
     }
-    // Restore focus back to the triggering element
     setTimeout(() => {
       lastActiveElementRef.current?.focus();
     }, 50);
   };
 
-  // Filtered and sorted papers calculation: Always latest published year first
+  // Filtered papers (pre-sorted latest publishedYear first by prep_content.py)
   const filteredPapers = useMemo(() => {
-    const list = papersData.filter((paper) => {
-      // Category filter
-      if (selectedCategory && paper.category !== selectedCategory) {
-        return false;
-      }
-      // Publication year filter
-      if (selectedYear !== null && getPaperYear(paper) !== selectedYear) {
-        return false;
-      }
-      // Tag filter
-      if (selectedTag && !paper.tags.includes(selectedTag)) {
-        return false;
-      }
-      // Search query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const inTitle = paper.title.toLowerCase().includes(q);
-        const inAuthors = paper.authors.toLowerCase().includes(q);
-        const inTags = paper.tags.some((t) => t.toLowerCase().includes(q));
-        const inExcerpt = paper.excerpt.toLowerCase().includes(q);
-        const inContent = paper.content.toLowerCase().includes(q);
-        return inTitle || inAuthors || inTags || inExcerpt || inContent;
+    const q = searchQuery.trim().toLowerCase();
+    return papersData.filter((paper) => {
+      if (selectedCategory && paper.category !== selectedCategory) return false;
+      if (selectedYear !== null && paper.publishedYear !== selectedYear) return false;
+      if (selectedTag && !paper.tags.includes(selectedTag)) return false;
+      if (q) {
+        return (
+          paper.title.toLowerCase().includes(q) ||
+          paper.authors.toLowerCase().includes(q) ||
+          paper.tags.some((t) => t.toLowerCase().includes(q)) ||
+          paper.excerpt.toLowerCase().includes(q) ||
+          paper.content.toLowerCase().includes(q)
+        );
       }
       return true;
-    });
-
-    // Always sort by latest published year first (descending)
-    return list.sort((a, b) => {
-      const yearA = getPaperYear(a);
-      const yearB = getPaperYear(b);
-      if (yearB !== yearA) {
-        return yearB - yearA; // Latest year first
-      }
-      return (b.date || '').localeCompare(a.date || '') || a.title.localeCompare(b.title);
     });
   }, [searchQuery, selectedCategory, selectedYear, selectedTag]);
 
   const categories = Object.keys(taxonomyData.categories || {});
+  const availableYears = taxonomyData.years || [];
 
   return (
     <div className="min-h-screen flex flex-col bg-cream-paper text-charcoal transition-colors selection:bg-marker-orange/20 selection:text-charcoal">
@@ -252,21 +148,20 @@ export const App: React.FC = () => {
 
       {/* Main Semantic Landmark */}
       <main id="main-content" className="flex-1 flex flex-col">
-        {/* Hero Visual Stage */}
+        {/* Minimal Editorial Hero Stage */}
         <HeroBanner
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
           totalPapers={papersData.length}
           totalCategories={categories.length}
-          totalTags={taxonomyData.tags.length}
         />
 
-        {/* Feature & Catalog Stage: Full-width Dew Drop (#f7efe9) Warm Band with Notebook Dots */}
-        <section id="catalog" className="flex-1 w-full bg-dew-drop bg-notebook-dots border-b-[1.5px] border-charcoal/20 py-10 sm:py-14 transition-colors">
+        {/* Catalog Stage: Warm Dew Drop Band with Subtle Archival Grain */}
+        <section id="catalog" className="flex-1 w-full bg-dew-drop/60 bg-notebook-dots py-8 sm:py-10 transition-colors">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
             
-            {/* Category & Tag & Year Filter Bar */}
+            {/* Consolidated Search, Category, Year & Keyword Toolbar */}
             <FilterBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
               categories={categories}
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
@@ -280,31 +175,29 @@ export const App: React.FC = () => {
               totalCount={papersData.length}
             />
 
-            {/* Paper Grid — 2-Column Warm Notebook Cards with 12px Radius & Defer Rendering */}
+            {/* Paper Grid — Clean 2-Column Editorial Cards */}
             {filteredPapers.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-7 mt-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
                 {filteredPapers.map((paper, index) => (
                   <PaperCard
                     key={paper.id}
                     paper={paper}
-                    isDeferred={index >= 4}
+                    isDeferred={index >= 6}
                     onSelect={handleSelectPaper}
-                    onTagClick={(tag) => setSelectedTag(tag)}
-                    onYearClick={(year) => setSelectedYear(year)}
                   />
                 ))}
               </div>
             ) : (
               /* Empty Search State */
-              <div className="py-20 text-center max-w-md mx-auto">
-                <div className="w-14 h-14 rounded-[12px] bg-cream-paper border-[1.5px] border-charcoal flex items-center justify-center mx-auto mb-4 text-charcoal shadow-subtle">
-                  <SearchX className="w-6 h-6" />
+              <div className="py-16 text-center max-w-md mx-auto">
+                <div className="w-10 h-10 rounded-[8px] bg-cream-paper border border-charcoal/15 flex items-center justify-center mx-auto mb-3 text-charcoal/70">
+                  <SearchX className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-gelica font-semibold lowercase text-cocoa-ink mb-2">
-                  no matching research monographs found
+                <h3 className="text-lg font-gelica font-semibold lowercase text-cocoa-ink mb-1.5">
+                  no matching monographs found
                 </h3>
-                <p className="text-sm text-charcoal/80 font-geist mb-6 leading-relaxed">
-                  ลองค้นหาด้วยชื่อสารเคมี คำสำคัญ หรือรีเซ็ตตัวกรองเพื่อดูงานวิจัยทั้งหมด
+                <p className="text-[13px] text-charcoal/70 font-geist mb-5 leading-relaxed">
+                  ลองค้นหาด้วยชื่อสารเคมี คำสำคัญอื่น หรือล้างตัวกรองเพื่อดูงานวิจัยทั้งหมด
                 </p>
                 <button
                   onClick={() => {
@@ -313,7 +206,7 @@ export const App: React.FC = () => {
                     setSelectedYear(null);
                     setSelectedTag(null);
                   }}
-                  className="superr-pill-btn !py-2 !px-5"
+                  className="superr-pill-btn"
                 >
                   รีเซ็ตตัวกรองทั้งหมด
                 </button>
@@ -324,36 +217,30 @@ export const App: React.FC = () => {
         </section>
       </main>
 
-      {/* Lazy-loaded Paper Reader Modal wrapped in Error Boundary and Suspense */}
-      <PaperReaderErrorBoundary key={readerRetryKey} onRetry={handleRetryReader}>
-        <Suspense fallback={null}>
-          <PaperReaderComponent
-            paper={selectedPaper}
-            onClose={handleCloseReader}
-            onTagClick={(tag) => setSelectedTag(tag)}
-          />
-        </Suspense>
-      </PaperReaderErrorBoundary>
+      {/* Monograph Reader Modal */}
+      <PaperReader
+        paper={selectedPaper}
+        onClose={handleCloseReader}
+        onTagClick={(tag) => setSelectedTag(tag)}
+      />
 
-      {/* Superr Footer Brand Band: Marker Orange (#ff6f1e) with 56px Top Border Radius */}
-      <footer className="w-full bg-marker-orange text-charcoal rounded-t-[56px] pt-10 pb-8 px-6 sm:px-10 mt-auto transition-colors shadow-card">
-        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center text-center sm:text-left">
-            <span className="font-gelica font-semibold text-[20px] lowercase text-charcoal">
-              ntwk coffee
-            </span>
-          </div>
+      {/* Quiet Editorial Footer */}
+      <footer className="w-full bg-cream-paper border-t border-charcoal/12 py-6 px-4 sm:px-6 lg:px-8 mt-auto transition-colors">
+        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-charcoal/60 font-geist">
+          <span className="font-gelica font-semibold text-[15px] lowercase text-cocoa-ink">
+            ntwk coffee
+          </span>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-[13px] font-gelica text-charcoal">
-            <span>daily sync 12:00 ict (05:00 utc)</span>
-            <span className="text-charcoal/40">•</span>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span>Coffee Science Research Archive</span>
+            <span aria-hidden="true">·</span>
             <a
               href="https://github.com/NTWKKM/ntwcoff"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline decoration-charcoal/40 hover:decoration-charcoal transition-colors"
+              className="hover:text-cocoa-ink underline underline-offset-4 transition-colors"
             >
-              github source
+              GitHub Source
             </a>
           </div>
         </div>

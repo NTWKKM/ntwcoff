@@ -106,7 +106,7 @@ def sync_drive():
                 service.files()
                 .list(
                     q=query,
-                    fields="nextPageToken, files(id, name, mimeType, modifiedTime, md5Checksum, size)",
+                    fields="nextPageToken, files(id, name, mimeType, modifiedTime, size)",
                     pageToken=page_token,
                 )
                 .execute()
@@ -136,7 +136,6 @@ def sync_drive():
         file_name = file["name"]
         mime_type = file["mimeType"]
         modified_time = file.get("modifiedTime", "")
-        md5 = file.get("md5Checksum", "")
 
         # Validate filename to prevent path traversal, null bytes, or invalid path components
         if not is_safe_filename(file_name):
@@ -173,7 +172,10 @@ def sync_drive():
             print(
                 f"⏭️ [UNCHANGED] {file_path.name} (modified: {modified_time}) - Skipping download."
             )
-            new_manifest[file_id] = cached_info
+            new_manifest[file_id] = {
+                "name": file_path.name,
+                "modifiedTime": modified_time,
+            }
             skipped_count += 1
             continue
 
@@ -198,7 +200,6 @@ def sync_drive():
         new_manifest[file_id] = {
             "name": file_path.name,
             "modifiedTime": modified_time,
-            "md5Checksum": md5,
         }
         print(f"✅ Successfully saved: {file_path.name}")
 

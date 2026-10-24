@@ -2,7 +2,6 @@ export interface Paper {
   id: string;
   slug: string;
   title: string;
-  documentHeader: string;
   date: string;
   publishedYear: number | null;
   category: string;
