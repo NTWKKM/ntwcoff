@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useRef, useMemo } from 'react';
 import { Paper } from '../types';
 import {
   KatexRenderer,
@@ -151,7 +151,9 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
   const progressBarRef = useRef<HTMLDivElement>(null);
   const copyTimeoutRef = useRef<number | null>(null);
   const currentPaperRef = useRef(paper);
-  currentPaperRef.current = paper;
+  useLayoutEffect(() => {
+    currentPaperRef.current = paper;
+  }, [paper]);
 
   useEffect(() => {
     return () => {
