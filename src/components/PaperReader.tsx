@@ -102,7 +102,8 @@ const renderSourceLinks = (linksText: string): React.ReactNode => {
 
     let href = cleanToken;
     if (cleanToken.startsWith('10.')) {
-      href = `https://doi.org/${cleanToken}`;
+      const decodedDoi = cleanToken.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+      href = `https://doi.org/${decodedDoi}`;
     } else if (cleanToken.startsWith('PMC')) {
       href = `https://pmc.ncbi.nlm.nih.gov/articles/${cleanToken}/`;
     } else if (cleanToken.startsWith('PMID:')) {
@@ -149,6 +150,8 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const copyTimeoutRef = useRef<number | null>(null);
+  const currentPaperRef = useRef(paper);
+  currentPaperRef.current = paper;
 
   useEffect(() => {
     return () => {
@@ -256,10 +259,12 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
 
   const copyCitation = () => {
     if (!paper || !navigator.clipboard) return;
+    const targetPaperId = paper.id;
     const citation = `${paper.authors || 'Unknown'} (${paper.publishedYear || 'n.d.'}). ${paper.title}. ${paper.journal || ''}.`;
     navigator.clipboard
       .writeText(citation)
       .then(() => {
+        if (currentPaperRef.current?.id !== targetPaperId) return;
         setCopied(true);
         if (copyTimeoutRef.current !== null) {
           window.clearTimeout(copyTimeoutRef.current);
