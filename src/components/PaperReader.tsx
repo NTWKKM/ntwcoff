@@ -26,13 +26,31 @@ const cleanTrailingPunctuation = (rawToken: string): string => {
   let token = rawToken;
 
   while (token.length > 0) {
-    const lastChar = token[token.length - 1];
-
-    if (/[.,;:!?]/.test(lastChar)) {
-      token = token.slice(0, -1);
-      continue;
+    // Encoded closing angle bracket (&gt;)
+    if (token.endsWith('&gt;')) {
+      const openCount = (token.match(/<|&lt;/g) || []).length;
+      const closeCount = (token.match(/>|&gt;/g) || []).length;
+      if (closeCount > openCount) {
+        token = token.slice(0, -4);
+        continue;
+      }
+      break;
     }
 
+    const lastChar = token[token.length - 1];
+
+    // Raw closing angle bracket (>)
+    if (lastChar === '>') {
+      const openCount = (token.match(/<|&lt;/g) || []).length;
+      const closeCount = (token.match(/>|&gt;/g) || []).length;
+      if (closeCount > openCount) {
+        token = token.slice(0, -1);
+        continue;
+      }
+      break;
+    }
+
+    // Closing parenthesis
     if (lastChar === ')') {
       const openCount = (token.match(/\(/g) || []).length;
       const closeCount = (token.match(/\)/g) || []).length;
@@ -40,8 +58,10 @@ const cleanTrailingPunctuation = (rawToken: string): string => {
         token = token.slice(0, -1);
         continue;
       }
+      break;
     }
 
+    // Closing square bracket
     if (lastChar === ']') {
       const openCount = (token.match(/\[/g) || []).length;
       const closeCount = (token.match(/\]/g) || []).length;
@@ -49,6 +69,13 @@ const cleanTrailingPunctuation = (rawToken: string): string => {
         token = token.slice(0, -1);
         continue;
       }
+      break;
+    }
+
+    // Trailing punctuation characters like .,;:!?
+    if (/[.,;:!?]/.test(lastChar)) {
+      token = token.slice(0, -1);
+      continue;
     }
 
     break;
@@ -60,7 +87,7 @@ const cleanTrailingPunctuation = (rawToken: string): string => {
 const renderSourceLinks = (linksText: string): React.ReactNode => {
   // Match DOIs (10.xxxx/...), PMCID (PMC...), PMID, or direct https:// URLs
   const tokenRegex =
-    /(https?:\/\/[^\s]+|10\.\d{4,9}\/[-._;()/:A-Za-z0-9<>]+|PMC\d+|PMID:\s*\d+)/g;
+    /(https?:\/\/[^\s]+|10\.\d{4,9}\/[-._;()/:A-Za-z0-9<>&]+|PMC\d+|PMID:\s*\d+)/g;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
