@@ -93,24 +93,20 @@ const formatNonMathSegment = (raw: string, applyParams: boolean): string => {
 
 export const formatInlineMarkdown = (raw: string, applyParams = false): string => {
   if (!raw) return '';
-  const parts: string[] = [];
-  let lastIndex = 0;
+  const tokens: string[] = [];
   const mathRegex = /(\$\$[\s\S]+?\$\$|\$[^\$\n]+?\$)/g;
-  let match: RegExpExecArray | null;
 
-  while ((match = mathRegex.exec(raw)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(formatNonMathSegment(raw.slice(lastIndex, match.index), applyParams));
-    }
-    parts.push(renderKatexToken(match[0]));
-    lastIndex = mathRegex.lastIndex;
-  }
+  // Mask math tokens so paired markdown emphasis across math tokens is processed together
+  const masked = raw.replace(mathRegex, (match) => {
+    const idx = tokens.length;
+    tokens.push(renderKatexToken(match));
+    return `@@KATEX_${idx}@@`;
+  });
 
-  if (lastIndex < raw.length) {
-    parts.push(formatNonMathSegment(raw.slice(lastIndex), applyParams));
-  }
+  const formatted = formatNonMathSegment(masked, applyParams);
 
-  return parts.join('');
+  // Restore rendered KaTeX tokens
+  return formatted.replace(/@@KATEX_(\d+)@@/g, (_, idx) => tokens[Number(idx)] ?? '');
 };
 
 const cleanTocTitle = (rawHeading: string): string => {
@@ -119,13 +115,14 @@ const cleanTocTitle = (rawHeading: string): string => {
       math
         .replace(/\\times/g, '×')
         .replace(/\\approx/g, '≈')
-        .replace(/\\le|\\leq/g, '≤')
-        .replace(/\\ge|\\geq/g, '≥')
+        .replace(/\\leq|\\le/g, '≤')
+        .replace(/\\geq|\\ge/g, '≥')
         .replace(/\\pm/g, '±')
         .replace(/\^2\b/g, '²')
         .replace(/\^3\b/g, '³')
         .replace(/\\text\{([^}]*)\}/g, '$1')
-        .replace(/[\\%{}]/g, (m) => (m === '\\%' ? '%' : ''))
+        .replace(/\\%/g, '%')
+        .replace(/[\\{}]/g, '')
         .trim()
     )
     .replace(/[*_`#]/g, '')
@@ -293,10 +290,10 @@ export const parsePaperMarkdown = (
     } else if (line.startsWith('## ')) {
       const headingText = line.replace('## ', '').trim();
       const id = slugifyHeading(headingText, counts, assigned);
-      const sectionMatch = headingText.match(/^([1-9])\.\s*(.+)$/);
+      const sectionMatch = headingText.match(/^([1-9]\d*)\.(?!\d)\s*(.+)$/);
 
       if (sectionMatch) {
-        const secNum = `0${sectionMatch[1]}.`;
+        const secNum = sectionMatch[1].padStart(2, '0') + '.';
         const secTitle = sectionMatch[2];
         toc.push({
           id,

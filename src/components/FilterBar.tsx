@@ -68,7 +68,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             placeholder="ค้นหาสารเคมี หัวข้อ หรือชื่อผู้วิจัย..."
             autoComplete="off"
             spellCheck={false}
-            className="w-full pl-9 pr-8 py-2 rounded-[8px] bg-cream-paper border border-charcoal/18 text-charcoal placeholder:text-charcoal/45 text-[13px] font-geist focus:outline-none focus:border-charcoal transition-colors"
+            className="w-full pl-9 pr-8 py-2 rounded-[8px] bg-cream-paper border border-charcoal/18 text-charcoal placeholder:text-charcoal/45 text-[16px] sm:text-[13px] font-geist focus:outline-none focus:border-charcoal transition-colors"
           />
           {searchQuery && (
             <button
@@ -97,7 +97,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 onChange={(e) =>
                   setSelectedYear(e.target.value ? Number(e.target.value) : null)
                 }
-                className="px-3 py-1.5 rounded-[8px] bg-cream-paper border border-charcoal/18 text-[13px] font-geist text-charcoal focus:outline-none focus:border-charcoal transition-colors cursor-pointer tabular-nums"
+                className="px-3 py-1.5 rounded-[8px] bg-cream-paper border border-charcoal/18 text-[16px] sm:text-[13px] font-geist text-charcoal focus:outline-none focus:border-charcoal transition-colors cursor-pointer tabular-nums"
               >
                 <option value="">ทุกปีที่ตีพิมพ์ (All years)</option>
                 {years.map(({ year, count }) => (
@@ -113,7 +113,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           {tags.length > 0 && (
             <button
               type="button"
-              onClick={() => setShowTagsDrawer((prev) => !prev)}
+              onClick={() => {
+                if (selectedTag !== null) {
+                  setSelectedTag(null);
+                  setShowTagsDrawer(false);
+                } else {
+                  setShowTagsDrawer((prev) => !prev);
+                }
+              }}
               aria-expanded={showTagsDrawer || selectedTag !== null}
               className={`px-3 py-1.5 rounded-[8px] border text-[13px] font-geist inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
                 showTagsDrawer || selectedTag

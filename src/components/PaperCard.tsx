@@ -12,21 +12,10 @@ export const PaperCard: React.FC<PaperCardProps> = ({
   isDeferred = false,
   onSelect,
 }) => {
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onSelect(paper);
-    }
-  };
-
   return (
     <article
-      role="button"
-      tabIndex={0}
       onClick={() => onSelect(paper)}
-      onKeyDown={handleKeyDown}
-      aria-label={`อ่านงานวิจัย: ${paper.title}`}
-      className={`group relative flex flex-col justify-between rounded-[10px] bg-cream-paper border border-charcoal/14 hover:border-charcoal/45 p-6 transition-colors duration-150 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marker-orange ${
+      className={`group relative flex flex-col justify-between rounded-[10px] bg-cream-paper border border-charcoal/14 hover:border-charcoal/45 p-6 transition-colors duration-150 cursor-pointer text-left has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-marker-orange ${
         isDeferred ? 'paper-card-deferred' : ''
       }`}
     >
@@ -46,7 +35,16 @@ export const PaperCard: React.FC<PaperCardProps> = ({
 
         {/* Paper Title — Fraunces 600, Cocoa Ink */}
         <h2 className="text-[19px] sm:text-[21px] font-gelica font-semibold leading-[1.25] text-cocoa-ink group-hover:text-marker-orange transition-colors mb-2 text-balance">
-          {paper.title}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(paper);
+            }}
+            className="text-left font-inherit text-inherit after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+          >
+            {paper.title}
+          </button>
         </h2>
 
         {/* Single-Line Authors & Journal Metadata */}

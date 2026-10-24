@@ -258,41 +258,63 @@ export const PaperReader: React.FC<PaperReaderProps> = ({
 
             {/* Center Reading Controls */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center rounded-[8px] bg-dew-drop border border-charcoal/15 p-0.5">
-                {(['sm', 'md', 'lg'] as const).map((sz, i) => (
-                  <button
-                    key={sz}
-                    onClick={() => setFontSize(sz)}
-                    className={`px-2.5 py-0.5 rounded-[6px] text-[11px] font-geist transition-colors whitespace-nowrap shrink-0 ${
-                      fontSize === sz
-                        ? 'bg-cream-paper text-cocoa-ink font-semibold shadow-sm'
-                        : 'text-charcoal/65 hover:text-charcoal'
-                    }`}
-                  >
-                    {i === 0 ? 'A-' : i === 1 ? 'A' : 'A+'}
-                  </button>
-                ))}
+              <div className="flex items-center rounded-[8px] bg-dew-drop border border-charcoal/15 p-0.5" role="group" aria-label="Font size">
+                {(['sm', 'md', 'lg'] as const).map((sz, i) => {
+                  const sizeLabels = {
+                    sm: 'Small text size',
+                    md: 'Default text size',
+                    lg: 'Large text size',
+                  };
+                  return (
+                    <button
+                      key={sz}
+                      type="button"
+                      onClick={() => setFontSize(sz)}
+                      aria-label={sizeLabels[sz]}
+                      aria-pressed={fontSize === sz}
+                      className={`px-2.5 py-0.5 rounded-[6px] text-[11px] font-geist transition-colors whitespace-nowrap shrink-0 ${
+                        fontSize === sz
+                          ? 'bg-cream-paper text-cocoa-ink font-semibold shadow-sm'
+                          : 'text-charcoal/65 hover:text-charcoal'
+                      }`}
+                    >
+                      {i === 0 ? 'A-' : i === 1 ? 'A' : 'A+'}
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="hidden sm:flex items-center rounded-[8px] bg-dew-drop border border-charcoal/15 p-0.5">
-                {(['focus', 'standard'] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() => setColumnWidth(mode)}
-                    className={`px-2.5 py-0.5 rounded-[6px] text-[11px] font-geist transition-colors whitespace-nowrap shrink-0 capitalize ${
-                      columnWidth === mode
-                        ? 'bg-cream-paper text-cocoa-ink font-semibold shadow-sm'
-                        : 'text-charcoal/65 hover:text-charcoal'
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
+              <div className="hidden sm:flex items-center rounded-[8px] bg-dew-drop border border-charcoal/15 p-0.5" role="group" aria-label="Reading width">
+                {(['focus', 'standard'] as const).map((mode) => {
+                  const widthLabels = {
+                    focus: 'Focus column width (64ch)',
+                    standard: 'Standard column width (70ch)',
+                  };
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setColumnWidth(mode)}
+                      aria-label={widthLabels[mode]}
+                      aria-pressed={columnWidth === mode}
+                      className={`px-2.5 py-0.5 rounded-[6px] text-[11px] font-geist transition-colors whitespace-nowrap shrink-0 capitalize ${
+                        columnWidth === mode
+                          ? 'bg-cream-paper text-cocoa-ink font-semibold shadow-sm'
+                          : 'text-charcoal/65 hover:text-charcoal'
+                      }`}
+                    >
+                      {mode}
+                    </button>
+                  );
+                })}
               </div>
 
               {tocItems.length > 0 && (
                 <button
+                  type="button"
                   onClick={() => setShowTocMobile(!showTocMobile)}
+                  aria-expanded={showTocMobile}
+                  aria-label="Table of Contents"
                   className="lg:hidden superr-pill-btn"
                   title="Table of Contents"
                 >

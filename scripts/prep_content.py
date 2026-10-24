@@ -205,12 +205,32 @@ def extract_metadata(text: str, slug: str = "") -> dict:
         _assign_meta(metadata, k.strip(), v.strip())
 
     # 4. Google Docs plain text / tab format
-    gdoc_matches = re.findall(
-        r"(ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบันวิจัย|สถาบัน|หน่วยงาน|วารสารวิชาการ|ลิงก์งานวิจัยต้นฉบับ|ลิงก์งานวิจัย|ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year)[^\n]*\n\s*([^\n]+)",
-        meta_text,
+    meta_labels = (
+        r"ชื่อบทความวิจัย|คณะผู้วิจัย|ผู้วิจัย|สถาบันวิจัย|สถาบัน|หน่วยงาน|"
+        r"วารสารวิชาการ|ลิงก์งานวิจัยต้นฉบับ|ลิงก์งานวิจัย|"
+        r"ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year"
     )
-    for k, v in gdoc_matches:
+
+    # 4a. Inline label values: label and value on same line (e.g. ชื่อบทความวิจัย: Title or ชื่อบทความวิจัย\tTitle)
+    inline_matches = re.findall(
+        rf"^[ \t]*[*\-•]?[ \t]*({meta_labels})[ \t]*(?::|\t)[ \t]*([^\n]+)",
+        meta_text,
+        re.MULTILINE,
+    )
+    for k, v in inline_matches:
         _assign_meta(metadata, k.strip(), v.strip())
+
+    # 4b. Following-line values: label occupies its own line, followed by value on next line
+    following_line_matches = re.findall(
+        rf"^[ \t]*[*\-•]?[ \t]*({meta_labels})[ \t]*:?[ \t]*\n[ \t]*([^\n]+)",
+        meta_text,
+        re.MULTILINE,
+    )
+    for k, v in following_line_matches:
+        val_clean = v.strip()
+        # Ensure a subsequent metadata line (e.g. ผู้วิจัย) is not captured as value
+        if not re.match(rf"^(?:{meta_labels})(?:[:\t]|\s*$)", val_clean):
+            _assign_meta(metadata, k.strip(), val_clean)
 
     header_year = re.search(
         r"^(?:ปีที่ตีพิมพ์|ปีที่เผยแพร่|ปีพิมพ์|Published Year|Year):\s*([^\n]+)",

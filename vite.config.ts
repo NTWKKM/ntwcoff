@@ -11,10 +11,13 @@ export default defineConfig({
   plugins: [react()],
   base: './', // Relative base path ensures deployment works seamlessly on GitHub Pages subpaths
   server: {
-    host: '0.0.0.0',
+    host: process.env.HOST || undefined,
     port: 3000,
-    allowedHosts: true,
     hmr: process.env.DISABLE_HMR !== 'true',
+  },
+  preview: {
+    host: process.env.HOST || undefined,
+    port: 3000,
   },
   build: {
     chunkSizeWarningLimit: 700,

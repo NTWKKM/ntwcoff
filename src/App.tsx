@@ -61,15 +61,13 @@ export const App: React.FC = () => {
   }, []);
 
   const toggleTheme = () => {
-    setIsDark((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem('ntwcoff_theme', next ? 'dark' : 'light');
-      } catch {
-        // Ignore storage errors
-      }
-      return next;
-    });
+    const next = !isDark;
+    setIsDark(next);
+    try {
+      localStorage.setItem('ntwcoff_theme', next ? 'dark' : 'light');
+    } catch {
+      // Ignore storage errors
+    }
   };
 
   // Handle URL hash for deep linking
