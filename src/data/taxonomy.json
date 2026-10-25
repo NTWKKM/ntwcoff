@@ -1,11 +1,11 @@
 {
-  "lastUpdated": "2026-10-24T15:25:30.388086+00:00",
-  "totalPapers": 46,
+  "lastUpdated": "2026-10-25T09:53:38.121901+00:00",
+  "totalPapers": 47,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 12,
+    "การแปรรูปและหมัก (Processing & Fermentation)": 12,
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 11,
-    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 12,
-    "การแปรรูปและหมัก (Processing & Fermentation)": 11
+    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 12
   },
   "years": [
     {
@@ -14,7 +14,7 @@
     },
     {
       "year": 2025,
-      "count": 2
+      "count": 3
     },
     {
       "year": 2024,
@@ -88,7 +88,7 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 45
+      "count": 46
     },
     {
       "name": "RoastingChemistry",
@@ -96,15 +96,15 @@
     },
     {
       "name": "SensoryScience",
-      "count": 37
+      "count": 38
     },
     {
       "name": "Extraction",
-      "count": 37
+      "count": 38
     },
     {
       "name": "CoffeeBody",
-      "count": 27
+      "count": 28
     },
     {
       "name": "Phenolics",
@@ -112,6 +112,10 @@
     },
     {
       "name": "KineticModeling",
+      "count": 17
+    },
+    {
+      "name": "FT-ICR-MS",
       "count": 17
     },
     {
@@ -123,16 +127,12 @@
       "count": 16
     },
     {
-      "name": "FT-ICR-MS",
-      "count": 16
-    },
-    {
       "name": "GrindingPhysics",
       "count": 16
     },
     {
       "name": "Fermentation",
-      "count": 14
+      "count": 15
     },
     {
       "name": "MaillardReaction",
