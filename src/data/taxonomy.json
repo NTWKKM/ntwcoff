@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2026-10-30T11:27:23.786747+00:00",
-  "totalPapers": 49,
+  "lastUpdated": "2026-10-31T10:57:59.206179+00:00",
+  "totalPapers": 50,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 13,
     "การแปรรูปและหมัก (Processing & Fermentation)": 12,
-    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 11,
+    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 12,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 13
   },
   "years": [
@@ -38,7 +38,7 @@
     },
     {
       "year": 2019,
-      "count": 2
+      "count": 3
     },
     {
       "year": 2018,
@@ -88,23 +88,23 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 48
+      "count": 49
     },
     {
       "name": "RoastingChemistry",
-      "count": 44
+      "count": 45
     },
     {
       "name": "SensoryScience",
-      "count": 40
+      "count": 41
     },
     {
       "name": "Extraction",
-      "count": 40
+      "count": 41
     },
     {
       "name": "CoffeeBody",
-      "count": 29
+      "count": 30
     },
     {
       "name": "Phenolics",
