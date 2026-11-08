@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2026-11-07T11:47:14.613980+00:00",
-  "totalPapers": 57,
+  "lastUpdated": "2026-11-08T11:58:56.659089+00:00",
+  "totalPapers": 58,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 15,
     "การแปรรูปและหมัก (Processing & Fermentation)": 14,
-    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 13,
+    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 14,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 15
   },
   "years": [
@@ -22,7 +22,7 @@
     },
     {
       "year": 2023,
-      "count": 4
+      "count": 5
     },
     {
       "year": 2022,
@@ -88,19 +88,19 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 56
+      "count": 57
     },
     {
       "name": "RoastingChemistry",
-      "count": 50
+      "count": 51
     },
     {
       "name": "Extraction",
-      "count": 48
+      "count": 49
     },
     {
       "name": "SensoryScience",
-      "count": 47
+      "count": 48
     },
     {
       "name": "CoffeeBody",
@@ -119,12 +119,12 @@
       "count": 21
     },
     {
-      "name": "SucrosePyrolysis",
+      "name": "Q-Grader",
       "count": 20
     },
     {
-      "name": "Q-Grader",
-      "count": 19
+      "name": "SucrosePyrolysis",
+      "count": 20
     },
     {
       "name": "GrindingPhysics",
