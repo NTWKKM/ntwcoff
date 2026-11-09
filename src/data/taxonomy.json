@@ -1,9 +1,9 @@
 {
-  "lastUpdated": "2026-11-08T11:58:56.659089+00:00",
-  "totalPapers": 58,
+  "lastUpdated": "2026-11-09T13:59:31.723863+00:00",
+  "totalPapers": 59,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 15,
-    "การแปรรูปและหมัก (Processing & Fermentation)": 14,
+    "การแปรรูปและหมัก (Processing & Fermentation)": 15,
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 14,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 15
   },
@@ -14,7 +14,7 @@
     },
     {
       "year": 2025,
-      "count": 3
+      "count": 4
     },
     {
       "year": 2024,
@@ -88,23 +88,23 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 57
+      "count": 58
     },
     {
       "name": "RoastingChemistry",
-      "count": 51
+      "count": 52
+    },
+    {
+      "name": "SensoryScience",
+      "count": 49
     },
     {
       "name": "Extraction",
       "count": 49
     },
     {
-      "name": "SensoryScience",
-      "count": 48
-    },
-    {
       "name": "CoffeeBody",
-      "count": 32
+      "count": 33
     },
     {
       "name": "KineticModeling",
@@ -115,24 +115,24 @@
       "count": 23
     },
     {
-      "name": "FT-ICR-MS",
+      "name": "SucrosePyrolysis",
       "count": 21
     },
     {
       "name": "Q-Grader",
-      "count": 20
+      "count": 21
     },
     {
-      "name": "SucrosePyrolysis",
-      "count": 20
+      "name": "FT-ICR-MS",
+      "count": 21
+    },
+    {
+      "name": "Fermentation",
+      "count": 18
     },
     {
       "name": "GrindingPhysics",
       "count": 18
-    },
-    {
-      "name": "Fermentation",
-      "count": 17
     },
     {
       "name": "MaillardReaction",
