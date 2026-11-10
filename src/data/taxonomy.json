@@ -1,8 +1,8 @@
 {
-  "lastUpdated": "2026-11-09T13:59:31.723863+00:00",
-  "totalPapers": 59,
+  "lastUpdated": "2026-11-10T13:34:02.169745+00:00",
+  "totalPapers": 60,
   "categories": {
-    "การสกัดและการชง (Brewing & Extraction)": 15,
+    "การสกัดและการชง (Brewing & Extraction)": 16,
     "การแปรรูปและหมัก (Processing & Fermentation)": 15,
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 14,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 15
@@ -46,7 +46,7 @@
     },
     {
       "year": 2017,
-      "count": 2
+      "count": 3
     },
     {
       "year": 2016,
@@ -88,31 +88,31 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 58
+      "count": 59
     },
     {
       "name": "RoastingChemistry",
-      "count": 52
+      "count": 53
     },
     {
       "name": "SensoryScience",
-      "count": 49
+      "count": 50
     },
     {
       "name": "Extraction",
-      "count": 49
+      "count": 50
     },
     {
       "name": "CoffeeBody",
-      "count": 33
+      "count": 34
     },
     {
       "name": "KineticModeling",
-      "count": 24
+      "count": 25
     },
     {
       "name": "Phenolics",
-      "count": 23
+      "count": 24
     },
     {
       "name": "SucrosePyrolysis",
@@ -140,7 +140,7 @@
     },
     {
       "name": "Astringency",
-      "count": 11
+      "count": 12
     },
     {
       "name": "WaterChemistry",
