@@ -1,11 +1,11 @@
 {
-  "lastUpdated": "2026-11-10T13:34:02.169745+00:00",
-  "totalPapers": 60,
+  "lastUpdated": "2026-11-11T12:47:31.036926+00:00",
+  "totalPapers": 61,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 16,
     "การแปรรูปและหมัก (Processing & Fermentation)": 15,
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 14,
-    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 15
+    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 16
   },
   "years": [
     {
@@ -66,7 +66,7 @@
     },
     {
       "year": 2012,
-      "count": 3
+      "count": 4
     },
     {
       "year": 2010,
@@ -88,35 +88,35 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 59
+      "count": 60
     },
     {
       "name": "RoastingChemistry",
-      "count": 53
+      "count": 54
     },
     {
       "name": "SensoryScience",
-      "count": 50
+      "count": 51
     },
     {
       "name": "Extraction",
-      "count": 50
+      "count": 51
     },
     {
       "name": "CoffeeBody",
-      "count": 34
+      "count": 35
+    },
+    {
+      "name": "Phenolics",
+      "count": 25
     },
     {
       "name": "KineticModeling",
       "count": 25
     },
     {
-      "name": "Phenolics",
-      "count": 24
-    },
-    {
       "name": "SucrosePyrolysis",
-      "count": 21
+      "count": 22
     },
     {
       "name": "Q-Grader",
@@ -136,7 +136,7 @@
     },
     {
       "name": "MaillardReaction",
-      "count": 15
+      "count": 16
     },
     {
       "name": "Astringency",
@@ -148,7 +148,7 @@
     },
     {
       "name": "Melanoidins",
-      "count": 6
+      "count": 7
     },
     {
       "name": "5-HMF",
