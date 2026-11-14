@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-13T13:12:09.120272+00:00",
+  "lastUpdated": "2026-11-14T12:16:43.100744+00:00",
   "totalPapers": 62,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 16,
@@ -104,7 +104,7 @@
     },
     {
       "name": "CoffeeBody",
-      "count": 36
+      "count": 35
     },
     {
       "name": "Phenolics",
@@ -112,19 +112,19 @@
     },
     {
       "name": "KineticModeling",
-      "count": 25
-    },
-    {
-      "name": "Q-Grader",
-      "count": 22
+      "count": 26
     },
     {
       "name": "SucrosePyrolysis",
       "count": 22
     },
     {
-      "name": "FT-ICR-MS",
+      "name": "Q-Grader",
       "count": 21
+    },
+    {
+      "name": "FT-ICR-MS",
+      "count": 20
     },
     {
       "name": "Fermentation",
@@ -144,7 +144,7 @@
     },
     {
       "name": "WaterChemistry",
-      "count": 9
+      "count": 10
     },
     {
       "name": "Melanoidins",
