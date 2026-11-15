@@ -1,11 +1,11 @@
 {
-  "lastUpdated": "2026-11-14T12:16:43.100744+00:00",
-  "totalPapers": 62,
+  "lastUpdated": "2026-11-15T12:49:17.161520+00:00",
+  "totalPapers": 63,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 16,
     "การแปรรูปและหมัก (Processing & Fermentation)": 16,
     "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 14,
-    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 16
+    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 17
   },
   "years": [
     {
@@ -34,7 +34,7 @@
     },
     {
       "year": 2020,
-      "count": 6
+      "count": 7
     },
     {
       "year": 2019,
@@ -88,15 +88,15 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 61
+      "count": 62
     },
     {
       "name": "RoastingChemistry",
-      "count": 55
+      "count": 56
     },
     {
       "name": "SensoryScience",
-      "count": 52
+      "count": 53
     },
     {
       "name": "Extraction",
@@ -104,23 +104,23 @@
     },
     {
       "name": "CoffeeBody",
-      "count": 35
+      "count": 36
     },
     {
       "name": "Phenolics",
-      "count": 26
+      "count": 27
     },
     {
       "name": "KineticModeling",
-      "count": 26
+      "count": 27
     },
     {
       "name": "SucrosePyrolysis",
-      "count": 22
+      "count": 23
     },
     {
       "name": "Q-Grader",
-      "count": 21
+      "count": 22
     },
     {
       "name": "FT-ICR-MS",
@@ -131,12 +131,12 @@
       "count": 19
     },
     {
-      "name": "GrindingPhysics",
+      "name": "MaillardReaction",
       "count": 18
     },
     {
-      "name": "MaillardReaction",
-      "count": 17
+      "name": "GrindingPhysics",
+      "count": 18
     },
     {
       "name": "Astringency",
@@ -144,7 +144,7 @@
     },
     {
       "name": "WaterChemistry",
-      "count": 10
+      "count": 11
     },
     {
       "name": "Melanoidins",
@@ -160,11 +160,11 @@
     },
     {
       "name": "FoodSafety",
-      "count": 2
+      "count": 3
     },
     {
       "name": "Acrylamide",
-      "count": 1
+      "count": 2
     }
   ]
 }
