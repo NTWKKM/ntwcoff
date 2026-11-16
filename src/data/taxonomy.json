@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2026-11-15T12:49:17.161520+00:00",
+  "lastUpdated": "2026-11-16T13:45:26.469805+00:00",
   "totalPapers": 63,
   "categories": {
-    "การสกัดและการชง (Brewing & Extraction)": 16,
+    "การสกัดและการชง (Brewing & Extraction)": 17,
     "การแปรรูปและหมัก (Processing & Fermentation)": 16,
-    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 14,
+    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 13,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 17
   },
   "years": [
@@ -140,11 +140,11 @@
     },
     {
       "name": "Astringency",
-      "count": 13
+      "count": 12
     },
     {
       "name": "WaterChemistry",
-      "count": 11
+      "count": 12
     },
     {
       "name": "Melanoidins",
