@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-16T13:45:26.469805+00:00",
+  "lastUpdated": "2026-11-17T14:36:02.987402+00:00",
   "totalPapers": 63,
   "categories": {
     "การสกัดและการชง (Brewing & Extraction)": 17,
@@ -92,7 +92,7 @@
     },
     {
       "name": "RoastingChemistry",
-      "count": 56
+      "count": 55
     },
     {
       "name": "SensoryScience",
@@ -139,11 +139,11 @@
       "count": 18
     },
     {
-      "name": "Astringency",
-      "count": 12
+      "name": "WaterChemistry",
+      "count": 13
     },
     {
-      "name": "WaterChemistry",
+      "name": "Astringency",
       "count": 12
     },
     {
@@ -152,7 +152,7 @@
     },
     {
       "name": "5-HMF",
-      "count": 6
+      "count": 7
     },
     {
       "name": "Tribology",
