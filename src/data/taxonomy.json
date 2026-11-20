@@ -1,11 +1,11 @@
 {
-  "lastUpdated": "2026-11-19T14:29:43.228993+00:00",
+  "lastUpdated": "2026-11-20T14:07:24.870720+00:00",
   "totalPapers": 65,
   "categories": {
-    "การสกัดและการชง (Brewing & Extraction)": 18,
+    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 14,
     "การแปรรูปและหมัก (Processing & Fermentation)": 16,
-    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 13,
-    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 18
+    "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 18,
+    "การสกัดและการชง (Brewing & Extraction)": 17
   },
   "years": [
     {
@@ -108,11 +108,11 @@
     },
     {
       "name": "Phenolics",
-      "count": 29
+      "count": 28
     },
     {
       "name": "KineticModeling",
-      "count": 27
+      "count": 26
     },
     {
       "name": "SucrosePyrolysis",
