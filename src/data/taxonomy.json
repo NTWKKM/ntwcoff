@@ -1,9 +1,9 @@
 {
-  "lastUpdated": "2026-11-23T16:07:15.325156+00:00",
-  "totalPapers": 67,
+  "lastUpdated": "2026-11-24T15:57:45.348578+00:00",
+  "totalPapers": 68,
   "categories": {
     "การแปรรูปและหมัก (Processing & Fermentation)": 17,
-    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 14,
+    "กลิ่นรสและประสาทสัมผัส (Sensory & Flavor)": 15,
     "เคมีและฟิสิกส์การคั่ว (Roasting Science)": 19,
     "การสกัดและการชง (Brewing & Extraction)": 17
   },
@@ -14,7 +14,7 @@
     },
     {
       "year": 2025,
-      "count": 5
+      "count": 6
     },
     {
       "year": 2024,
@@ -88,19 +88,19 @@
   "tags": [
     {
       "name": "SpecialtyCoffee",
-      "count": 66
+      "count": 67
     },
     {
       "name": "RoastingChemistry",
-      "count": 59
+      "count": 60
     },
     {
       "name": "SensoryScience",
-      "count": 55
+      "count": 56
     },
     {
       "name": "Extraction",
-      "count": 55
+      "count": 56
     },
     {
       "name": "CoffeeBody",
@@ -108,7 +108,7 @@
     },
     {
       "name": "Phenolics",
-      "count": 30
+      "count": 31
     },
     {
       "name": "KineticModeling",
@@ -135,23 +135,23 @@
       "count": 20
     },
     {
-      "name": "GrindingPhysics",
+      "name": "WaterChemistry",
       "count": 19
     },
     {
-      "name": "WaterChemistry",
-      "count": 18
+      "name": "GrindingPhysics",
+      "count": 19
     },
     {
       "name": "Astringency",
       "count": 11
     },
     {
-      "name": "Melanoidins",
-      "count": 7
+      "name": "5-HMF",
+      "count": 8
     },
     {
-      "name": "5-HMF",
+      "name": "Melanoidins",
       "count": 7
     },
     {
